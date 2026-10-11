@@ -24,9 +24,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Install Capacitor CLI and dependencies
         run: |
           npm init -y
@@ -47,7 +44,7 @@ jobs:
 
       - name: Init Capacitor
         run: |
-          npx cap init "موبایل پرشیا" "com.persia.mobile" --web-dir=www
+          npx cap init "Persia Mobile" "com.persia.mobile" --web-dir=www
 
       - name: Add Android platform
         run: npx cap add android

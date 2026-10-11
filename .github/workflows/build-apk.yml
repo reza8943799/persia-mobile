@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build APK
 
 on:
   push:
@@ -7,51 +7,67 @@ on:
 
 jobs:
   build:
-    name: Build APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
-      - name: Prepare www folder
-        run: |
-          mkdir -p www
-          cp index.html www/ 2>/dev/null || true
-          cp manifest.json www/ 2>/dev/null || true
-          cp sw.js www/ 2>/dev/null || true
-          cp icon.png www/ 2>/dev/null || true
-          cp -r font www/ 2>/dev/null || true
-
-      - name: Init npm and install Capacitor
-        run: |
-          npm init -y
-          npm install @capacitor/core@5 @capacitor/cli@5 @capacitor/android@5
-
-      - name: Init Capacitor
-        run: npx cap init "Persia Mobile" "com.persia.mobile" --web-dir www
-
-      - name: Add Android platform
-        run: npx cap add android
-
-      - name: Sync web assets
-        run: npx cap sync android
-
-      - name: Setup Java
+      - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Capacitor CLI and dependencies
+        run: |
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install --save-dev @capacitor/assets
+
+      - name: Prepare www folder
+        run: |
+          mkdir -p www
+          cp index.html www/
+          cp manifest.json www/
+          cp sw.js www/
+          cp icon.png www/
+          cp brands-db.js www/
+          cp patch.js www/
+          mkdir -p www/font
+          cp -r font/* www/font/ 2>/dev/null || true
+
+      - name: Init Capacitor
+        run: |
+          npx cap init "موبایل پرشیا" "com.persia.mobile" --web-dir=www
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Generate app icons and splash screens
+        run: |
+          mkdir -p assets
+          cp icon.png assets/icon.png
+          npx @capacitor/assets generate --android
+        continue-on-error: true
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Make Gradlew executable
+        run: chmod +x android/gradlew
+
       - name: Build APK
         run: |
           cd android
-          chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Upload APK
@@ -59,4 +75,3 @@ jobs:
         with:
           name: persia-mobile-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30

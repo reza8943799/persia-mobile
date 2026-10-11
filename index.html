@@ -5554,40 +5554,44 @@ function mergeArraysById(localList, remoteList) {
   return merged.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
 }
 
+// ═══════════════════════════════════════════════════════════════
+// 🔧 FIX: Smart Sync — Download First, Then Upload
+// ═══════════════════════════════════════════════════════════════
+
 function startSmartSync() {
   if (_syncInProgress) { showToast('همگام‌سازی در جریان است...', 'info'); return; }
   _syncInProgress = true;
-  
+
   var targetUrl = driveScriptUrl || defaultDriveUrl;
   var st = document.getElementById('main-sync-status');
-  if (st) { st.innerText = '⏳ در حال ارسال...'; st.style.color = '#1e40af'; }
-  
-  var done = showProgress(); window._syncProgressDone = done;
+  if (st) { st.innerText = '⏳ در حال دریافت از سرور...'; st.style.color = '#1e40af'; }
+
+  var done = showProgress();
+  window._syncProgressDone = done;
+
+  clearTimeout(window._syncSafetyTimer);
   window._syncSafetyTimer = setTimeout(function() {
     _syncInProgress = false;
-    if (done) done();
+    if (window._syncProgressDone) window._syncProgressDone();
     if (st) st.innerText = '⏰ زمان پاسخ طولانی شد.';
     showToast('زمان همگام‌سازی به پایان رسید', 'warning');
-  }, 20000);
-  
-  var payload = { customers: customers, transactions: transactions, quotes: quotes, parts: parts, expenses: expenses, paymentText: customPaymentText, nextIntakeSeq: nextIntakeSeq, syncTime: Date.now() };
-  var jsonStr = JSON.stringify(payload);
-  
-  fetch(targetUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: jsonStr })
-  .then(function() {
-    if (st) st.innerText = '⏳ ارسال شد، در حال دریافت...';
-    setTimeout(function() {
-      doSmartSyncDownload(targetUrl);
-    }, 1500);
-  })
-  .catch(function() {
-    var form = document.getElementById('drive_form');
-    var input = document.getElementById('drive_form_data');
-    if (form && input) { form.action = targetUrl; input.value = jsonStr; isSubmittingDrive = true; form.submit(); }
-    setTimeout(function() {
-      doSmartSyncDownload(targetUrl);
-    }, 2000);
-  });
+  }, 25000);
+
+  // ✅ مرحله ۱: اول دانلود
+  var oldScript = document.getElementById('jsonp_drive_script');
+  if (oldScript) oldScript.remove();
+
+  var script = document.createElement('script');
+  script.id = 'jsonp_drive_script';
+  script.src = targetUrl + (targetUrl.indexOf('?') !== -1 ? '&' : '?') + 'callback=onSmartSyncDataReceived&t=' + Date.now();
+  script.onerror = function() {
+    _syncInProgress = false;
+    clearTimeout(window._syncSafetyTimer);
+    if (window._syncProgressDone) window._syncProgressDone();
+    if (st) st.innerText = '❌ خطا در دریافت';
+    showToast('خطا در برقراری ارتباط', 'error');
+  };
+  document.body.appendChild(script);
 }
 
 // 🔽 دریافت داده از سرور (JSONP)
@@ -5609,25 +5613,84 @@ function doSmartSyncDownload(targetUrl) {
 }
 
 window.onSmartSyncDataReceived = function(rawContent) {
-  _syncInProgress = false; var st = document.getElementById('main-sync-status');
+  var st = document.getElementById('main-sync-status');
+  var targetUrl = driveScriptUrl || defaultDriveUrl;
+
   try {
-    var d = typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent; if (!d) d = {};
+    var d = typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent;
+    if (!d) d = {};
+
+    // ✅ مرحله ۲: ادغام دیتای سرور با محلی
     customers = mergeArraysById(customers, d.customers || []);
     transactions = mergeArraysById(transactions, d.transactions || []);
     quotes = mergeArraysById(quotes, d.quotes || []);
     parts = mergeArraysById(parts, d.parts || []);
     expenses = mergeArraysById(expenses, d.expenses || []);
     if (d.nextIntakeSeq) nextIntakeSeq = Math.max(nextIntakeSeq, Number(d.nextIntakeSeq) || 1000);
-    saveAll(); invalidateCaches();
-    renderCustomers(); renderWorkshopBoard(); renderDepositsStream(); renderExpenses(); renderParts(); renderReports();
-    if (activeCustomerId) { renderQuotes(); renderTransactions(); renderCustomerLoyaltyBanner(); }
-    if (window._syncSafetyTimer) clearTimeout(window._syncSafetyTimer);
+
+    saveAll();
+    invalidateCaches();
+
+    // ✅ مرحله ۳: رندر همه بخش‌ها
+    try { renderCustomers(); } catch(e){}
+    try { renderWorkshopBoard(); } catch(e){}
+    try { renderDepositsStream(); } catch(e){}
+    try { renderExpenses(); } catch(e){}
+    try { renderParts(); } catch(e){}
+    try { renderReports(); } catch(e){}
+    if (activeCustomerId) {
+      try { renderQuotes(); } catch(e){}
+      try { renderTransactions(); } catch(e){}
+      try { renderCustomerLoyaltyBanner(); } catch(e){}
+    }
+
+    if (st) st.innerText = '⏳ ادغام شد، در حال ارسال مجدد...';
+
+    // ✅ مرحله ۴: آپلود داده‌های merge شده به سرور
+    setTimeout(function() {
+      var payload = {
+        customers: customers,
+        transactions: transactions,
+        quotes: quotes,
+        parts: parts,
+        expenses: expenses,
+        paymentText: customPaymentText,
+        nextIntakeSeq: nextIntakeSeq,
+        syncTime: Date.now()
+      };
+
+      fetch(targetUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      })
+      .then(function() {
+        _syncInProgress = false;
+        clearTimeout(window._syncSafetyTimer);
+        if (window._syncProgressDone) { window._syncProgressDone(); window._syncProgressDone = null; }
+        if (st) { st.innerText = '✅ همگام‌سازی کامل شد'; st.style.color = '#15803d'; }
+        try { localStorage.setItem('db_last_sync_time', Date.now().toString()); } catch(e) {}
+        updateSyncStatusBadge();
+        showToast('✅ اطلاعات همگام شد (' + customers.length + ' مشتری، ' + quotes.length + ' فاکتور)', 'success');
+      })
+      .catch(function() {
+        _syncInProgress = false;
+        clearTimeout(window._syncSafetyTimer);
+        if (window._syncProgressDone) { window._syncProgressDone(); window._syncProgressDone = null; }
+        if (st) st.innerText = '⚠️ دریافت شد ولی ارسال ناموفق';
+        showToast('⚠️ ارسال داده‌های ادغام‌شده ناموفق بود', 'warning');
+      });
+    }, 400);
+
+  } catch(e) {
+    _syncInProgress = false;
+    clearTimeout(window._syncSafetyTimer);
     if (window._syncProgressDone) { window._syncProgressDone(); window._syncProgressDone = null; }
-    if (st) st.innerText = '✅ اطلاعات همگام شد.';
-try { localStorage.setItem('db_last_sync_time', Date.now().toString()); } catch(e) {}
-updateSyncStatusBadge();
-showToast('✅ اطلاعات ابری همگام شد.', 'success');
-  } catch(e) { if (st) st.innerText = '❌ خطا در پردازش داده‌های ابری'; }
+    if (st) st.innerText = '❌ خطا در پردازش داده‌های ابری';
+    console.error('Sync error:', e);
+    showToast('خطا در پردازش داده', 'error');
+  }
 };
 
 function downloadFromDrive() {

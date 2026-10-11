@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
+    <script src="brands-db.js"></script>
+<script src="patch.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>تعمیرات تخصصی موبایل پرشیا</title>
@@ -9,150 +11,116 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="موبایل پرشیا">
-<link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2830/2830305.png">
+
 <style>
-@font-face {
-  font-family: 'Vazirmatn';
-  src: url('font/Vazirmatn-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Vazirmatn';
-  src: url('font/Vazirmatn-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-display: swap;
-}
+/* ========================================= */
+/* ۱. تنظیمات پایه و متغیرهای رنگی */
+/* ========================================= */
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v3.3.0/Vazirmatn-font-face.css');
 
 :root{
-  --primary:#2563eb;
-  --primary-dark:#1d4ed8;
-  --primary-light:#eff6ff;
-  --gold:#f59e0b;
-  --danger:#ef4444;
-  --success:#10b981;
-  --warning:#f59e0b;
-  --bg:#f1f5f9;
-  --card:#ffffff;
-  --text:#0f172a;
-  --muted:#64748b;
-  --border:#e2e8f0;
-  --radius:18px;
-  --header-height:64px;
+  --primary:#2563eb; --primary-dark:#1d4ed8; --primary-light:#eff6ff;
+  --gold:#f59e0b; --danger:#ef4444; --success:#10b981; --warning:#f59e0b;
+  --bg:#f1f5f9; --card:#ffffff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0;
+  --radius:18px; --header-height:64px;
   --shadow-sm:0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   --shadow-md:0 10px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
 }
-*{box-sizing:border-box;font-family:'Vazirmatn',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Tahoma,sans-serif;margin:0;padding:0}
-body{background-color:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;line-height:1.6;letter-spacing:-0.2px}
 
+*{box-sizing:border-box;font-family:'Vazirmatn',system-ui,-apple-system,sans-serif;margin:0;padding:0;}
+body{background-color:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;line-height:1.6;letter-spacing:-0.2px;}
+
+/* تراز ماشینی فقط برای مبالغ و فیلدها (حل باگ پرش ارتفاع ایموجی‌ها) */
+input[type="text"], .total-box, .stat-val, .badge, td, th {
+  font-variant-numeric: tabular-nums !important;
+}
+
+/* ========================================= */
+/* ۲. استایل‌های اصلی (هدر، منوها، کارت‌ها) */
+/* ========================================= */
 header{
-  background:linear-gradient(135deg,#0b132b 0%,#1e3a8a 50%,#1e40af 100%);
-  color:#fff;
-  padding:12px 18px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-weight:800;
-  font-size:1.1rem;
-  box-shadow:0 4px 15px rgba(11,19,43,0.3);
-  position:sticky;
-  top:0;
-  z-index:100;
-  min-height:var(--header-height);
-}
-.header-btn{
-  background:rgba(255,255,255,0.15);
-  border:1px solid rgba(255,255,255,0.3);
-  color:#fff;
-  font-size:0.75rem;
-  padding:6px 12px;
-  border-radius:20px;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  gap:4px;
-  box-shadow:none;
-  transition:all 0.2s ease;
-}
-.header-btn:hover{background:rgba(255,255,255,0.25)}
-.header-btn.syncing{
-  background:rgba(245,158,11,0.25);
-  border-color:rgba(245,158,11,0.6);
-}
-.header-btn.syncing::before{
-  content:'';
-  display:inline-block;
-  width:10px;
-  height:10px;
-  border:2px solid rgba(255,255,255,0.4);
-  border-top-color:#fbbf24;
-  border-radius:50%;
-  animation:spin 0.8s linear infinite;
-  margin-left:4px;
+  background: rgba(11, 19, 43, 0.75) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color:#fff; padding:12px 18px; display:flex; justify-content:space-between;
+  align-items:center; font-weight:800; font-size:1.1rem; box-shadow:0 4px 15px rgba(11,19,43,0.3);
+  position:sticky; top:0; z-index:100; min-height:var(--header-height);
 }
 
-/* منوی ناوبری پایین مدرن */
+/* منوی ناوبری پایین با افکت شیشه‌ای عمیق و ارتفاع قفل‌شده */
 .nav-tabs{
-  position:fixed;bottom:0;left:0;right:0;display:flex;
-  background:rgba(255, 255, 255, 0.96);backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);box-shadow:0 -4px 20px rgba(0,0,0,0.06);
-  z-index:1000;padding-bottom:env(safe-area-inset-bottom);
-  border-top:1px solid var(--border);overflow-x:auto;
+  position:fixed; bottom:0; left:0; right:0; display:flex;
+  height: calc(64px + env(safe-area-inset-bottom)); /* قفل کردن ارتفاع */
+  background: rgba(255, 255, 255, 0.85) !important; 
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.06); z-index:1000; padding-bottom:env(safe-area-inset-bottom);
+  border-top:1px solid var(--border); overflow-x:auto;
 }
 .nav-tab{
-  flex:1;padding:10px 2px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;color:var(--muted);
-  font-size:0.68rem;font-weight:800;border:none;background:transparent;
-  cursor:pointer;transition:all 0.2s ease;min-width:60px;gap:4px;
+  position: relative; overflow: hidden; /* جلوگیری از پرش و باگ ریپل */
+  flex:1; padding:0; height: 64px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; color:var(--muted);
+  font-size:0.68rem; font-weight:800; border:none; background:transparent;
+  cursor:pointer; transition:all 0.2s ease; min-width:60px; gap:4px;
 }
-.nav-tab.active{color:var(--primary);}
-.nav-icon{font-size:1.4rem;transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);}
-.nav-tab.active .nav-icon{transform:translateY(-3px) scale(1.15);}
+.nav-tab.active { color: #1e40af !important; text-shadow: 0 0 0.5px rgba(30, 64, 175, 0.5); }
+.nav-icon { font-size:1.4rem; display:inline-block; transition:transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* خط نشانگر آبی بالای تب انتخاب‌شده */
+.nav-tab::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%) scaleX(0);
+  width: 38px; height: 4px; background: #2563eb; border-radius: 0 0 6px 6px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.5);
+}
+.nav-tab.active::before { transform: translateX(-50%) scaleX(1); }
+.nav-tab.active::after {
+  content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  width: 44px; height: 44px; background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%; z-index: -1; pointer-events: none;
+}
+
+/* تعاملات خُرد (Micro-interactions) برای رقص ایموجی‌ها */
+#btn-tab-customers.active .nav-icon { transform: translateY(-3px) scale(1.15) rotate(-12deg) !important; }
+#btn-tab-deposits.active .nav-icon { transform: translateY(-3px) scale(1.15) rotate(15deg) !important; }
+#btn-tab-expenses.active .nav-icon { transform: translateY(-3px) scale(1.15) rotate(-15deg) !important; }
+#btn-tab-parts.active .nav-icon { transform: translateY(-6px) scale(1.25) !important; }
+#btn-tab-reports.active .nav-icon { transform: translateY(-3px) scale(1.15) skewY(-8deg) !important; }
+#btn-tab-backup.active .nav-icon { transform: translateY(-3px) scale(1.15) rotate(-135deg) !important; }
 
 /* حالت تاریک (Dark Mode) */
 body.dark-mode {
-  --primary: #3b82f6;
-  --primary-dark: #2563eb;
-  --primary-light: #1e293b;
-  --bg: #0f172a;
-  --card: #1e293b;
-  --text: #f8fafc;
-  --muted: #94a3b8;
-  --border: #334155;
+  --primary: #3b82f6; --primary-dark: #2563eb; --primary-light: #1e293b;
+  --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8; --border: #334155;
 }
+body.dark-mode header { background: rgba(15, 23, 42, 0.75) !important; }
+body.dark-mode .nav-tabs { background: rgba(30, 41, 59, 0.85) !important; }
+body.dark-mode .nav-tab.active { color: #93c5fd !important; text-shadow: 0 0 0.5px rgba(147, 197, 253, 0.5); }
+body.dark-mode .nav-tab::before { background: #60a5fa; box-shadow: 0 2px 10px rgba(96, 165, 250, 0.5); }
+body.dark-mode .nav-tab.active::after { background: radial-gradient(circle, rgba(147, 197, 253, 0.15) 0%, rgba(15,23,42,0) 70%); }
 body.dark-mode input, body.dark-mode textarea, body.dark-mode select { background: #0f172a; color: #f8fafc; }
-body.dark-mode .nav-tabs { background: rgba(30, 41, 59, 0.96); }
-body.dark-mode .modal-content { background: #1e293b; }
+body.dark-mode .modal-content { background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); }
 body.dark-mode .invoice-row, body.dark-mode .workshop-details-box, body.dark-mode .note-box, body.dark-mode .part-search-results { background: #0f172a; }
 body.dark-mode .sub-switch-box, body.dark-mode .cust-sub-nav { background: #334155; }
 body.dark-mode .sub-switch-btn.active, body.dark-mode .cust-sub-tab.active { background: var(--primary); color: #fff; }
 body.dark-mode .filter-btn { background: #0f172a; }
+body.dark-mode .cash-drawer-box { background: #331f38; border-color: #a21caf; }
+body.dark-mode input[type="checkbox"] { background: #475569; }
+body.dark-mode input[type="checkbox"]:checked { background: var(--primary); }
+body.dark-mode .repair-timeline::before { background: #334155; }
+body.dark-mode .rt-dot { background: #1e293b; border-color: #475569; }
 
-/* دکمه شناور (FAB) */
-.fab {
-  position:fixed;bottom:85px;right:20px;
-  width:60px;height:60px;border-radius:50%;
-  background:linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color:white;font-size:1.8rem;display:flex;justify-content:center;align-items:center;
-  box-shadow:0 4px 15px rgba(37, 99, 235, 0.4);z-index:900;border:none;cursor:pointer;
-  transition:transform 0.2s, box-shadow 0.2s;padding:0;margin:0;
-}
-.fab:active {transform:scale(0.9);box-shadow:0 2px 8px rgba(37, 99, 235, 0.3);}
-
-/* افکت موجی (Ripple) */
-.ripple-effect {
-  position:absolute;border-radius:50%;background:rgba(255,255,255,0.4);
-  transform:scale(0);animation:ripple-anim 0.6s linear;pointer-events:none;
-}
-@keyframes ripple-anim { to { transform:scale(4); opacity:0; } }
-
+/* دکمه‌های فرم و UI */
 .container{max-width:560px;margin:0 auto;padding:14px}
 .card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:14px;border:1px solid var(--border);box-shadow:var(--shadow-sm);transition:transform .15s ease,box-shadow .15s ease}
 .card:hover{box-shadow:var(--shadow-md)}
 input,textarea,select,button{width:100%;padding:11px 13px;border-radius:9px;border:1px solid var(--border);margin-top:6px;font-size:.9rem;outline:none}
 input:focus,textarea:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(30,64,175,.15)}
-button{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;border:none;font-weight:bold;cursor:pointer;box-shadow:0 3px 10px rgba(30,64,175,0.25)}
-button:active{transform:scale(.98)}
+button{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;border:none;font-weight:bold;cursor:pointer;box-shadow:0 3px 10px rgba(30,64,175,0.25); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease !important;}
+button:active{transform:scale(0.92) translateY(2px) !important;box-shadow: 0 0 0 transparent !important;}
 .btn-debt{background:linear-gradient(135deg,#ef4444 0%,#b91c1c 100%);box-shadow:0 4px 12px rgba(239,68,68,0.3)}
 .btn-pay{background:linear-gradient(135deg,#10b981 0%,#047857 100%);box-shadow:0 4px 12px rgba(16,185,129,0.3)}
 .btn-quote{background:linear-gradient(135deg,#f59e0b 0%,#b45309 100%);color:#fff;box-shadow:0 4px 12px rgba(245,158,11,0.3)}
@@ -162,46 +130,41 @@ button:active{transform:scale(.98)}
 .btn-print{background:#475569;font-size:.82rem;padding:9px;flex:1;border-radius:8px}
 .btn-add-row{background:var(--primary-light);color:var(--primary);border:1px dashed var(--primary);font-size:.85rem;padding:9px;margin-top:8px}
 .btn-tariff{background:#fef3c7;color:#b45309;border:1px solid #fde68a;font-size:.82rem;padding:8px 12px;width:auto;border-radius:8px}
-.loyalty-banner{padding:10px 12px;border-radius:10px;text-align:center;font-weight:800;font-size:.85rem;margin:8px 0;line-height:1.6}
-.tier-regular{background:#f1f5f9;color:#475569;border:1px solid #cbd5e1}
-.tier-silver{background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe}
-.tier-gold{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
-.sub-switch-box{display:flex;background:#e2e8f0;border-radius:12px;padding:4px;gap:4px;margin-bottom:14px}
-.sub-switch-btn{flex:1;padding:10px 4px;text-align:center;border-radius:9px;font-size:.86rem;font-weight:800;color:#475569;background:transparent;margin:0;cursor:pointer;box-shadow:none}
-.sub-switch-btn.active{background:#fff;color:var(--primary);box-shadow:0 2px 6px rgba(0,0,0,.06)}
-.cust-sub-nav{display:flex;gap:5px;background:#e2e8f0;padding:4px;border-radius:12px;margin-bottom:14px}
-.cust-sub-tab{flex:1;padding:9px 3px;border:none;background:transparent;font-size:.81rem;font-weight:800;color:#475569;border-radius:8px;cursor:pointer;text-align:center;margin:0}
-.cust-sub-tab.active{background:var(--primary);color:#fff}
+.action-btn{background:none;border:none;padding:4px 6px;font-size:1rem;width:auto;cursor:pointer;margin:0;box-shadow:none !important;}
 
-.status-filters {
-  display: flex; gap: 10px; overflow-x: auto; padding: 10px 4px;
-  scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
-}
-.filter-btn {
-  position: relative; display: flex; align-items: center; padding: 8px 16px; 
-  border-radius: 30px; font-weight: 800; font-size: 0.8rem;
-  background: #f1f5f9; color: #64748b; border: none; cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* انیمیشن فنری */
-  white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-.filter-btn.active {
-  background: var(--primary); color: #fff; transform: scale(1.05);
-  box-shadow: 0 8px 15px rgba(37, 99, 235, 0.25);
-}
-.filter-badge {
-  display: inline-flex; align-items: center; justify-content: center;
-  background: #e2e8f0; color: #475569; border-radius: 50%;
-  width: 22px; height: 22px; font-size: 0.7rem; margin-right: 8px;
-  transition: background 0.3s, color 0.3s;
-}
-.filter-btn.active .filter-badge { background: #fff; color: var(--primary); }
+/* ========================================= */
+/* ۳. تابلوی وضعیت و المان‌های تخصصی کارگاه */
+/* ========================================= */
+.status-filters { display: flex !important; gap: 8px !important; overflow-x: auto !important; padding: 10px 4px !important; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+.filter-btn { flex-shrink: 0 !important; min-width: max-content !important; display: inline-flex !important; align-items: center !important; padding: 6px 14px !important; border-radius: 30px !important; font-weight: 800 !important; font-size: 0.8rem !important; background: #f1f5f9 !important; color: #64748b !important; border: 1px solid var(--border) !important; transition: all 0.2s !important; white-space: nowrap !important; margin: 0 !important; }
+.filter-btn.active { background: var(--primary) !important; color: #fff !important; border-color: var(--primary) !important; transform: scale(1.05); box-shadow: 0 8px 15px rgba(37, 99, 235, 0.25); }
+.filter-badge { display: inline-flex !important; align-items: center; justify-content: center; background: #cbd5e1 !important; color: #1e293b !important; border-radius: 50%; width: 22px !important; height: 22px !important; font-size: 0.75rem !important; margin-right: 6px !important; font-weight: 900 !important; }
+.filter-btn.active .filter-badge { background: #fff !important; color: var(--primary) !important; }
 
-
-.filter-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
-.workshop-card{border-right:5px solid var(--primary);cursor:pointer}
-.workshop-card.overdue{border-right:5px solid var(--danger);background:#fffafa}
+.workshop-card { transition: all 0.3s ease; border-right:5px solid var(--primary); cursor:pointer; }
+.workshop-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+.workshop-card.overdue { box-shadow: 0 4px 20px rgba(239,68,68,0.15) !important; border: 1px solid rgba(239,68,68,0.3) !important; border-right: 5px solid var(--danger) !important; animation: breatheAlert 2s infinite; background:#fffafa;}
+.workshop-card:has(.badge-green) { box-shadow: 0 4px 20px rgba(16,185,129,0.12) !important; border-right-color: var(--success) !important; }
 .workshop-details-box{display:none;background:#f8fafc;border:1px dashed var(--border);border-radius:8px;padding:10px;margin-top:10px;font-size:.82rem;line-height:1.7}
 .workshop-details-box.open{display:block}
+
+/* تایم‌لاین زنده روی کارت */
+.repair-timeline { display: flex; justify-content: space-between; position: relative; margin: 15px 0 10px 0; padding-top: 10px; border-top: 1px dashed var(--border); }
+.repair-timeline::before { content: ''; position: absolute; top: 17px; left: 15px; right: 15px; height: 4px; background: #e2e8f0; z-index: 1; border-radius: 4px; }
+.rt-progress { position: absolute; top: 17px; right: 15px; height: 4px; background: var(--primary); z-index: 2; border-radius: 4px; transition: width 0.6s ease; }
+.rt-step { position: relative; z-index: 3; text-align: center; font-size: 0.65rem; color: #94a3b8; font-weight: 800; width: 33.33%; }
+.rt-dot { width: 16px; height: 16px; background: #fff; border: 3px solid #cbd5e1; border-radius: 50%; margin: 0 auto 4px; transition: all 0.3s; }
+.rt-step.active { color: var(--primary); }
+.rt-step.active .rt-dot { border-color: var(--primary); background: var(--primary-light); box-shadow: 0 0 8px rgba(37,99,235,0.4); transform: scale(1.2); }
+.rt-step.done .rt-dot { background: var(--primary); border-color: var(--primary); }
+.rt-step.done { color: var(--text); }
+
+/* اکشن ردیف کارت‌ها (۶ تایی) */
+.action-row { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; margin-top: 12px !important; }
+.action-row button { width: 100% !important; margin: 0 !important; padding: 10px 4px !important; font-size: 0.78rem !important; border-radius: 8px !important; white-space: nowrap !important; flex: none !important; }
+.workshop-card select.smart-dropdown { width: max-content !important; flex: 0 0 auto !important; padding: 6px 10px !important; display: inline-block !important; font-size: 0.8rem; margin: 0; border-radius: 8px; font-weight: bold; color: #fff !important; border: none !important; outline: none; appearance: none; -webkit-appearance: none; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+
+/* بج‌ها (Badges) */
 .badge{padding:4px 9px;border-radius:8px;font-size:.76rem;font-weight:800;display:inline-block}
 .badge-red{background:#fee2e2;color:var(--danger)}
 .badge-green{background:#dcfce7;color:var(--success)}
@@ -210,12 +173,89 @@ button:active{transform:scale(.98)}
 .badge-purple{background:#f3e8ff;color:#7e22ce}
 .badge-collab{background:#ffedd5;color:#c2410c;border:1px solid #fed7aa}
 .badge-overdue{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5}
-.badge-tier-gold{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
-.badge-tier-silver{background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe}
-.badge-tier-regular{background:#f1f5f9;color:#475569;border:1px solid #cbd5e1}
+
+/* ========================================= */
+/* ۴. انیمیشن‌ها و افکت‌های لاکچری (Super Packages) */
+/* ========================================= */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shineWave { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
+@keyframes pulseDot { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.5; } }
+@keyframes slowSpin { 100% { transform: rotate(360deg); } }
+@keyframes tiltHourglass { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(15deg); } 75% { transform: rotate(-15deg); } }
+@keyframes breatheAlert { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+@keyframes scanLaser { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+@keyframes shineHolo { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
+@keyframes auroraMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes slideDown { to { transform: translateY(0); } }
+@keyframes slideInPage { from { opacity: 0; transform: translateX(15px) scale(0.99); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes printPaperOut { 0% { height: 0; transform: translateY(0); } 75% { height: 90px; transform: translateY(0); } 100% { height: 90px; transform: translateY(30px); opacity: 0; } }
+@keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes pulseBadge{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,0.7)}50%{transform:scale(1.15);box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+@keyframes ripple-anim { to { transform:scale(4); opacity:0; } }
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(20px) scale(0.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+
+.text-wave { background: linear-gradient(90deg, #93c5fd 0%, #93c5fd 40%, #ffffff 45%, #e879f9 50%, #ffffff 55%, #93c5fd 60%, #93c5fd 100%); background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text; animation: shineWave 3s linear infinite; }
+.status-dot-ready { display: inline-block; width: 7px; height: 7px; background: #10b981; border-radius: 50%; margin-left: 4px; animation: pulseDot 1.5s infinite ease-in-out; }
+.status-icon-bench { display: inline-block; margin-left: 4px; animation: slowSpin 4s linear infinite; }
+.status-icon-wait { display: inline-block; margin-left: 4px; animation: tiltHourglass 2s ease-in-out infinite; }
+.qr-scanner-box { position: relative; display: inline-block; overflow: hidden; border-radius: 6px; }
+.qr-scanner-box img { display: block; width: 46px; height: 46px; border: 1px solid #cbd5e1; }
+.qr-scanner-box::after { content: ''; position: absolute; left: 0; width: 100%; height: 2px; background: rgba(59, 130, 246, 0.8); box-shadow: 0 0 4px #3b82f6; animation: scanLaser 2s linear infinite; }
+.card-gold { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 20%, #fde68a 50%, #fef3c7 80%, #fffbeb 100%) !important; background-size: 200% auto !important; animation: shineHolo 6s linear infinite !important; border: 1px solid #fcd34d !important; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15) !important; }
+.card-silver { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 20%, #e2e8f0 50%, #f1f5f9 80%, #f8fafc 100%) !important; background-size: 200% auto !important; animation: shineHolo 6s linear infinite !important; border: 1px solid #cbd5e1 !important; box-shadow: 0 8px 20px rgba(148, 163, 184, 0.15) !important; }
+.aurora-bg { background: linear-gradient(-45deg, #0f172a, #1e3a8a, #312e81, #064e3b) !important; background-size: 400% 400% !important; animation: auroraMove 12s ease infinite !important; color: white !important; border: none !important; box-shadow: 0 10px 30px rgba(30, 58, 138, 0.3) !important; }
+.aurora-bg .stat-card { background: rgba(255, 255, 255, 0.1) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2) !important; }
+.aurora-bg .stat-card div { color: rgba(255,255,255,0.85) !important; }
+.aurora-bg .stat-card .stat-val { color: #fff !important; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+.page-transition { animation: slideInPage 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important; }
+.secret-terminal { background: #0f172a; color: #10b981; font-family: monospace; padding: 10px 12px; border-radius: 8px; border-left: 3px solid #10b981; margin-top: 8px; font-size: 0.8rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); direction: rtl; }
+.bg-blue { background: #3b82f6 !important; } .bg-purple { background: #8b5cf6 !important; } .bg-orange { background: #f59e0b !important; } .bg-collab { background: #ea580c !important; } .bg-green { background: #10b981 !important; } .bg-red { background: #ef4444 !important; }
+
+/* ========================================= */
+/* ۵. اجزای پیچیده UI (اسپات‌لایت، فاب مایع، پرینتر، مودال‌ها) */
+/* ========================================= */
+.spotlight-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: none; justify-content: center; align-items: flex-start; z-index: 999999; padding: 20px; padding-top: 60px; }
+.spotlight-box { background: rgba(255, 255, 255, 0.9); width: 100%; max-width: 500px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; border: 1px solid rgba(255,255,255,0.4); transform: translateY(-20px); animation: slideDown 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.spotlight-input-wrap { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.spotlight-input { flex: 1; background: transparent !important; border: none !important; font-size: 1.1rem; color: var(--text); outline: none !important; box-shadow: none !important; margin: 0; padding: 0 10px !important; }
+.spotlight-close { background: #f1f5f9; color: var(--danger); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-weight: bold; padding: 0 !important; margin: 0 !important; }
+.spotlight-results { max-height: 50vh; overflow-y: auto; padding: 10px; }
+.spotlight-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; cursor: pointer; transition: background 0.2s; }
+.spotlight-item:hover { background: rgba(37, 99, 235, 0.1); }
+.sp-icon { font-size: 1.5rem; width: 42px; height: 42px; display: flex; justify-content: center; align-items: center; background: var(--bg); border-radius: 12px; }
+
+.fab-container { position: fixed; bottom: 85px; right: 20px; z-index: 900; display: flex; flex-direction: column-reverse; align-items: center; gap: 12px; pointer-events: none; }
+.fab-main, .fab-mini { pointer-events: auto; }
+.fab-mini { width: 46px; height: 46px; border-radius: 50%; background: #fff; color: var(--primary); font-size: 1.2rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: none; cursor: pointer; transform: scale(0) translateY(20px); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+body.dark-mode .fab-mini { background: #334155; }
+.fab-container.open .fab-mini { transform: scale(1) translateY(0); opacity: 1; }
+.fab-container.open .fab-mini:nth-child(2) { transition-delay: 0.05s; }
+.fab-container.open .fab-mini:nth-child(3) { transition-delay: 0.1s; }
+.fab-container.open .fab-mini:nth-child(4) { transition-delay: 0.15s; }
+.fab-main { width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: #ffffff !important; font-family: Arial, sans-serif !important; font-size: 1.8rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s; }
+.fab-container.open .fab-main { transform: rotate(135deg); background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+
+.printer-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.85); backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; z-index: 9999999; flex-direction: column; }
+.printer-box { position: relative; width: 110px; height: 50px; background: #475569; border-radius: 12px 12px 4px 4px; border-top: 14px solid #1e293b; box-shadow: 0 15px 30px rgba(0,0,0,0.5); z-index: 2; }
+.printer-paper { position: absolute; width: 74px; height: 0; background: #fff; bottom: -8px; left: 18px; border-radius: 2px; overflow: hidden; display: flex; flex-direction: column; gap: 4px; padding-top: 6px; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1; }
+.printer-line { width: 50px; height: 4px; background: #e2e8f0; border-radius: 2px; }
+.printing-text { color: #fff; font-weight: 800; margin-top: 25px; font-size: 1.1rem; animation: pulseText 1s infinite; }
+
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.4) !important; backdrop-filter: blur(8px) saturate(150%); -webkit-backdrop-filter: blur(8px) saturate(150%); display:none;justify-content:center;align-items:center;z-index:1000;padding:14px;animation:fadeIn .2s ease-out}
+.modal-content{background:rgba(255, 255, 255, 0.85) !important; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius:18px;padding:18px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.5);animation:slideUp .25s cubic-bezier(0.34,1.56,0.64,1)}
+
+#toast-box{background: rgba(30, 41, 59, 0.95) !important; backdrop-filter: blur(8px); color: #ffffff !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; border: 1px solid rgba(255, 255, 255, 0.1); position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(30px);opacity:0;padding:11px 22px;border-radius:12px;font-weight:bold;font-size:.88rem;z-index:99999;box-shadow:0 10px 30px rgba(0,0,0,0.25);transition:all .3s cubic-bezier(0.34,1.56,0.64,1);max-width:90%;text-align:center;pointer-events:none}
+
+/* متفرقه فرم‌ها و لیست‌ها */
+.sub-switch-box{display:flex;background:#e2e8f0;border-radius:12px;padding:4px;gap:4px;margin-bottom:14px}
+.sub-switch-btn{flex:1;padding:10px 4px;text-align:center;border-radius:9px;font-size:.86rem;font-weight:800;color:#475569;background:transparent;margin:0;cursor:pointer;box-shadow:none}
+.sub-switch-btn.active{background:#fff;color:var(--primary);box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.cust-sub-nav{display:flex;gap:5px;background:#e2e8f0;padding:4px;border-radius:12px;margin-bottom:14px}
+.cust-sub-tab{flex:1;padding:9px 3px;border:none;background:transparent;font-size:.81rem;font-weight:800;color:#475569;border-radius:8px;cursor:pointer;text-align:center;margin:0}
+.cust-sub-tab.active{background:var(--primary);color:#fff}
 .total-box{font-size:1.35rem;font-weight:900;text-align:center;margin:8px 0}
 .row{display:flex;gap:8px}
-.action-btn{background:none;border:none;padding:4px 6px;font-size:1rem;width:auto;cursor:pointer;margin:0;box-shadow:none}
 .field-label{font-size:.82rem;font-weight:bold;color:#475569;margin-top:10px;display:block}
 .quote-box{background:#fffdf5;border:1px solid #fde68a;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow-sm)}
 .note-box{background:#f8fafc;border-right:3px solid var(--primary);padding:8px 12px;border-radius:6px;font-size:.85rem;color:#334155;margin-top:8px;text-align:right}
@@ -229,10 +269,6 @@ button:active{transform:scale(.98)}
 .part-search-results{max-height:150px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:#fff;margin-top:4px;display:none}
 .part-search-item{padding:8px 12px;font-size:.83rem;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .part-search-item:hover{background:var(--primary-light)}
-.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.65);display:none;justify-content:center;align-items:center;z-index:1000;padding:14px;backdrop-filter:blur(3px);animation:fadeIn .2s ease-out}
-.modal-content{background:#fff;border-radius:18px;padding:18px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;box-shadow:0 12px 35px rgba(0,0,0,0.2);animation:slideUp .25s cubic-bezier(0.34,1.56,0.64,1)}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{transform:translateY(20px) scale(0.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 .pattern-pad{display:grid;grid-template-columns:repeat(3,48px);gap:12px;justify-content:center;margin:12px auto}
 .pattern-dot{width:48px;height:48px;border-radius:50%;background:#f1f5f9;border:2px solid #cbd5e1;display:flex;justify-content:center;align-items:center;font-weight:bold;font-size:1.05rem;color:#475569;cursor:pointer;user-select:none;box-shadow:none}
 .pattern-dot.active{background:var(--primary);color:#fff;border-color:var(--primary-dark)}
@@ -251,62 +287,44 @@ button:active{transform:scale(.98)}
 .evidence-view-item{border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#f8fafc}
 .evidence-view-item img{width:100%;display:block;background:#fff;min-height:60px}
 .evidence-view-info{padding:8px 10px;font-size:.78rem;color:#475569;border-top:1px solid #e2e8f0}
-#toast-box{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(30px);opacity:0;padding:11px 22px;border-radius:12px;color:#fff;font-weight:bold;font-size:.88rem;z-index:99999;box-shadow:0 10px 30px rgba(0,0,0,0.25);transition:all .3s cubic-bezier(0.34,1.56,0.64,1);max-width:90%;text-align:center;pointer-events:none}
+.loyalty-banner{padding:10px 12px;border-radius:10px;text-align:center;font-weight:800;font-size:.85rem;margin:8px 0;line-height:1.6}
+.tier-regular{background:#f1f5f9;color:#475569;border:1px solid #cbd5e1}
+.tier-silver{background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe}
+.tier-gold{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+.note-cat-btn { background: #f1f5f9 !important; color: #475569 !important; padding: 8px 6px !important; font-size: 0.76rem !important; border-radius: 8px !important; border: 1.5px solid #e2e8f0 !important; cursor: pointer !important; margin: 0 !important; box-shadow: none !important; font-weight: 700 !important; transition: all 0.2s !important; white-space: nowrap !important; }
+.note-cat-btn.active { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important; color: #fff !important; border-color: #1d4ed8 !important; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important; }
+
+/* اسکرول‌بار اختصاصی و باریک */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+input[type="checkbox"] { -webkit-appearance: none; appearance: none; width: 44px !important; height: 24px !important; background: #cbd5e1; border-radius: 20px !important; position: relative; cursor: pointer; outline: none; border: none !important; transition: background 0.3s; margin: 0; vertical-align: middle; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+input[type="checkbox"]::after { content: ''; position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+input[type="checkbox"]:checked { background: var(--success); }
+input[type="checkbox"]:checked::after { transform: translateX(-20px); }
 
 #progress-bar{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,#f59e0b,#fbbf24,#f59e0b);z-index:99999;transition:width .3s ease;box-shadow:0 0 8px rgba(245,158,11,0.6)}
-@keyframes pulseBadge{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,0.7)}50%{transform:scale(1.15);box-shadow:0 0 0 6px rgba(239,68,68,0)}}
-#nav-deposits-badge{animation:pulseBadge 2s infinite}
 #initial-loader{position:fixed;inset:0;background:#f8fafc;display:flex;justify-content:center;align-items:center;z-index:99998;transition:opacity .3s ease}
 #initial-loader.fade-out{opacity:0;pointer-events:none}
-@keyframes spin{to{transform:rotate(360deg)}}
 .loader-spinner{width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#1e40af;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+
+/* ========================================= */
+/* ۶. استایل‌های چاپ (Print) */
+/* ========================================= */
 #print-section{display:none}
 @media print{
 body *{visibility:hidden}
-/* واترمارک کلمه در مرکز فاکتور چاپی */
-.r-watermark {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%) rotate(-30deg);
-  font-size: 65pt; /* سایز کوچکتر شد تا کلمه کامل جا بشود */
-  font-weight: 900;
-  letter-spacing: 12px; /* فاصله شیک بین حروف */
-  text-transform: uppercase; /* حروف بزرگ */
-  color: rgba(0, 0, 0, 0.04); z-index: 0; pointer-events: none;
-  font-family: Arial, sans-serif;
-}
-
-.print-half { position: relative; } /* برای اینکه واترمارک در مرکز قرار بگیرد */
-
+.r-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 65pt; font-weight: 900; letter-spacing: 12px; text-transform: uppercase; color: rgba(0, 0, 0, 0.04); z-index: 0; pointer-events: none; font-family: Arial, sans-serif; }
+.print-half { position: relative; } 
 #print-section,#print-section *{visibility:visible}
 #print-section{display:block!important;position:absolute;left:0;top:0;width:100%;margin:0;background:#fff;color:#000;font-family:Tahoma,Arial,sans-serif}
 @page{size:A5 portrait;margin:0}
-/* اضافه کردن محدودیت ارتفاع و جلوگیری از سرریز به صفحه دوم */
-html, body { 
-  width: 148mm; 
-  height: 209mm; /* 1 میلی‌متر کمتر از سایز واقعی A5 برای جلوگیری از سرریز */
-  overflow: hidden; 
-  margin: 0 !important; 
-  padding: 0 !important; 
-}
-#print-section { 
-  height: 100%; 
-  overflow: hidden; 
-  page-break-after: avoid; 
-  page-break-inside: avoid;
-}
-.print-page {
-  width: 148mm; 
-  height: 209mm; /* محدود کردن دقیق ارتفاع */
-  max-height: 209mm;
-  box-sizing: border-box; 
-  padding: 2mm 3mm; 
-  display: flex; 
-  flex-direction: column; 
-  overflow: hidden;
-  page-break-after: avoid;
-}
-
-.print-half{flex:1;overflow:hidden;box-sizing:border-box;padding:3mm 4mm;border:1px dashed #333;border-radius:4px;display:flex;flex-direction:column;min-height:0;}
+html, body { width: 148mm; height: 209mm; overflow: hidden; margin: 0 !important; padding: 0 !important; }
+#print-section { height: 100%; overflow: hidden; page-break-after: avoid; page-break-inside: avoid; }
+.print-page { width: 148mm; height: 209mm; max-height: 209mm; box-sizing: border-box; padding: 2mm 3mm; display: flex; flex-direction: column; overflow: hidden; page-break-after: avoid; }
+.print-half{flex:1;overflow:hidden;box-sizing:border-box;padding:3mm 4mm;border:1.5px solid #333;border-radius:4px;display:flex;flex-direction:column;min-height:0;position:relative;}
 .print-half.split{flex-direction:row;padding:0;gap:0;}
 .workshop-col{flex:2;padding:3mm 3.5mm;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
 .notes-col{flex:1;padding:3mm 2.5mm;border-right:1px dashed #333;display:flex;flex-direction:column;min-height:0;background:#fdfdfd;}
@@ -338,412 +356,224 @@ html, body {
 .r-tech-sign{margin-top:1.5mm;font-size:6pt;}
 .r-tech-sign .line{border-bottom:1px dotted #333;height:6mm;margin-bottom:0.5mm;}
 }
-/* ========================================= */
+
 /* ♿ احترام به تنظیمات «کاهش انیمیشن» کاربر  */
-/* ========================================= */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  .aurora-bg { animation: none !important; } .card-gold, .card-silver { animation: none !important; } .qr-scanner-box::after { display: none !important; }
+  .status-dot-ready, .status-icon-bench, .status-icon-wait { animation: none !important; } .workshop-card.overdue { animation: none !important; }
+  .filter-btn { transition: none !important; } .nav-icon { transition: none !important; } .page-transition { animation: none !important; }
+  .printer-paper { animation: none !important; } .spotlight-box { animation: none !important; }
+}
+
+/* افکت موجی (Ripple) کلیک دکمه‌ها */
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0);
+  animation: ripple-anim 0.6s linear;
+  pointer-events: none;
+}
+
+  /* ☁️ دکمه همگام‌سازی هوشمند (Smart Sync) */
+  .btn-smart-sync {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #2563eb 0%, #6366f1 50%, #8b5cf6 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 14px 20px !important;
+    border-radius: 14px !important;
+    font-weight: 900 !important;
+    font-size: 1rem !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4) !important;
+    margin-top: 0 !important;
   }
-  .aurora-bg { animation: none !important; }
-  .card-gold, .card-silver { animation: none !important; }
-  .qr-scanner-box::after { display: none !important; }
-  .status-dot-ready,
-  .status-icon-bench,
-  .status-icon-wait { animation: none !important; }
-  .workshop-card.overdue { animation: none !important; }
-  .filter-btn { transition: none !important; }
-  .nav-icon { transition: none !important; }
-  .page-transition { animation: none !important; }
-  .printer-paper { animation: none !important; }
-  .spotlight-box { animation: none !important; }
-}
-/* ========================================= */
-/* ارتقای ظاهری (زیباسازی اپلیکیشن) */
-/* ========================================= */
+  
+  /* افکت برق‌زدن (Shine) روی دکمه */
+  .btn-smart-sync::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-25deg);
+    animation: syncShine 4s infinite;
+  }
+  @keyframes syncShine {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
+  }
+  
+  /* حالت دارک‌مود برای کارت درایو */
+  body.dark-mode .sync-card-premium {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+    border-color: #334155 !important;
+  }
 
-/* ۱. اسکرول‌بار اختصاصی و باریک */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--primary); }
-body.dark-mode ::-webkit-scrollbar-thumb { background: #475569; }
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🎨 پچ Brand-Autocomplete: چیپ‌های برند و پیشنهاد مدل */
+/* ═══════════════════════════════════════════════════════════════ */
 
-/* ۲. هدر شیشه‌ای (Glassmorphism) */
-header {
-  background: rgba(11, 19, 43, 0.85) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+.brand-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0;
 }
-body.dark-mode header {
-  background: rgba(15, 23, 42, 0.85) !important;
-}
-
-/* ۳. انیمیشن محو شدن نرم برای تب‌ها */
-@keyframes fadeScale {
-  from { opacity: 0; transform: translateY(8px) scale(0.99); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-div[id^="tab-content-"] {
-  animation: fadeScale 0.3s ease-out;
-}
-/* کادر بستن دخل شبانه */
-.cash-drawer-box {
-  background: #fdf4ff; border: 1.5px dashed #d946ef; border-radius: 12px;
-  padding: 14px; margin-top: 14px; font-size: 0.85rem; line-height: 1.8;
-}
-body.dark-mode .cash-drawer-box { background: #331f38; border-color: #a21caf; }
-/* ========================================= */
-/* واضح‌تر کردن و زیباسازی تب فعال در منوی پایین (نسخه بدون لرزش) */
-/* ========================================= */
-
-/* تغییر رنگ متن تب فعال (بدون تغییر ضخامت که باعث پرش می‌شد) */
-.nav-tab.active { color: #1e40af !important; text-shadow: 0 0 0.5px rgba(30, 64, 175, 0.5); }
-body.dark-mode .nav-tab.active { color: #93c5fd !important; text-shadow: 0 0 0.5px rgba(147, 197, 253, 0.5); }
-
-/* سایه درخشان زیر آیکون فعال */
-.nav-tab.active .nav-icon {
-  transform: translateY(-4px) scale(1.2);
-  filter: drop-shadow(0 4px 6px rgba(37, 99, 235, 0.4));
-}
-body.dark-mode .nav-tab.active .nav-icon {
-  filter: drop-shadow(0 4px 8px rgba(147, 197, 253, 0.5));
-}
-
-/* خط نشانگر آبی بالای تب انتخاب‌شده */
-.nav-tab::before {
-  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%) scaleX(0);
-  width: 38px; height: 4px; background: #2563eb; border-radius: 0 0 6px 6px;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.5);
-}
-body.dark-mode .nav-tab::before { 
-  background: #60a5fa; box-shadow: 0 2px 10px rgba(96, 165, 250, 0.5); 
-}
-.nav-tab.active::before { transform: translateX(-50%) scaleX(1); }
-
-/* هاله رنگی ملایم پشت آیکون */
-.nav-tab.active::after {
-  content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-  width: 44px; height: 44px; background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, rgba(255,255,255,0) 70%);
-  border-radius: 50%; z-index: -1; pointer-events: none;
-}
-body.dark-mode .nav-tab.active::after {
-  background: radial-gradient(circle, rgba(147, 197, 253, 0.15) 0%, rgba(15,23,42,0) 70%);
-}
-/* ========================================= */
-/* سوپر پکیج گرافیکی (ویژن‌پرو + دکمه‌های ۳-بعدی + بج‌های زنده) */
-/* ========================================= */
-
-/* ۱. مودال‌های شیشه‌ای و تاریک (VisionOS Style) */
-.modal-overlay {
-  background: rgba(15, 23, 42, 0.4) !important;
-  backdrop-filter: blur(8px) saturate(150%);
-  -webkit-backdrop-filter: blur(8px) saturate(150%);
-}
-.modal-content {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
-}
-body.dark-mode .modal-content {
-  background: rgba(30, 41, 59, 0.75) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* ۲. دکمه‌های فنری و سه‌بعدی (3D Bouncy) */
-button {
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease !important;
-}
-button:active {
-  transform: scale(0.92) translateY(2px) !important;
-  box-shadow: 0 0 0 transparent !important;
-}
-
-/* ۳. میکرو-انیمیشن‌های تابلوی کارگاه (Alive Badges) */
-@keyframes pulseDot { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.5; } }
-@keyframes slowSpin { 100% { transform: rotate(360deg); } }
-@keyframes tiltHourglass { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(15deg); } 75% { transform: rotate(-15deg); } }
-
-.status-dot-ready {
-  display: inline-block; width: 7px; height: 7px; background: #10b981;
-  border-radius: 50%; margin-left: 4px; animation: pulseDot 1.5s infinite ease-in-out;
-}
-.status-icon-bench { display: inline-block; margin-left: 4px; animation: slowSpin 4s linear infinite; }
-.status-icon-wait { display: inline-block; margin-left: 4px; animation: tiltHourglass 2s ease-in-out infinite; }
-
-/* ========================================= */
-/* 📋 پچ ۱۸ت: دکمه‌های دسته‌بندی یادداشت */
-/* ========================================= */
-.note-cat-btn {
+.brand-chip {
   background: #f1f5f9 !important;
   color: #475569 !important;
-  padding: 8px 6px !important;
-  font-size: 0.76rem !important;
-  border-radius: 8px !important;
   border: 1.5px solid #e2e8f0 !important;
+  padding: 8px 12px !important;
+  font-size: 0.82rem !important;
+  border-radius: 20px !important;
+  font-weight: 700 !important;
   cursor: pointer !important;
   margin: 0 !important;
   box-shadow: none !important;
-  font-weight: 700 !important;
-  transition: all 0.2s !important;
-  white-space: nowrap !important;
+  transition: all 0.2s ease !important;
+  width: auto !important;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
-.note-cat-btn.active {
+.brand-chip:active { transform: scale(0.95) !important; }
+.brand-chip.active {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
   color: #fff !important;
   border-color: #1d4ed8 !important;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+  transform: scale(1.05);
 }
-body.dark-mode .note-cat-btn {
+.brand-chip .brand-emoji { font-size: 0.95rem; }
+
+body.dark-mode .brand-chip {
   background: #0f172a !important;
   color: #cbd5e1 !important;
   border-color: #334155 !important;
 }
-body.dark-mode .note-cat-btn.active {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+body.dark-mode .brand-chip.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
   color: #fff !important;
+  border-color: #2563eb !important;
 }
 
-/* ۴. بوم مخفی برای بارش کاغذ رنگی (Confetti) */
-#confetti-canvas {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  pointer-events: none; z-index: 999999; display: none;
+/* Autocomplete مدل */
+.model-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+.model-suggestion-item {
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+.model-suggestion-item:last-child { border-bottom: none; }
+.model-suggestion-item:hover,
+.model-suggestion-item.active {
+  background: var(--primary-light);
+}
+.model-suggestion-item.learned {
+  border-right: 3px solid #f59e0b;
+}
+.learned-tag {
+  font-size: 0.68rem;
+  color: #f59e0b;
+  font-weight: 800;
+  background: #fef3c7;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.model-suggestion-empty {
+  padding: 14px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 600;
+}
+body.dark-mode .model-suggestions {
+  background: #1e293b;
+  border-color: #334155;
+}
+body.dark-mode .model-suggestion-item { border-color: #334155; }
+body.dark-mode .model-suggestion-item:hover,
+body.dark-mode .model-suggestion-item.active {
+  background: rgba(59, 130, 246, 0.15);
 }
 
-/* اصلاح قطعی چیدمان دکمه‌های پایین (شبکه ۳ ستونه منظم) */
-.action-row {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 8px !important;
-  margin-top: 12px !important;
+/* ردیف مدل‌های یادگرفته‌شده در تنظیمات */
+.learned-brand-section {
+  margin-bottom: 12px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid var(--border);
 }
-.action-row button {
-  width: auto !important; /* این خط عوض شد تا دکمه‌ها از کادر بیرون نزنند */
-  margin: 0 !important;
-  padding: 10px 4px !important;
-  font-size: 0.78rem !important;
-  border-radius: 8px !important;
-  white-space: nowrap !important;
-  flex: none !important;
+.learned-brand-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #92400e;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-
-/* ========================================= */
-/* سوپر پکیج گرافیکی ۲ (آفتاب‌پرست، ترمینال، لیزر و تنفس) */
-/* ========================================= */
-
-/* ۱. افکت تنفس برای دستگاه‌های رسوب‌کرده */
-@keyframes breatheAlert {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-}
-.workshop-card.overdue {
-  animation: breatheAlert 2s infinite;
-  border: 1px solid #fca5a5 !important;
-}
-
-/* ۲. دیزاین سایبری برای یادداشت‌های محرمانه (ترمینال) */
-.secret-terminal {
-  background: #0f172a;
-  color: #10b981;
-  font-family: monospace;
-  padding: 10px 12px;
+.learned-model-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: #f8fafc;
   border-radius: 8px;
-  border-left: 3px solid #10b981;
-  margin-top: 8px;
-  font-size: 0.8rem;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-  direction: rtl;
+  margin-bottom: 4px;
+  font-size: 0.82rem;
+  gap: 8px;
 }
-body.dark-mode .secret-terminal { background: #000; border-left-color: #34d399; }
-.secret-terminal b { color: #fff; }
-
-/* ۳. منوی کشویی آفتاب‌پرستی (Smart Dropdown) */
-.smart-dropdown {
-  width: auto; padding: 6px 10px; font-size: 0.8rem; margin: 0; border-radius: 8px; font-weight: bold;
-  color: #fff !important; border: none !important; outline: none; appearance: none; -webkit-appearance: none;
-  cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center;
+.learned-model-row span { flex: 1; min-width: 0; word-break: break-word; }
+.learned-model-row button {
+  width: auto !important;
+  padding: 4px 10px !important;
+  font-size: 0.72rem !important;
+  margin: 0 !important;
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  font-weight: 800 !important;
+  flex-shrink: 0;
 }
-.bg-blue { background: #3b82f6 !important; }
-.bg-purple { background: #8b5cf6 !important; }
-.bg-orange { background: #f59e0b !important; }
-.bg-collab { background: #ea580c !important; }
-.bg-green { background: #10b981 !important; }
-.bg-red { background: #ef4444 !important; }
-
-/* ۴. اسکنر لیزری روی QR Code */
-.qr-scanner-box { position: relative; display: inline-block; overflow: hidden; border-radius: 6px; }
-.qr-scanner-box img { display: block; width: 46px; height: 46px; border: 1px solid #cbd5e1; }
-.qr-scanner-box::after {
-  content: ''; position: absolute; left: 0; width: 100%; height: 2px;
-  background: rgba(59, 130, 246, 0.8); box-shadow: 0 0 4px #3b82f6;
-  animation: scanLaser 2s linear infinite;
-}
-@keyframes scanLaser {
-  0% { top: 0; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
-}
-
-/* ========================================= */
-/* سوپر پکیج گرافیکی ۳ (کارت‌های VIP، شفق قطبی، اسپات‌لایت) */
-/* ========================================= */
-
-/* ۱. کارت‌های هولوگرافیک وفاداری (VIP Cards) */
-@keyframes shineHolo {
-  0% { background-position: 200% center; }
-  100% { background-position: -200% center; }
-}
-.card-gold {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 20%, #fde68a 50%, #fef3c7 80%, #fffbeb 100%) !important;
-  background-size: 200% auto !important;
-  animation: shineHolo 6s linear infinite !important;
-  border: 1px solid #fcd34d !important;
-  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15) !important;
-}
-.card-silver {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 20%, #e2e8f0 50%, #f1f5f9 80%, #f8fafc 100%) !important;
-  background-size: 200% auto !important;
-  animation: shineHolo 6s linear infinite !important;
-  border: 1px solid #cbd5e1 !important;
-  box-shadow: 0 8px 20px rgba(148, 163, 184, 0.15) !important;
-}
-body.dark-mode .card-gold {
-  background: linear-gradient(135deg, #422006 0%, #78350f 20%, #92400e 50%, #78350f 80%, #422006 100%) !important;
-  border-color: #b45309 !important;
-}
-body.dark-mode .card-silver {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 20%, #334155 50%, #1e293b 80%, #0f172a 100%) !important;
-  border-color: #475569 !important;
-}
-
-/* ۲. داشبورد شفق قطبی (Aurora Fluid Background) */
-@keyframes auroraMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-.aurora-bg {
-  background: linear-gradient(-45deg, #0f172a, #1e3a8a, #312e81, #064e3b) !important;
-  background-size: 400% 400% !important;
-  animation: auroraMove 12s ease infinite !important;
-  color: white !important;
-  border: none !important;
-  box-shadow: 0 10px 30px rgba(30, 58, 138, 0.3) !important;
-}
-.aurora-bg .stat-card {
-  background: rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-.aurora-bg .stat-card div { color: rgba(255,255,255,0.85) !important; }
-.aurora-bg .stat-card .stat-val { color: #fff !important; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-
-/* ۳. موتور جستجوی اسپات‌لایت (Glassmorphic Modal) */
-.spotlight-overlay {
-  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  display: none; justify-content: center; align-items: flex-start;
-  z-index: 999999; padding: 20px; padding-top: 60px;
-}
-.spotlight-box {
-  background: rgba(255, 255, 255, 0.9); width: 100%; max-width: 500px;
-  border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-  overflow: hidden; border: 1px solid rgba(255,255,255,0.4);
-  transform: translateY(-20px); animation: slideDown 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-body.dark-mode .spotlight-box { background: rgba(30, 41, 59, 0.9); border-color: rgba(255,255,255,0.1); }
-.spotlight-input-wrap { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); }
-.spotlight-input {
-  flex: 1; background: transparent !important; border: none !important; font-size: 1.1rem;
-  color: var(--text); outline: none !important; box-shadow: none !important; margin: 0; padding: 0 10px !important;
-}
-.spotlight-close { background: #f1f5f9; color: var(--danger); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-weight: bold; padding: 0 !important; margin: 0 !important; }
-.spotlight-results { max-height: 50vh; overflow-y: auto; padding: 10px; }
-.spotlight-item {
-  display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; cursor: pointer; transition: background 0.2s;
-}
-.spotlight-item:hover { background: rgba(37, 99, 235, 0.1); }
-.sp-icon { font-size: 1.5rem; width: 42px; height: 42px; display: flex; justify-content: center; align-items: center; background: var(--bg); border-radius: 12px; }
-@keyframes slideDown { to { transform: translateY(0); } }
-
-/* ========================================= */
-/* سوپر پکیج انیمیشن (دکمه ژله‌ای، ترانزیشن صفحات، چاپگر ۳-بعدی) */
-/* ========================================= */
-
-/* ۱. ترانزیشن نرم و ابریشمی برای تغییر صفحات */
-@keyframes slideInPage {
-  from { opacity: 0; transform: translateX(15px) scale(0.99); }
-  to { opacity: 1; transform: translateX(0) scale(1); }
-}
-.page-transition {
-  animation: slideInPage 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
-}
-
-/* ۲. منوی شناور ژله‌ای و چندمنظوره (Liquid FAB) */
-.fab-container {
-  position: fixed; bottom: 85px; right: 20px; z-index: 900;
-  display: flex; flex-direction: column-reverse; align-items: center; gap: 12px; pointer-events: none;
-}
-.fab-main, .fab-mini { pointer-events: auto; }
-.fab-mini {
-  width: 46px; height: 46px; border-radius: 50%; background: #fff; color: var(--primary);
-  font-size: 1.2rem; display: flex; justify-content: center; align-items: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: none; cursor: pointer;
-  transform: scale(0) translateY(20px); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-body.dark-mode .fab-mini { background: #334155; }
-.fab-container.open .fab-mini { transform: scale(1) translateY(0); opacity: 1; }
-.fab-container.open .fab-mini:nth-child(2) { transition-delay: 0.05s; }
-.fab-container.open .fab-mini:nth-child(3) { transition-delay: 0.1s; }
-.fab-container.open .fab-mini:nth-child(4) { transition-delay: 0.15s; }
-.fab-main {
-  width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; font-size: 1.8rem;
-  display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
-}
-.fab-container.open .fab-main {
-  transform: rotate(135deg); /* چرخش به شکل ضربدر */
-  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-}
-
-/* ۳. انیمیشن چاپگر مینیاتوری */
-.printer-overlay {
-  position: fixed; inset: 0; background: rgba(15,23,42,0.85); backdrop-filter: blur(6px);
-  display: none; justify-content: center; align-items: center; z-index: 9999999; flex-direction: column;
-}
-.printer-box {
-  position: relative; width: 110px; height: 50px; background: #475569;
-  border-radius: 12px 12px 4px 4px; border-top: 14px solid #1e293b; box-shadow: 0 15px 30px rgba(0,0,0,0.5); z-index: 2;
-}
-.printer-paper {
-  position: absolute; width: 74px; height: 0; background: #fff; bottom: -8px; left: 18px;
-  border-radius: 2px; overflow: hidden; display: flex; flex-direction: column; gap: 4px; padding-top: 6px;
-  align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1;
-}
-.printer-line { width: 50px; height: 4px; background: #e2e8f0; border-radius: 2px; }
-@keyframes printPaperOut {
-  0% { height: 0; transform: translateY(0); }
-  75% { height: 90px; transform: translateY(0); }
-  100% { height: 90px; transform: translateY(30px); opacity: 0; }
-}
-.printing .printer-paper { animation: printPaperOut 1.8s forwards; }
-.printing-text { color: #fff; font-weight: 800; margin-top: 25px; font-size: 1.1rem; animation: pulseText 1s infinite; }
-@keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
+body.dark-mode .learned-brand-section { background: #0f172a; }
+body.dark-mode .learned-model-row { background: #1e293b; }
 
 </style>
 </head>
+
+
+
 <body>
 
 <div id="progress-bar"></div>
@@ -963,12 +793,26 @@ body.dark-mode .fab-mini { background: #334155; }
 </div>
 
 <div id="sub-section-customers">
-<div class="card" style="border:2px solid #3b82f6;background:#eff6ff;padding:14px;">
-<button type="button" onclick="startSmartSync()" style="font-size:.95rem;padding:12px;display:flex;justify-content:center;align-items:center;gap:8px;margin-top:0;">
-<span>🔄</span><span>همگام‌سازی و ادغام هوشمند با درایو</span>
-</button>
-<div id="main-sync-status" style="font-size:.8rem;text-align:center;margin-top:8px;font-weight:bold;color:#1e40af;">اطلاعات با گوشی و کامپیوتر بدون حذف داده ادغام می‌شود</div>
+<div class="card sync-card-premium" style="position: relative; overflow: hidden; border: 1.5px solid #c7d2fe; background: linear-gradient(135deg, #f5f3ff 0%, #e0e7ff 100%); padding: 18px; box-shadow: inset 0 2px 10px rgba(255,255,255,0.8);">
+  
+  <!-- هاله نوری در پس‌زمینه کارت -->
+  <div style="position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; background: #8b5cf6; filter: blur(50px); opacity: 0.15; border-radius: 50%; pointer-events: none;"></div>
+  
+  <button type="button" class="btn-smart-sync" onclick="startSmartSync()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+       <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+       <path d="M3 3v5h5"></path>
+       <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+       <path d="M16 16h5v5"></path>
+    </svg>
+    <span>همگام‌سازی و ادغام ابری</span>
+  </button>
+  
+  <div id="main-sync-status" style="font-size:0.8rem; text-align:center; margin-top:12px; font-weight:900; color:#4338ca; letter-spacing: -0.3px;">
+    ☁️ اتصال با درایو (بدون حذف اطلاعات قبلی)
+  </div>
 </div>
+
 
 <div class="card">
 <div class="row" style="align-items:center;">
@@ -1131,11 +975,18 @@ body.dark-mode .fab-mini { background: #334155; }
 </div>
 </div>
 
-<label class="field-label">مشخصات دستگاه و عیب اولیه:</label>
-<div style="display:grid;grid-template-columns:1.5fr 1fr;gap:8px;">
-<input type="text" id="dev-model" placeholder="مدل (مثال: سامسونگ A54)" style="margin-top:0;">
-<input type="text" id="dev-color" placeholder="رنگ (مشکی، سفید...)" style="margin-top:0;background:#fef9c3;border-color:#fde047;">
+<label class="field-label">📱 برند دستگاه:</label>
+<div id="dev-brand-chips" class="brand-chips-container"></div>
+<input type="hidden" id="dev-brand" value="">
+
+<label class="field-label">مدل دقیق دستگاه:</label>
+<div style="position:relative;">
+  <input type="text" id="dev-model" placeholder="مثال: a12 یا A54 (تایپ کن تا پیشنهاد بیاد)" autocomplete="off" style="margin-top:0;">
+  <div id="dev-model-suggestions" class="model-suggestions" style="display:none;"></div>
 </div>
+
+<label class="field-label">رنگ دستگاه:</label>
+<input type="text" id="dev-color" placeholder="مشکی، سفید، آبی..." style="margin-top:0;background:#fef9c3;border-color:#fde047;">
 
 <label class="field-label" style="color:#7c3aed;">🔍 نشانه‌های خاص دستگاه (برای تشخیص آسان):</label>
 <textarea id="dev-marker" placeholder="مثال:&#10;• گوشه‌ی راست پایین خط داره&#10;• برچسب آبی روی قاب&#10;• لبه‌ی بالای صفحه شکسته" style="border-color:#c4b5fd;background:#f5f3ff;min-height:60px;font-family:inherit;font-size:0.85rem;"></textarea>
@@ -1657,6 +1508,15 @@ body.dark-mode .fab-mini { background: #334155; }
 <div style="font-size:0.82rem;color:#3730a3;margin-bottom:8px;line-height:1.6;">
 فاکتورهای یتیم (فاکتورهایی که مشتری‌شون حذف شده) رو پاک می‌کنه. همچنین نسخه‌ی جدید برنامه رو از سرور می‌گیره.
 </div>
+
+<div class="card" style="border:1.5px solid #fde68a;background:#fffbeb;">
+<div style="font-weight:800;font-size:1.05rem;margin-bottom:8px;color:#92400e;">📚 مدل‌های سفارشی من</div>
+<div style="font-size:0.82rem;color:#78350f;margin-bottom:10px;line-height:1.6;">
+مدل‌هایی که خودت اضافه کردی یا سیستم خودکار یاد گرفته. اگه اشتباهی ثبت شده، از اینجا پاکش کن.
+</div>
+<div id="learned-models-list"></div>
+</div>
+
 <button type="button" onclick="cleanupOrphanQuotes()" style="background:#6366f1;color:#fff;margin-top:0;">🧹 پاکسازی فاکتورهای یتیم</button>
 <button type="button" onclick="forceAppRefresh()" style="background:#7c3aed;color:#fff;margin-top:8px;">🔄 دریافت نسخه جدید برنامه</button>
 </div>
@@ -1879,8 +1739,15 @@ body.dark-mode .fab-mini { background: #334155; }
 </div>
 <input type="hidden" id="eq-quote-id" value="">
 
-<label class="field-label">مدل دستگاه:</label>
-<input type="text" id="eq-model" placeholder="مثال: سامسونگ A54">
+<label class="field-label">📱 برند دستگاه:</label>
+<div id="eq-brand-chips" class="brand-chips-container"></div>
+<input type="hidden" id="eq-brand" value="">
+
+<label class="field-label">مدل دقیق:</label>
+<div style="position:relative;">
+  <input type="text" id="eq-model" placeholder="تایپ کن تا پیشنهاد بیاد" autocomplete="off">
+  <div id="eq-model-suggestions" class="model-suggestions" style="display:none;"></div>
+</div>
 
 <label class="field-label">رنگ دستگاه:</label>
 <input type="text" id="eq-color" placeholder="مشکی، سفید، آبی..." style="background:#fef9c3;border-color:#fde047;">
@@ -2153,6 +2020,595 @@ body.dark-mode .fab-mini { background: #334155; }
 <script>
 // --- Dark Mode ---
 if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// 🔍 تابع جستجو در دیتابیس برند (برای autocomplete)
+// ═══════════════════════════════════════════════════════════════
+
+function searchBrandModels(brand, query) {
+  var list = PHONE_BRANDS_DB[brand] || [];
+  var q = (query || '').trim().toLowerCase();
+  if (!q) return list.slice(0, 10); // بدون تایپ → ۱۰ مدل اول
+
+  // حذف فاصله و تطبیق ساده
+  var qCompact = q.replace(/\s+/g, '');
+  return list.filter(function(m) {
+    var mCompact = m.toLowerCase().replace(/\s+/g, '');
+    return mCompact.indexOf(qCompact) !== -1;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 📚 بارگذاری و ذخیره‌سازی
+// ═══════════════════════════════════════════════════════════════
+function loadLearnedModels() {
+  if (_learnedModels) return _learnedModels;
+  try {
+    var raw = localStorage.getItem(LEARNED_MODELS_KEY);
+    _learnedModels = raw ? JSON.parse(raw) : {};
+  } catch(e) { _learnedModels = {}; }
+  return _learnedModels;
+}
+
+function saveLearnedModels() {
+  try {
+    localStorage.setItem(LEARNED_MODELS_KEY, JSON.stringify(_learnedModels || {}));
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ✅ یادگیری مدل جدید
+// ═══════════════════════════════════════════════════════════════
+function learnBrandModel(brand, model) {
+  if (!brand || !model || brand === 'سایر') return false;
+  var m = (model || '').trim();
+  if (!m) return false;
+
+  var learned = loadLearnedModels();
+  if (!learned[brand]) learned[brand] = [];
+
+  // چک: توی DB پیش‌فرض هست؟
+  var defaultList = PHONE_BRANDS_DB[brand] || [];
+  if (defaultList.indexOf(m) !== -1) return false;
+
+  // چک: قبلاً یاد گرفته شده؟
+  var existing = learned[brand].find(function(x) { return x.model === m; });
+  if (existing) {
+    existing.lastUsed = Date.now();
+    saveLearnedModels();
+    return false;
+  }
+
+  learned[brand].push({ model: m, createdAt: Date.now(), lastUsed: Date.now() });
+  saveLearnedModels();
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🧹 پاکسازی خودکار مدل‌های قدیمی (۳۶۵ روز)
+// ═══════════════════════════════════════════════════════════════
+function cleanupLearnedModels() {
+  var learned = loadLearnedModels();
+  var now = Date.now();
+  var yearMs = 365 * 24 * 60 * 60 * 1000;
+  var removed = 0;
+
+  for (var brand in learned) {
+    var before = learned[brand].length;
+    learned[brand] = learned[brand].filter(function(x) {
+      return (now - (x.lastUsed || x.createdAt || 0)) < yearMs;
+    });
+    removed += (before - learned[brand].length);
+    if (learned[brand].length === 0) delete learned[brand];
+  }
+
+  if (removed > 0) {
+    _learnedModels = learned;
+    saveLearnedModels();
+  }
+  return removed;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🔍 جستجو در هر دو دیتابیس
+// ═══════════════════════════════════════════════════════════════
+function searchBrandModels(brand, query) {
+  var defaultList = PHONE_BRANDS_DB[brand] || [];
+  var learnedList = (loadLearnedModels()[brand] || []).map(function(x) { return x.model; });
+
+  // ادغام: یادگرفته‌ها اول
+  var allModels = [];
+  learnedList.forEach(function(m) { allModels.push({ name: m, learned: true }); });
+  defaultList.forEach(function(m) {
+    if (learnedList.indexOf(m) === -1) allModels.push({ name: m, learned: false });
+  });
+
+  var q = (query || '').trim().toLowerCase();
+  if (!q) return allModels.slice(0, 15);
+
+  var qCompact = q.replace(/\s+/g, '');
+  return allModels.filter(function(item) {
+    var mCompact = item.name.toLowerCase().replace(/\s+/g, '');
+    return mCompact.indexOf(qCompact) !== -1;
+  }).slice(0, 15);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 📝 helper: نمایش کامل دستگاه
+// ═══════════════════════════════════════════════════════════════
+function getDeviceDisplayName(item) {
+  if (!item) return 'نامشخص';
+  var brand = item.brand || '';
+  var model = item.model || '';
+  if (brand && brand !== 'سایر' && model) return brand + ' ' + model;
+  if (model) return model;
+  return 'نامشخص';
+}
+
+function getDeviceDisplayNameShort(item) {
+  if (!item) return 'نامشخص';
+  var model = item.model || '';
+  var brand = item.brand || '';
+  if (model) {
+    // اگه مدل با نام برند شروع می‌شه، دیگه برند رو نچسبون
+    if (brand === 'اپل' && model.indexOf('iPhone') === 0) return '🍏 ' + model;
+    if (brand === 'سامسونگ' && model.indexOf('Galaxy') === 0) return '🌌 ' + model;
+    if (brand && brand !== 'سایر') return BRAND_EMOJIS[brand] + ' ' + model;
+    return '📱 ' + model;
+  }
+  return '📱 نامشخص';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🎨 چیپ‌های برند
+// ═══════════════════════════════════════════════════════════════
+function renderBrandChips(containerId, selectedBrand, onSelect) {
+  var container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  BRAND_LIST.forEach(function(brand) {
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'brand-chip' + (brand === selectedBrand ? ' active' : '');
+    chip.innerHTML = '<span class="brand-emoji">' + (BRAND_EMOJIS[brand] || '📱') + '</span>' + brand;
+    chip.onclick = function() { onSelect(brand); };
+    container.appendChild(chip);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🔍 Autocomplete مدل
+// ═══════════════════════════════════════════════════════════════
+var _modelSuggestionIndex = -1;
+
+function setupModelAutocomplete(inputId, suggestionsId, getBrandFn) {
+  var input = document.getElementById(inputId);
+  var box = document.getElementById(suggestionsId);
+  if (!input || !box) return;
+
+  function showSuggestions() {
+    var brand = getBrandFn();
+    if (!brand) {
+      box.innerHTML = '<div class="model-suggestion-empty">اول برند رو انتخاب کن 📱</div>';
+      box.style.display = 'block';
+      return;
+    }
+    if (brand === 'سایر') {
+      box.style.display = 'none';
+      return;
+    }
+
+    var results = searchBrandModels(brand, input.value);
+
+    if (results.length === 0) {
+      box.innerHTML = '<div class="model-suggestion-empty">' +
+        'مدل جدید — موقع ثبت، خودکار یاد گرفته می‌شه ✨' +
+        '</div>';
+      box.style.display = 'block';
+      return;
+    }
+
+    box.innerHTML = '';
+    results.forEach(function(item) {
+      var row = document.createElement('div');
+      row.className = 'model-suggestion-item' + (item.learned ? ' learned' : '');
+      var right = '<span>' + esc(item.name) + '</span>';
+      var left = item.learned ? '<span class="learned-tag">⭐ یادگرفته</span>' : '';
+      row.innerHTML = right + left;
+      row.onclick = function() {
+        input.value = item.name;
+        box.style.display = 'none';
+        _modelSuggestionIndex = -1;
+      };
+      box.appendChild(row);
+    });
+    box.style.display = 'block';
+    _modelSuggestionIndex = -1;
+  }
+
+  input.addEventListener('focus', showSuggestions);
+  input.addEventListener('input', showSuggestions);
+
+  input.addEventListener('keydown', function(e) {
+    if (box.style.display === 'none') return;
+    var items = box.querySelectorAll('.model-suggestion-item');
+    if (items.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      _modelSuggestionIndex = Math.min(_modelSuggestionIndex + 1, items.length - 1);
+      items.forEach(function(it, idx) {
+        it.classList.toggle('active', idx === _modelSuggestionIndex);
+      });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      _modelSuggestionIndex = Math.max(_modelSuggestionIndex - 1, -1);
+      items.forEach(function(it, idx) {
+        it.classList.toggle('active', idx === _modelSuggestionIndex);
+      });
+    } else if (e.key === 'Enter') {
+      if (_modelSuggestionIndex >= 0) {
+        e.preventDefault();
+        items[_modelSuggestionIndex].click();
+      }
+    } else if (e.key === 'Escape') {
+      box.style.display = 'none';
+    }
+  });
+
+  // بستن با کلیک بیرون
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target) && !box.contains(e.target)) {
+      box.style.display = 'none';
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 📱 پچ کامل Brand-Autocomplete (متغیرها + دیتابیس + توابع گمشده)
+// ═══════════════════════════════════════════════════════════════
+
+// ─── ۱. لیست برندها ───
+var BRAND_LIST = ['سامسونگ', 'اپل', 'شیائومی', 'هواوی', 'آنر', 'نوکیا', 'ال جی', 'سایر'];
+var BRAND_EMOJIS = {
+  'سامسونگ': '🌌',
+  'اپل': '🍏',
+  'شیائومی': '🟠',
+  'هواوی': '🌸',
+  'آنر': '⭐',
+  'نوکیا': '📞',
+  'ال جی': '📺',
+  'سایر': '📱'
+};
+
+// ─── ۲. متغیرهای یادگیری ───
+var LEARNED_MODELS_KEY = 'db_learned_models_v1';
+var _learnedModels = null;
+var currentDevBrand = '';
+var currentEqBrand = '';
+var _modelSuggestionIndex = -1;
+
+// ─── ۳. دیتابیس برندها (کامل) ───
+var PHONE_BRANDS_DB = {
+  'سامسونگ': [
+    'Galaxy S6', 'Galaxy S6 Edge', 'Galaxy S6 Edge+', 'Galaxy Note 5',
+    'Galaxy A3', 'Galaxy A5', 'Galaxy A7', 'Galaxy A8', 'Galaxy J1', 'Galaxy J2', 'Galaxy J5', 'Galaxy J7',
+    'Galaxy S7', 'Galaxy S7 Edge', 'Galaxy Note 7',
+    'Galaxy A3 (2016)', 'Galaxy A5 (2016)', 'Galaxy A7 (2016)', 'Galaxy A9', 'Galaxy A9 Pro',
+    'Galaxy J1 (2016)', 'Galaxy J2 (2016)', 'Galaxy J3', 'Galaxy J5 (2016)', 'Galaxy J7 (2016)', 'Galaxy J7 Prime', 'Galaxy J2 Prime',
+    'Galaxy S8', 'Galaxy S8+', 'Galaxy Note 8',
+    'Galaxy A3 (2017)', 'Galaxy A5 (2017)', 'Galaxy A7 (2017)', 'Galaxy A8 (2018)', 'Galaxy A8+ (2018)',
+    'Galaxy J3 (2017)', 'Galaxy J5 (2017)', 'Galaxy J7 (2017)', 'Galaxy J7+', 'Galaxy J7 Pro', 'Galaxy J7 Prime 2', 'Galaxy J7 Neo', 'Galaxy J7 Duo',
+    'Galaxy C5', 'Galaxy C7', 'Galaxy C9 Pro',
+    'Galaxy S9', 'Galaxy S9+', 'Galaxy Note 9',
+    'Galaxy A6', 'Galaxy A6+', 'Galaxy A7 (2018)', 'Galaxy A8 Star', 'Galaxy A9 (2018)',
+    'Galaxy J4', 'Galaxy J4+', 'Galaxy J6', 'Galaxy J6+', 'Galaxy J8',
+    'Galaxy M10', 'Galaxy M20',
+    'Galaxy S10', 'Galaxy S10+', 'Galaxy S10e', 'Galaxy S10 5G', 'Galaxy S10 Lite',
+    'Galaxy Note 10', 'Galaxy Note 10+', 'Galaxy Note 10 Lite',
+    'Galaxy Fold',
+    'Galaxy A10', 'Galaxy A10s', 'Galaxy A20', 'Galaxy A20s', 'Galaxy A30', 'Galaxy A30s',
+    'Galaxy A40', 'Galaxy A50', 'Galaxy A50s', 'Galaxy A60', 'Galaxy A70', 'Galaxy A70s', 'Galaxy A80', 'Galaxy A90 5G',
+    'Galaxy M10s', 'Galaxy M30', 'Galaxy M30s', 'Galaxy M40',
+    'Galaxy S20', 'Galaxy S20+', 'Galaxy S20 Ultra', 'Galaxy S20 FE',
+    'Galaxy Note 20', 'Galaxy Note 20 Ultra',
+    'Galaxy Z Flip', 'Galaxy Z Fold2',
+    'Galaxy A01', 'Galaxy A01 Core', 'Galaxy A11', 'Galaxy A21', 'Galaxy A21s',
+    'Galaxy A31', 'Galaxy A41', 'Galaxy A51', 'Galaxy A51 5G', 'Galaxy A71', 'Galaxy A71 5G',
+    'Galaxy M01', 'Galaxy M11', 'Galaxy M21', 'Galaxy M21s', 'Galaxy M31', 'Galaxy M31s', 'Galaxy M51',
+    'Galaxy S21', 'Galaxy S21+', 'Galaxy S21 Ultra', 'Galaxy S21 FE',
+    'Galaxy Z Flip3', 'Galaxy Z Fold3',
+    'Galaxy A02', 'Galaxy A02s', 'Galaxy A03', 'Galaxy A03s', 'Galaxy A03 Core',
+    'Galaxy A12', 'Galaxy A22', 'Galaxy A22 5G', 'Galaxy A32 5G',
+    'Galaxy A52', 'Galaxy A52 5G', 'Galaxy A52s 5G', 'Galaxy A72',
+    'Galaxy M02', 'Galaxy M02s', 'Galaxy M12', 'Galaxy M22', 'Galaxy M32', 'Galaxy M42', 'Galaxy M52',
+    'Galaxy S22', 'Galaxy S22+', 'Galaxy S22 Ultra',
+    'Galaxy Z Flip4', 'Galaxy Z Fold4',
+    'Galaxy A04', 'Galaxy A04s', 'Galaxy A04e', 'Galaxy A13', 'Galaxy A23',
+    'Galaxy A33 5G', 'Galaxy A53 5G', 'Galaxy A73 5G',
+    'Galaxy M04', 'Galaxy M13', 'Galaxy M23', 'Galaxy M33', 'Galaxy M53',
+    'Galaxy S23', 'Galaxy S23+', 'Galaxy S23 Ultra', 'Galaxy S23 FE',
+    'Galaxy Z Flip5', 'Galaxy Z Fold5',
+    'Galaxy A05', 'Galaxy A05s', 'Galaxy A14', 'Galaxy A14 5G', 'Galaxy A24',
+    'Galaxy A34 5G', 'Galaxy A54 5G',
+    'Galaxy M14 5G', 'Galaxy M34 5G', 'Galaxy M54 5G',
+    'Galaxy S24', 'Galaxy S24+', 'Galaxy S24 Ultra', 'Galaxy S24 FE',
+    'Galaxy Z Flip6', 'Galaxy Z Fold6',
+    'Galaxy A06', 'Galaxy A16', 'Galaxy A16 5G', 'Galaxy A25 5G', 'Galaxy A35 5G', 'Galaxy A55 5G',
+    'Galaxy M15 5G', 'Galaxy M35 5G', 'Galaxy M55 5G',
+    'Galaxy S25', 'Galaxy S25+', 'Galaxy S25 Ultra', 'Galaxy S25 Edge',
+    'Galaxy Z Flip7', 'Galaxy Z Fold7',
+    'Galaxy A06 5G', 'Galaxy A17', 'Galaxy A17 5G', 'Galaxy A26', 'Galaxy A36', 'Galaxy A56',
+    'Galaxy M16', 'Galaxy M36', 'Galaxy M56',
+    'Galaxy S26', 'Galaxy S26+', 'Galaxy S26 Ultra'
+  ],
+  'اپل': [
+    'iPhone 6s', 'iPhone 6s Plus',
+    'iPhone SE (1st Gen)', 'iPhone 7', 'iPhone 7 Plus',
+    'iPhone 8', 'iPhone 8 Plus', 'iPhone X',
+    'iPhone XS', 'iPhone XS Max', 'iPhone XR',
+    'iPhone 11', 'iPhone 11 Pro', 'iPhone 11 Pro Max',
+    'iPhone SE (2nd Gen)', 'iPhone 12 mini', 'iPhone 12', 'iPhone 12 Pro', 'iPhone 12 Pro Max',
+    'iPhone 13 mini', 'iPhone 13', 'iPhone 13 Pro', 'iPhone 13 Pro Max',
+    'iPhone SE (3rd Gen)', 'iPhone 14', 'iPhone 14 Plus', 'iPhone 14 Pro', 'iPhone 14 Pro Max',
+    'iPhone 15', 'iPhone 15 Plus', 'iPhone 15 Pro', 'iPhone 15 Pro Max',
+    'iPhone 16', 'iPhone 16 Plus', 'iPhone 16 Pro', 'iPhone 16 Pro Max',
+    'iPhone 16e', 'iPhone 17', 'iPhone 17 Plus', 'iPhone 17 Pro', 'iPhone 17 Pro Max', 'iPhone 17 Air',
+    'iPhone 18', 'iPhone 18 Pro', 'iPhone 18 Pro Max'
+  ],
+  'شیائومی': [
+    'Mi 4', 'Mi 4i', 'Mi 4c', 'Mi 4s', 'Mi 5', 'Mi 5s', 'Mi 5s Plus', 'Mi 5X', 'Mi 5c',
+    'Mi 6', 'Mi 6X', 'Mi Max', 'Mi Max 2', 'Mi Max 3', 'Mi Mix', 'Mi Mix 2', 'Mi Mix 2S', 'Mi Mix 3',
+    'Mi 8', 'Mi 8 Lite', 'Mi 8 Pro', 'Mi 8 SE', 'Mi 9', 'Mi 9 SE', 'Mi 9T', 'Mi 9T Pro', 'Mi 9 Lite',
+    'Mi 10', 'Mi 10 Pro', 'Mi 10 Lite', 'Mi 10T', 'Mi 10T Pro', 'Mi 10T Lite', 'Mi Note 10', 'Mi Note 10 Lite', 'Mi Note 10 Pro',
+    'Mi 11', 'Mi 11 Pro', 'Mi 11 Ultra', 'Mi 11 Lite', 'Mi 11 Lite 5G', 'Mi 11i', 'Mi 11X', 'Mi 11X Pro', 'Mi 11T', 'Mi 11T Pro',
+    'Xiaomi 12', 'Xiaomi 12X', 'Xiaomi 12 Pro', 'Xiaomi 12S', 'Xiaomi 12S Pro', 'Xiaomi 12S Ultra', 'Xiaomi 12T', 'Xiaomi 12T Pro', 'Xiaomi 12 Lite',
+    'Xiaomi 13', 'Xiaomi 13 Lite', 'Xiaomi 13 Pro', 'Xiaomi 13 Ultra', 'Xiaomi 13T', 'Xiaomi 13T Pro',
+    'Xiaomi 14', 'Xiaomi 14 Pro', 'Xiaomi 14 Ultra', 'Xiaomi 14T', 'Xiaomi 14T Pro',
+    'Xiaomi 15', 'Xiaomi 15 Pro', 'Xiaomi 15 Ultra', 'Xiaomi 15T', 'Xiaomi 15T Pro',
+    'Xiaomi 16', 'Xiaomi 16 Pro', 'Xiaomi 16 Ultra',
+    'Redmi Note 2', 'Redmi Note 3', 'Redmi Note 3 Pro',
+    'Redmi Note 4', 'Redmi Note 4X',
+    'Redmi Note 5', 'Redmi Note 5 Pro', 'Redmi Note 5A',
+    'Redmi Note 6 Pro',
+    'Redmi Note 7', 'Redmi Note 7 Pro', 'Redmi Note 7S',
+    'Redmi Note 8', 'Redmi Note 8 Pro', 'Redmi Note 8T',
+    'Redmi Note 9', 'Redmi Note 9 Pro', 'Redmi Note 9 Pro Max', 'Redmi Note 9S', 'Redmi Note 9 5G', 'Redmi Note 9T',
+    'Redmi Note 10', 'Redmi Note 10 Pro', 'Redmi Note 10 Pro Max', 'Redmi Note 10S', 'Redmi Note 10 5G', 'Redmi Note 10 Lite',
+    'Redmi Note 11', 'Redmi Note 11S', 'Redmi Note 11 Pro', 'Redmi Note 11 Pro+', 'Redmi Note 11T Pro', 'Redmi Note 11E',
+    'Redmi Note 12', 'Redmi Note 12S', 'Redmi Note 12 Pro', 'Redmi Note 12 Pro+', 'Redmi Note 12 Turbo', 'Redmi Note 12 5G',
+    'Redmi Note 13', 'Redmi Note 13 Pro', 'Redmi Note 13 Pro+', 'Redmi Note 13 5G',
+    'Redmi Note 14', 'Redmi Note 14 Pro', 'Redmi Note 14 Pro+', 'Redmi Note 14 5G',
+    'Redmi Note 15', 'Redmi Note 15 Pro', 'Redmi Note 15 Pro+',
+    'Redmi 4', 'Redmi 4A', 'Redmi 4X',
+    'Redmi 5', 'Redmi 5 Plus', 'Redmi 5A',
+    'Redmi 6', 'Redmi 6A', 'Redmi 6 Pro',
+    'Redmi 7', 'Redmi 7A',
+    'Redmi 8', 'Redmi 8A',
+    'Redmi 9', 'Redmi 9A', 'Redmi 9C', 'Redmi 9T', 'Redmi 9 Power',
+    'Redmi 10', 'Redmi 10A', 'Redmi 10C', 'Redmi 10 5G',
+    'Redmi 11 Prime',
+    'Redmi 12', 'Redmi 12C', 'Redmi 12 5G',
+    'Redmi 13', 'Redmi 13C', 'Redmi 13C 5G', 'Redmi 13 5G',
+    'Redmi 14C', 'Redmi 14C 5G',
+    'Redmi 15', 'Redmi 15C', 'Redmi 15 5G',
+    'Redmi A1', 'Redmi A1+', 'Redmi A2', 'Redmi A2+', 'Redmi A3', 'Redmi A3x', 'Redmi A4', 'Redmi A5',
+    'Pocophone F1', 'Poco F2 Pro', 'Poco F3', 'Poco F3 GT', 'Poco F4', 'Poco F4 GT',
+    'Poco F5', 'Poco F5 Pro', 'Poco F6', 'Poco F6 Pro', 'Poco F7', 'Poco F7 Pro', 'Poco F7 Ultra',
+    'Poco X2', 'Poco X3', 'Poco X3 NFC', 'Poco X3 Pro', 'Poco X3 GT',
+    'Poco X4 Pro', 'Poco X4 GT', 'Poco X5', 'Poco X5 Pro', 'Poco X6', 'Poco X6 Pro', 'Poco X7', 'Poco X7 Pro',
+    'Poco M2', 'Poco M2 Pro', 'Poco M3', 'Poco M3 Pro', 'Poco M4 5G', 'Poco M4 Pro',
+    'Poco M5', 'Poco M5s', 'Poco M6', 'Poco M6 Pro', 'Poco M6 Plus', 'Poco M6 5G', 'Poco M7', 'Poco M7 Pro',
+    'Poco C3', 'Poco C31', 'Poco C40', 'Poco C50', 'Poco C51', 'Poco C55', 'Poco C61', 'Poco C65', 'Poco C75'
+  ],
+  'هواوی': [
+    'Mate 8', 'Mate S', 'Mate 9', 'Mate 9 Pro', 'Mate 10', 'Mate 10 Pro', 'Mate 10 Lite',
+    'Mate 20', 'Mate 20 Pro', 'Mate 20 Lite', 'Mate 20 X',
+    'Mate 30', 'Mate 30 Pro', 'Mate 30 Lite',
+    'Mate 40', 'Mate 40 Pro', 'Mate 40 Pro+', 'Mate 40E',
+    'Mate 50', 'Mate 50 Pro', 'Mate 50E',
+    'Mate 60', 'Mate 60 Pro', 'Mate 60 Pro+',
+    'Mate X', 'Mate X2', 'Mate X3', 'Mate X5', 'Mate X6',
+    'P8', 'P8 Lite', 'P8 Lite (2017)', 'P8 Max',
+    'P9', 'P9 Lite', 'P9 Plus', 'P9 Lite 2017',
+    'P10', 'P10 Lite', 'P10 Plus',
+    'P20', 'P20 Lite', 'P20 Pro',
+    'P30', 'P30 Lite', 'P30 Pro',
+    'P40', 'P40 Lite', 'P40 Lite 5G', 'P40 Pro', 'P40 Pro+',
+    'P50', 'P50 Pocket', 'P50 Pro', 'P50E',
+    'P60', 'P60 Art', 'P60 Pro',
+    'Pura 70', 'Pura 70 Pro', 'Pura 70 Pro+', 'Pura 70 Ultra',
+    'Nova', 'Nova Plus', 'Nova 2', 'Nova 2 Plus', 'Nova 2s', 'Nova 2i', 'Nova 2 Lite',
+    'Nova 3', 'Nova 3i', 'Nova 3e',
+    'Nova 4', 'Nova 4e',
+    'Nova 5', 'Nova 5 Pro', 'Nova 5i', 'Nova 5T', 'Nova 5z',
+    'Nova 6', 'Nova 6 5G', 'Nova 6 SE',
+    'Nova 7', 'Nova 7 5G', 'Nova 7 Pro', 'Nova 7 SE', 'Nova 7i',
+    'Nova 8', 'Nova 8 5G', 'Nova 8 Pro', 'Nova 8 SE', 'Nova 8i',
+    'Nova 9', 'Nova 9 Pro', 'Nova 9 SE',
+    'Nova 10', 'Nova 10 Pro', 'Nova 10 SE',
+    'Nova 11', 'Nova 11 Pro', 'Nova 11i', 'Nova 11 Ultra',
+    'Nova 12', 'Nova 12 Pro', 'Nova 12 Ultra', 'Nova 12 Lite', 'Nova 12i', 'Nova 12s', 'Nova 12 SE',
+    'Nova 13', 'Nova 13 Pro', 'Nova 13i',
+    'Y3', 'Y3 II', 'Y3 (2017)', 'Y3 (2018)',
+    'Y5', 'Y5 II', 'Y5 (2017)', 'Y5 Prime (2018)', 'Y5 Lite (2018)', 'Y5p',
+    'Y6', 'Y6 II', 'Y6 (2017)', 'Y6 (2018)', 'Y6 Prime (2018)', 'Y6 Pro (2017)', 'Y6 Pro (2019)', 'Y6p', 'Y6s',
+    'Y7', 'Y7 Prime', 'Y7 (2018)', 'Y7 Prime (2018)', 'Y7 Pro (2019)', 'Y7 (2019)', 'Y7p', 'Y7a',
+    'Y8p', 'Y8s',
+    'Y9 (2018)', 'Y9 (2019)', 'Y9 Prime (2019)', 'Y9s', 'Y9a'
+  ],
+  'آنر': [
+    'Magic', 'Magic 2', 'Magic 3', 'Magic 3 Pro',
+    'Magic 4', 'Magic 4 Pro', 'Magic 5', 'Magic 5 Pro', 'Magic 5 Ultimate',
+    'Magic 6', 'Magic 6 Pro', 'Magic 6 Ultimate', 'Magic 6 RSR',
+    'Magic 7', 'Magic 7 Pro',
+    'Magic V', 'Magic Vs', 'Magic V2', 'Magic V3', 'Magic V Flip',
+    'Honor 7', 'Honor 7i', 'Honor 7X',
+    'Honor 8', 'Honor 8 Pro', 'Honor 8X', 'Honor 8X Max',
+    'Honor 9', 'Honor 9N', 'Honor 9X', 'Honor 9X Pro',
+    'Honor 10', 'Honor 10 Lite',
+    'Honor 20', 'Honor 20 Pro', 'Honor 20 Lite', 'Honor 20i', 'Honor 20S',
+    'Honor 30', 'Honor 30 Pro', 'Honor 30 Pro+', 'Honor 30S', 'Honor 30i',
+    'Honor 50', 'Honor 50 Pro', 'Honor 50 Lite', 'Honor 50 SE',
+    'Honor 60', 'Honor 60 Pro',
+    'Honor 70', 'Honor 70 Pro', 'Honor 70 Pro+',
+    'Honor 80', 'Honor 80 Pro', 'Honor 80 SE',
+    'Honor 90', 'Honor 90 Pro', 'Honor 90 Lite', 'Honor 90 GT',
+    'Honor 100', 'Honor 100 Pro',
+    'Honor 200', 'Honor 200 Pro', 'Honor 200 Lite',
+    'Honor X5', 'Honor X5 Plus', 'Honor X6', 'Honor X6a', 'Honor X6b',
+    'Honor X7', 'Honor X7a', 'Honor X7b',
+    'Honor X8', 'Honor X8a', 'Honor X8b',
+    'Honor X9', 'Honor X9a', 'Honor X9b', 'Honor X9c',
+    'Honor X10', 'Honor X10 5G', 'Honor X20', 'Honor X20 SE', 'Honor X30', 'Honor X40', 'Honor X50',
+    'Honor Play', 'Honor Play 3', 'Honor Play 4', 'Honor Play 4T', 'Honor Play 5', 'Honor Play 5T', 'Honor Play 6', 'Honor Play 7'
+  ],
+  'نوکیا': [
+    'Nokia 1', 'Nokia 1 Plus', 'Nokia 2', 'Nokia 2.1', 'Nokia 2.2', 'Nokia 2.3', 'Nokia 2.4',
+    'Nokia 3', 'Nokia 3.1', 'Nokia 3.1 Plus', 'Nokia 3.2', 'Nokia 3.4',
+    'Nokia 4.2',
+    'Nokia 5', 'Nokia 5.1', 'Nokia 5.1 Plus', 'Nokia 5.2', 'Nokia 5.3', 'Nokia 5.4',
+    'Nokia 6', 'Nokia 6.1', 'Nokia 6.1 Plus', 'Nokia 6.2',
+    'Nokia 7', 'Nokia 7 Plus', 'Nokia 7.1', 'Nokia 7.2',
+    'Nokia 8', 'Nokia 8 Sirocco', 'Nokia 8.1', 'Nokia 8.3 5G', 'Nokia 9 PureView',
+    'Nokia X10', 'Nokia X20', 'Nokia X30', 'Nokia XR20', 'Nokia XR21',
+    'Nokia G10', 'Nokia G11', 'Nokia G11 Plus', 'Nokia G20', 'Nokia G21', 'Nokia G22',
+    'Nokia G42', 'Nokia G50', 'Nokia G60',
+    'Nokia C1', 'Nokia C1 Plus', 'Nokia C2', 'Nokia C3', 'Nokia C5 Endi',
+    'Nokia C10', 'Nokia C12', 'Nokia C20', 'Nokia C21', 'Nokia C21 Plus', 'Nokia C22',
+    'Nokia C30', 'Nokia C31', 'Nokia C32'
+  ],
+  'ال جی': [
+    'LG G4', 'LG G4 Stylus', 'LG G4c', 'LG G5', 'LG G5 SE', 'LG G6',
+    'LG G7 ThinQ', 'LG G7 Fit', 'LG G7 One', 'LG G8 ThinQ', 'LG G8s ThinQ', 'LG G8X ThinQ',
+    'LG V10', 'LG V20', 'LG V30', 'LG V30+', 'LG V30S ThinQ', 'LG V35 ThinQ',
+    'LG V40 ThinQ', 'LG V50 ThinQ', 'LG V50S ThinQ', 'LG V60 ThinQ',
+    'LG K4', 'LG K7', 'LG K8', 'LG K10', 'LG K10 (2017)', 'LG K10 (2018)',
+    'LG K11', 'LG K11 Plus', 'LG K12', 'LG K20', 'LG K22', 'LG K30', 'LG K40',
+    'LG K41s', 'LG K42', 'LG K50', 'LG K50S', 'LG K51', 'LG K52', 'LG K61', 'LG K62', 'LG K71', 'LG K92',
+    'LG Q6', 'LG Q6+', 'LG Q6a', 'LG Q7', 'LG Q7+', 'LG Q7a', 'LG Q8',
+    'LG Q51', 'LG Q52', 'LG Q60', 'LG Q61', 'LG Q70', 'LG Q92',
+    'LG Stylo 4', 'LG Stylo 5', 'LG Stylo 6',
+    'LG Aristo 2', 'LG Aristo 3', 'LG Aristo 4+', 'LG Aristo 5',
+    'LG Velvet', 'LG Wing'
+  ],
+  'سایر': ['سایر']
+};
+
+// ─── ۴. تابع‌های انتخاب برند ───
+function selectDevBrand(brand) {
+  currentDevBrand = brand;
+  document.getElementById('dev-brand').value = brand;
+  renderBrandChips('dev-brand-chips', brand, selectDevBrand);
+  document.getElementById('dev-model').value = '';
+  var sbox = document.getElementById('dev-model-suggestions');
+  if (sbox) sbox.style.display = 'none';
+  setTimeout(function() {
+    try { document.getElementById('dev-model').focus(); } catch(e) {}
+  }, 100);
+}
+
+function selectEqBrand(brand) {
+  currentEqBrand = brand;
+  document.getElementById('eq-brand').value = brand;
+  renderBrandChips('eq-brand-chips', brand, selectEqBrand);
+  document.getElementById('eq-model').value = '';
+  var sbox = document.getElementById('eq-model-suggestions');
+  if (sbox) sbox.style.display = 'none';
+}
+
+// ─── ۵. تابع رندر مدل‌های یادگرفته در تنظیمات ───
+function renderLearnedModels() {
+  var container = document.getElementById('learned-models-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  var learned = loadLearnedModels();
+  var totalModels = 0;
+  Object.keys(learned).forEach(function(b) { totalModels += learned[b].length; });
+
+  if (totalModels === 0) {
+    container.innerHTML = '<div style="text-align:center;color:#92400e;padding:20px;font-size:0.85rem;">' +
+      '<div style="font-size:2rem;margin-bottom:8px;">📭</div>' +
+      'هنوز مدل سفارشی نداری.' +
+      '</div>';
+    return;
+  }
+
+  BRAND_LIST.forEach(function(brand) {
+    if (!learned[brand] || learned[brand].length === 0) return;
+    var section = document.createElement('div');
+    section.className = 'learned-brand-section';
+
+    var title = document.createElement('div');
+    title.className = 'learned-brand-title';
+    title.innerHTML = (BRAND_EMOJIS[brand] || '📱') + ' ' + brand +
+      ' <span style="background:#fef3c7;color:#92400e;padding:1px 8px;border-radius:10px;font-size:0.7rem;">' +
+      learned[brand].length + ' مدل</span>';
+    section.appendChild(title);
+
+    learned[brand].sort(function(a, b) { return (b.lastUsed || 0) - (a.lastUsed || 0); }).forEach(function(item) {
+      var row = document.createElement('div');
+      row.className = 'learned-model-row';
+      row.innerHTML = '<span>' + esc(item.model) + '</span>';
+      var delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.innerHTML = '🗑 حذف';
+      delBtn.onclick = function() {
+        if (!confirm('مدل «' + item.model + '» حذف شود؟')) return;
+        var l = loadLearnedModels();
+        if (l[brand]) {
+          l[brand] = l[brand].filter(function(x) { return x.model !== item.model; });
+          if (l[brand].length === 0) delete l[brand];
+          _learnedModels = l;
+          saveLearnedModels();
+        }
+        renderLearnedModels();
+        showToast('✅ مدل حذف شد', 'success');
+      };
+      row.appendChild(delBtn);
+      section.appendChild(row);
+    });
+
+    container.appendChild(section);
+  });
+}
+
+// ─── ۶. راه‌اندازی chip‌ها و autocomplete بعد از لود DOM ───
+document.addEventListener('DOMContentLoaded', function() {
+  // فرم پذیرش
+  if (document.getElementById('dev-brand-chips')) {
+    renderBrandChips('dev-brand-chips', currentDevBrand, selectDevBrand);
+  }
+  if (document.getElementById('dev-model') && document.getElementById('dev-model-suggestions')) {
+    setupModelAutocomplete('dev-model', 'dev-model-suggestions', function() {
+      return document.getElementById('dev-brand').value || currentDevBrand;
+    });
+  }
+
+  // فرم ویرایش
+  if (document.getElementById('eq-brand-chips')) {
+    renderBrandChips('eq-brand-chips', '', selectEqBrand);
+  }
+  if (document.getElementById('eq-model') && document.getElementById('eq-model-suggestions')) {
+    setupModelAutocomplete('eq-model', 'eq-model-suggestions', function() {
+      return document.getElementById('eq-brand').value || currentEqBrand;
+    });
+  }
+});
+
+// ─── ۷. پاکسازی خودکار مدل‌های قدیمی (۳۶۵ روز) ───
+setTimeout(function() {
+  try {
+    var removed = cleanupLearnedModels();
+    if (removed > 0) console.log('🧹 ' + removed + ' learned model(s) cleaned up');
+  } catch(e) {}
+}, 2500);
+
+// ═══════════════════════════════════════════════════════════════
 
 // --- هوش دکمه شناور (FAB) ---
 function handleFabClick() {
@@ -2731,7 +3187,7 @@ var customPaymentText = '5859831000710003\nرنجبر';
 var defaultDriveUrl = 'https://script.google.com/macros/s/AKfycbwYKA-nSegJx_nipnNYmZ01xkKCrpFD_PDFiiuTT_HUQraiPNpPI9JECThPO0ztrHUo/exec';
 var driveScriptUrl = defaultDriveUrl;
 var qrBaseUrl = '';
-var nextIntakeSeq = 1000;
+var nextIntakeSeq = 1001;
 var activeCustomerId = null;
 var isSubmittingDrive = false;
 var currentPattern = [];
@@ -3778,7 +4234,17 @@ function resetInvoiceForm() {
     document.getElementById('collab-name').value = '';
     document.getElementById('collab-box').style.display = 'none';
   }
-  ['collab-cost','dev-model','dev-color','dev-marker','dev-imei','dev-problem','dev-pin-val','dev-acc','tx-deposit','tx-requested-deposit','dev-internal-diagnosis','dev-internal-notes'].forEach(id => { var el=document.getElementById(id); if(el) el.value=''; });
+// پاک کردن برند
+document.getElementById('dev-brand').value = '';
+currentDevBrand = '';
+var chipContainer = document.getElementById('dev-brand-chips');
+if (chipContainer) {
+  chipContainer.querySelectorAll('.brand-chip').forEach(function(c) { c.classList.remove('active'); });
+}
+var sbox = document.getElementById('dev-model-suggestions');
+if (sbox) sbox.style.display = 'none';
+
+['collab-cost','dev-model','dev-color','dev-marker','dev-imei','dev-problem','dev-pin-val','dev-acc','tx-deposit','tx-requested-deposit','dev-internal-diagnosis','dev-internal-notes'].forEach(id => { var el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('dev-lock-type').value = 'PATTERN';
   document.getElementById('dev-init-status').value = 'QUEUE';
   ['chk-dead','chk-water','chk-lcdrisk','chk-scratch','chk-opened','chk-sim','tx-oldpart'].forEach(id => { var el=document.getElementById(id); if(el) el.checked=false; });
@@ -3844,14 +4310,22 @@ function updateInvoiceTotals() {
 
 function saveMultiItemInvoice(type) {
   if (window._savingInvoice) return;
-window._savingInvoice = true;
-setTimeout(function() { window._savingInvoice = false; }, 1500);
+  window._savingInvoice = true;
+  setTimeout(function() { window._savingInvoice = false; }, 1500);
 
-var items = getInvoiceItemsFromForm();
-if (items.length === 0) return showToast('حداقل یک شرح کار وارد کنید', 'warning');;
+  var items = getInvoiceItemsFromForm();
+  if (items.length === 0) return showToast('حداقل یک شرح کار وارد کنید', 'warning');
+
+  // 👇 تغییر اصلی: خواندن برند از فیلد جدید
+  var brand = (document.getElementById('dev-brand').value || '').trim();
+  var model = (document.getElementById('dev-model').value || '').trim();
+  var color = (document.getElementById('dev-color').value || '').trim();
+  var marker = (document.getElementById('dev-marker').value || '').trim();
+
   var sumRaw = 0, laborSum = 0;
   items.forEach(it => { sumRaw += it.amount; if (!it.partId) laborSum += it.amount; });
   if (sumRaw <= 0) return showToast('مبلغ کل نمی‌تواند صفر باشد', 'warning');
+
   var loyalty = getCustomerLoyalty(activeCustomerId);
   var applyLoyalty = document.getElementById('chk-apply-loyalty') ? document.getElementById('chk-apply-loyalty').checked : true;
   var discountPercent = (applyLoyalty && loyalty.discountPercent) ? loyalty.discountPercent : 0;
@@ -3860,9 +4334,6 @@ if (items.length === 0) return showToast('حداقل یک شرح کار وارد
   var workType = document.getElementById('dev-work-type').value;
   var collabName = (document.getElementById('collab-name').value || '').trim();
   var collabCost = Number(cleanNumber(document.getElementById('collab-cost').value)) || 0;
-  var model = (document.getElementById('dev-model').value || '').trim();
-var color = (document.getElementById('dev-color').value || '').trim();
-var marker = (document.getElementById('dev-marker').value || '').trim();
   var imei = (document.getElementById('dev-imei').value || '').trim();
   var problem = (document.getElementById('dev-problem').value || '').trim();
   var lockType = document.getElementById('dev-lock-type').value;
@@ -3879,7 +4350,9 @@ var marker = (document.getElementById('dev-marker').value || '').trim();
   var deposit = Number(cleanNumber(document.getElementById('tx-deposit').value)) || 0;
   var requestedDeposit = Number(cleanNumber(document.getElementById('tx-requested-deposit').value)) || 0;
   var payMethod = document.getElementById('tx-pay-method').value || 'POS';
-  var dueY = document.getElementById('due-year').value; var dueM = document.getElementById('due-month').value; var dueD = document.getElementById('due-day').value;
+  var dueY = document.getElementById('due-year').value;
+  var dueM = document.getElementById('due-month').value;
+  var dueD = document.getElementById('due-day').value;
   var dueDate = (dueY && dueM && dueD) ? (dueY + '/' + dueM + '/' + dueD) : '';
   var date = toEnglishDigits((document.getElementById('tx-date').value || '').trim()) || getTodayJalali();
   var warranty = (document.getElementById('tx-warranty').value || '').trim();
@@ -3888,15 +4361,19 @@ var marker = (document.getElementById('dev-marker').value || '').trim();
   var internalNotes = (document.getElementById('dev-internal-notes').value || '').trim();
   var combinedTitle = (model ? model + ' - ' : '') + items.map(it => it.title).join(' ، ');
 
-  var currentIntakeCode = nextIntakeSeq; var currentTrackCode = generateRandom6Digit();
-  nextIntakeSeq++; try { localStorage.setItem('db_next_intake_seq', nextIntakeSeq.toString()); } catch(e) {}
+  var currentIntakeCode = nextIntakeSeq;
+  var currentTrackCode = generateRandom6Digit();
+  nextIntakeSeq++;
+  try { localStorage.setItem('db_next_intake_seq', nextIntakeSeq.toString()); } catch(e) {}
   deductPartsStock(items);
 
   if (type === 'QUOTE') {
-var quoteObj = {
-  id: Date.now(), customerId: activeCustomerId, intakeCode: currentIntakeCode, trackCode: currentTrackCode,
-  title: combinedTitle, workType: workType, collabName: collabName, collabCost: collabCost,
-  model: model, color: color, marker: marker, imei: imei, problem: problem, lockType: lockType, lockVal: pinVal, patternPath: patternPath,
+    var quoteObj = {
+      id: Date.now(), customerId: activeCustomerId, intakeCode: currentIntakeCode, trackCode: currentTrackCode,
+      title: combinedTitle, workType: workType, collabName: collabName, collabCost: collabCost,
+      // 👇 اضافه شدن brand
+      brand: brand, model: model, color: color, marker: marker,
+      imei: imei, problem: problem, lockType: lockType, lockVal: pinVal, patternPath: patternPath,
       deviceStatus: devStatus, acc: acc, isDead: isDead, isWater: isWater, isLcdRisk: isLcdRisk,
       isScratch: isScratch, isOpened: isOpened, hasSim: hasSim, items: items,
       rawAmount: sumRaw, amount: finalWorkAmount, loyaltyTier: loyalty.tier, loyaltyDiscountPercent: discountPercent, loyaltyDiscountAmount: discountAmt,
@@ -3914,22 +4391,34 @@ var quoteObj = {
       quoteObj.depositPayRecorded = true;
     }
     saveAll(); uploadToDrive(true); renderParts();
+
+    // 🎓 یادگیری خودکار مدل جدید
+    if (brand && model && brand !== 'سایر') {
+      var wasLearned = learnBrandModel(brand, model);
+      if (wasLearned) {
+        setTimeout(function() {
+          showToast('✅ ' + model + ' به لیست ' + brand + ' اضافه شد', 'success');
+        }, 1200);
+      }
+    }
+
     showToast('✅ پذیرش با موفقیت ثبت شد (قبض: ' + currentIntakeCode + ')', 'success');
     var printQuoteId = quoteObj.id;
     var askPrintText = 'پذیرش ثبت شد!\nقبض: ' + currentIntakeCode + '\nپیگیری: ' + currentTrackCode + '\nسطح: ' + loyalty.tier + (deposit > 0 ? '\nبیعانه: ' + formatToman(deposit) : '') + '\n\nفاکتور A5 چاپ شود؟';
     resetInvoiceForm(); renderCustomerLoyaltyBanner(); renderQuotes(); renderTransactions(); renderWorkshopBoard(); switchCustTab('quotes');
     setTimeout(() => { if (confirm(askPrintText)) printIntakeReceipt(printQuoteId); }, 150);
     return;
-} else {
-transactions.unshift({
-  id: Date.now(), customerId: activeCustomerId, intakeCode: currentIntakeCode, trackCode: currentTrackCode,
-  model: model, color: color, marker: marker, imei: imei,
-  title: combinedTitle, workType: workType, collabName: collabName, collabCost: collabCost, items: items,
-  totalWork: finalWorkAmount, rawAmount: sumRaw, loyaltyTier: loyalty.tier, loyaltyDiscountPercent: discountPercent, loyaltyDiscountAmount: discountAmt,
-  deposit: deposit, cashDeposit: deposit, onlineDeposit: 0, requestedDeposit: requestedDeposit, payMethod: payMethod, dueDate: dueDate, amount: finalWorkAmount,
-  type: 'DEBT', date: date, deliveredTimestamp: Date.now(), warranty: warranty, oldPartDelivered: oldPart, qcSummary: currentQcReport ? currentQcReport.summary : null,
-  internalDiagnosis: internalDiagnosis, internalNotes: internalNotes, stockRestored: false, deleted: false, updatedAt: Date.now()
-});
+  } else {
+    transactions.unshift({
+      id: Date.now(), customerId: activeCustomerId, intakeCode: currentIntakeCode, trackCode: currentTrackCode,
+      // 👇 اضافه شدن brand
+      brand: brand, model: model, color: color, marker: marker, imei: imei,
+      title: combinedTitle, workType: workType, collabName: collabName, collabCost: collabCost, items: items,
+      totalWork: finalWorkAmount, rawAmount: sumRaw, loyaltyTier: loyalty.tier, loyaltyDiscountPercent: discountPercent, loyaltyDiscountAmount: discountAmt,
+      deposit: deposit, cashDeposit: deposit, onlineDeposit: 0, requestedDeposit: requestedDeposit, payMethod: payMethod, dueDate: dueDate, amount: finalWorkAmount,
+      type: 'DEBT', date: date, deliveredTimestamp: Date.now(), warranty: warranty, oldPartDelivered: oldPart, qcSummary: currentQcReport ? currentQcReport.summary : null,
+      internalDiagnosis: internalDiagnosis, internalNotes: internalNotes, stockRestored: false, deleted: false, updatedAt: Date.now()
+    });
     if (deposit > 0) {
       transactions.unshift({
         id: Date.now() + 1, customerId: activeCustomerId, intakeCode: currentIntakeCode, trackCode: currentTrackCode,
@@ -3937,10 +4426,22 @@ transactions.unshift({
       });
     }
     saveAll(); uploadToDrive(true); renderParts();
+
+    // 🎓 یادگیری خودکار مدل جدید
+    if (brand && model && brand !== 'سایر') {
+      var wasLearned2 = learnBrandModel(brand, model);
+      if (wasLearned2) {
+        setTimeout(function() {
+          showToast('✅ ' + model + ' به لیست ' + brand + ' اضافه شد', 'success');
+        }, 1200);
+      }
+    }
+
     showToast('✅ فاکتور قطعی ثبت شد.', 'success');
   }
   resetInvoiceForm(); renderCustomerLoyaltyBanner(); renderQuotes(); renderTransactions(); renderWorkshopBoard(); switchCustTab('quotes');
 }
+
 
 function saveQuickPayment() {
   var amount = Number(cleanNumber(document.getElementById('tx-deposit').value));
@@ -4162,11 +4663,18 @@ function closeTimelineModal() {
 
 function openEditQuoteModal(qId, event) {
   if (event) event.stopPropagation();
-  var q = quotes.find(x => x.id === qId && !x.deleted); if (!q) return showToast('فاکتور یافت نشد', 'error');
+  var q = quotes.find(x => x.id === qId && !x.deleted);
+  if (!q) return showToast('فاکتور یافت نشد', 'error');
   document.getElementById('eq-quote-id').value = qId;
+
+  // 👇 برند
+  currentEqBrand = q.brand || '';
+  document.getElementById('eq-brand').value = currentEqBrand;
+  renderBrandChips('eq-brand-chips', currentEqBrand, selectEqBrand);
+
   document.getElementById('eq-model').value = q.model || '';
   document.getElementById('eq-color').value = q.color || '';
-document.getElementById('eq-marker').value = q.marker || '';
+  document.getElementById('eq-marker').value = q.marker || '';
   document.getElementById('eq-problem').value = q.problem || '';
   document.getElementById('eq-amount').value = q.amount ? Number(q.amount).toLocaleString('en-US') : '';
   var cashDep = Number(q.cashDeposit != null ? q.cashDeposit : (q.deposit || 0));
@@ -4182,7 +4690,8 @@ function closeEditQuoteModal() { document.getElementById('modal-quote-edit').sty
 function saveQuoteEdits() {
   var qId = Number(document.getElementById('eq-quote-id').value);
   var q = quotes.find(x => x.id === qId && !x.deleted); if (!q) return showToast('فاکتور یافت نشد', 'error');
-  var newModel = (document.getElementById('eq-model').value || '').trim();
+  var newBrand = (document.getElementById('eq-brand').value || '').trim();
+var newModel = (document.getElementById('eq-model').value || '').trim();
   var newProblem = (document.getElementById('eq-problem').value || '').trim();
   var newColor = (document.getElementById('eq-color').value || '').trim();
 var newMarker = (document.getElementById('eq-marker').value || '').trim();
@@ -4194,7 +4703,8 @@ var newMarker = (document.getElementById('eq-marker').value || '').trim();
   if (!newModel) return showToast('مدل دستگاه را وارد کنید', 'warning');
   if (newAmount <= 0) return showToast('مبلغ فاکتور باید بیشتر از صفر باشد', 'warning');
   var onlineDep = Number(q.onlineDeposit || 0);
-  q.model = newModel; q.color = newColor; q.marker = newMarker; q.problem = newProblem; q.amount = newAmount;
+  q.brand = newBrand;
+q.model = newModel; q.color = newColor; q.marker = newMarker; q.problem = newProblem; q.amount = newAmount;
   q.cashDeposit = newDeposit; q.deposit = newDeposit + onlineDep;
   q.dueDate = newDueDate; q.warranty = newWarranty; q.acc = newAcc; q.updatedAt = Date.now();
   addTimelineEvent(q, 'EDIT', '✏️', 'ویرایش فاکتور', '');
@@ -4214,7 +4724,16 @@ var newMarker = (document.getElementById('eq-marker').value || '').trim();
   }
   saveAll(); uploadToDrive(true); closeEditQuoteModal();
   renderCustomerLoyaltyBanner(); renderQuotes(); renderTransactions(); renderWorkshopBoard(); renderDepositsStream();
-  showToast('✅ فاکتور با موفقیت ویرایش شد', 'success');
+  // 🎓 یادگیری خودکار مدل جدید در ویرایش هم
+if (newBrand && newModel && newBrand !== 'سایر') {
+  var wasLearnedEdit = learnBrandModel(newBrand, newModel);
+  if (wasLearnedEdit) {
+    setTimeout(function() {
+      showToast('✅ ' + newModel + ' به لیست ' + newBrand + ' اضافه شد', 'success');
+    }, 1200);
+  }
+}
+showToast('✅ فاکتور با موفقیت ویرایش شد', 'success');
 }
 
 function convertQuoteToDebt(qId, deliverySignature, deliverySignatureDbId, newPayment, payMethod) {
@@ -4226,7 +4745,7 @@ function convertQuoteToDebt(qId, deliverySignature, deliverySignatureDbId, newPa
 
 transactions.unshift({
   id: Date.now(), customerId: q.customerId, intakeCode: q.intakeCode || '', trackCode: q.trackCode || '',
-  imei: q.imei || '', model: q.model || '',
+  imei: q.imei || '', brand: q.brand || '', model: q.model || '',
   title: q.title + ' (تحویل شد)', workType: q.workType || 'NORMAL', collabName: q.collabName || '', collabCost: q.collabCost || 0,
     items: q.items || [], totalWork: totalAmount, rawAmount: q.rawAmount || totalAmount,
     loyaltyTier: q.loyaltyTier || '', loyaltyDiscountPercent: q.loyaltyDiscountPercent || 0, loyaltyDiscountAmount: q.loyaltyDiscountAmount || 0,
@@ -4311,7 +4830,13 @@ function renderTransactions() {
     var warrantyTag = t.deliveredTimestamp ? (((nowTime - t.deliveredTimestamp) / (1000 * 60 * 60) <= 48) ? '<span class="badge badge-green" style="margin-right:4px;">🟢 در مهلت تست</span>' : '<span class="badge" style="background:#e2e8f0;color:#64748b;margin-right:4px;">⚪ منقضی</span>') : '';
     var amountDisplay = isDebt ? formatToman(t.totalWork || t.amount) : formatToman(t.amount);
     var subInfo = (isDebt && Number(t.deposit) > 0) ? ('<div style="font-size:.72rem;color:#059669;">بیعانه: ' + formatToman(t.deposit) + ' | مانده: ' + formatToman(Math.max(0, Number(t.totalWork) - Number(t.deposit))) + '</div>') : '';
-    cardDiv.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;cursor:pointer;" onclick="toggleInvoiceAccordion(' + t.id + ')"><div style="display:flex;align-items:flex-start;gap:6px;flex:1;"><span style="font-size:.75rem;color:#94a3b8;margin-top:2px;" id="inv-arrow-' + t.id + '">▼</span><div><div style="font-weight:bold;font-size:.92rem;"><span dir="auto" style="unicode-bidi:isolate;">' + esc(t.title || '') + '</span></div>' + (t.intakeCode ? '<div style="font-size:.72rem;color:#0284c7;">پذیرش: ' + esc(t.intakeCode) + '</div>' : '') + dueTag + subInfo + '</div></div><div style="text-align:left;flex-shrink:0;"><div style="font-weight:bold;font-size:.92rem;color:' + (isDebt ? 'var(--danger)' : 'var(--success)') + ';">' + (isDebt ? '+ ' : '- ') + amountDisplay + '</div><div style="font-size:.7rem;color:#94a3b8;">' + esc(toEnglishDigits(t.date)) + '</div><div style="margin-top:2px;">' + warrantyTag + '</div></div></div><div class="workshop-details-box" id="inv-body-' + t.id + '" style="margin-top:8px;"><div style="font-size:.8rem;color:#64748b;">نوع: ' + (isDebt ? 'فاکتور قطعی' : 'دریافتی') + ' | روش: ' + (t.payMethod === 'POS' ? 'پوز' : (t.payMethod === 'CARD' ? 'کارت‌به‌کارت' : 'نقد')) + '</div>' + sigBlock + '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;">' + (!isDebt ? '<button type="button" onclick="openEditPaymentModal(' + t.id + ')" style="background:#dbeafe;color:var(--primary);padding:5px 12px;width:auto;border-radius:6px;font-size:.8rem;font-weight:bold;">✏️ ویرایش</button>' : '') + '<button type="button" onclick="deleteTransaction(' + t.id + ')" style="background:#fee2e2;color:var(--danger);padding:5px 12px;width:auto;border-radius:6px;font-size:.8rem;">🗑️ حذف</button></div></div>';
+    cardDiv.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;cursor:pointer;" onclick="toggleInvoiceAccordion(' + t.id + ')"><div style="display:flex;align-items:flex-start;gap:6px;flex:1;"><span style="font-size:.75rem;color:#94a3b8;margin-top:2px;" id="inv-arrow-' + t.id + '">▼</span><div><div style="font-weight:bold;font-size:.92rem;"><span dir="auto" style="unicode-bidi:isolate;">' + esc(t.title || '') + '</span></div>' + (t.intakeCode ? '<div style="font-size:.72rem;color:#0284c7;">پذیرش: ' + esc(t.intakeCode) + '</div>' : '') + dueTag + subInfo + '</div></div><div style="text-align:left;flex-shrink:0;"><div style="font-weight:bold;font-size:.92rem;color:' + (isDebt ? 'var(--danger)' : 'var(--success)') + ';">' + (isDebt ? '+ ' : '- ') + amountDisplay + '</div><div style="font-size:.7rem;color:#94a3b8;">' + esc(toEnglishDigits(t.date)) + '</div><div style="margin-top:2px;">' + warrantyTag + '</div></div></div><div class="workshop-details-box" id="inv-body-' + t.id + '" style="margin-top:8px;"><div style="font-size:.8rem;color:#64748b;">نوع: ' + (isDebt ? 'فاکتور قطعی' : 'دریافتی') + ' | روش: ' + (t.payMethod === 'POS' ? 'پوز' : (t.payMethod === 'CARD' ? 'کارت‌به‌کارت' : 'نقد')) + '</div>' + sigBlock + '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:8px;flex-wrap:wrap;">' +
+  (isDebt ? '<button type="button" onclick="printCustomerInvoice(' + t.id + ')" style="background:#059669;color:#fff;padding:7px 14px;width:auto;border-radius:8px;font-size:.82rem;font-weight:800;">🧾 چاپ فاکتور خدمات</button>' : '<span></span>') +
+  '<div style="display:flex;gap:6px;">' +
+    (!isDebt ? '<button type="button" onclick="openEditPaymentModal(' + t.id + ')" style="background:#dbeafe;color:var(--primary);padding:7px 12px;width:auto;border-radius:8px;font-size:.8rem;font-weight:bold;">✏️ ویرایش</button>' : '') +
+    '<button type="button" onclick="deleteTransaction(' + t.id + ')" style="background:#fee2e2;color:var(--danger);padding:7px 12px;width:auto;border-radius:8px;font-size:.8rem;">🗑️ حذف</button>' +
+  '</div>' +
+'</div>';
     listEl.appendChild(cardDiv);
   });
   hydrateIdbImages();
@@ -4502,30 +5027,12 @@ var evidenceCount = (q.evidenceList && q.evidenceList.length > 0) ? q.evidenceLi
     div.onclick = e => toggleWorkshopDetails(q.id, e);
     var colorTag = q.color ? '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:bold;margin-right:4px;">🎨 ' + esc(q.color) + '</span>' : '';
 var markerTag = q.marker ? '<div style="font-size:.75rem;color:#7c3aed;background:#f5f3ff;border-right:2px solid #8b5cf6;padding:4px 8px;border-radius:4px;margin-top:4px;"><b>🔍 نشانه:</b> ' + esc(q.marker.replace(/\n/g, ' • ')) + '</div>' : '';
-div.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;"><div style="flex:1;"><div style="font-weight:800;font-size:1rem;color:#1e293b;"><span dir="auto" style="unicode-bidi:isolate;">📱 ' + esc(q.model || 'دستگاه بدون مدل') + '</span> ' + colorTag + '</div>' + markerTag + '<div style="font-size:.83rem;color:#475569;margin-top:2px;"><b>ایراد: </b><span dir="auto" style="unicode-bidi:isolate;">' + esc(itemsDesc) + '</span></div><div style="font-size:.82rem;color:#64748b;margin-top:3px;">مشتری: <b>' + esc(c.name) + '</b> (' + esc(c.phone || '---') + ') ' + callBtn + ' • اشتراک: <b>' + esc(loyalty.custCode) + '</b></div><div style="font-size:.75rem;color:#0284c7;margin-top:2px;">قبض: <b style="direction:ltr;display:inline-block;">' + esc(q.intakeCode || '---') + '</b> | پیگیری: <b style="direction:ltr;display:inline-block;">' + esc(q.trackCode || '---') + '</b> | ' + esc(q.date) + ' (' + daysOld + ' روز)</div>' + evidenceTag + receiptBtn + '</div><div style="text-align:center;margin-right:8px;"><img src="' + qrImgSrc + '" style="width:46px;height:46px;border:1px solid #cbd5e1;border-radius:6px;display:block;" alt="QR"><div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:4px;"><button type="button" class="action-btn" onclick="openQuickNoteModal(' + q.id + ', event)" style="color:#10b981;font-size:1rem;padding:2px;" title="افزودن یادداشت">📝</button><button type="button" class="action-btn" onclick="viewTimeline(' + q.id + ', event)" style="color:#8b5cf6;font-size:1rem;padding:2px;" title="تایملاین">📋</button></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:4px;"><div><span class="badge ' + badgeCls + '">' + (statusLabels[st] || st) + '</span> ' + loyaltyTag + overdueTag + '</div><span style="font-size:.75rem;color:#64748b;">(لمس برای جزئیات)</span></div><div class="workshop-details-box" id="ws-details-' + q.id + '"><div><b>🔒 قفل:</b> ' + esc(lockInfo) + '</div><div><b>⚠️ شروط:</b> ' + esc(condsStr) + '</div>' + (q.imei ? '<div><b>IMEI:</b> ' + esc(q.imei) + '</div>' : '') + (q.dueDate ? '<div style="color:#b45309;"><b>موعد:</b> ' + esc(q.dueDate) + '</div>' : '') + (q.qcSummary ? '<div style="color:#0284c7;"><b>QC:</b> ' + esc(q.qcSummary) + '</div>' : '') + (q.internalDiagnosis ? '<div style="color:#be185d;"><b>🔒 تشخیص داخلی:</b> ' + esc(q.internalDiagnosis) + '</div>' : '') + (q.internalNotes ? '<div style="color:#be185d;"><b>🔒 یادداشت داخلی:</b> ' + esc(q.internalNotes) + '</div>' : '') + (q.timeline && q.timeline.length > 0 ? '<button type="button" onclick="viewTimeline(' + q.id + ', event)" style="background:#f5f3ff;color:#7c3aed;border:1px dashed #c4b5fd;padding:6px 10px;font-size:0.78rem;border-radius:8px;width:100%;font-weight:bold;margin:8px 0 0 0;box-shadow:none;">📋 مشاهده تایملاین (' + q.timeline.length + ' رویداد)</button>' : '') + '</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;"><span style="font-size:.92rem;font-weight:800;color:var(--primary);">' + formatToman(q.amount) + (totalDep > 0 ? ' (بیعانه: ' + formatToman(totalDep) + ' | مانده: ' + formatToman(remain) + ')' : '') + '</span><select onchange="updateQuoteStatus(' + q.id + ', this.value)" style="width:auto;padding:6px 10px;font-size:.8rem;margin:0;border-radius:8px;font-weight:bold;"><option value="QUEUE"' + (st === 'QUEUE' ? ' selected' : '') + '>در نوبت</option><option value="WAIT_APPROVAL"' + (st === 'WAIT_APPROVAL' ? ' selected' : '') + '>⏳ منتظر تایید هزینه</option><option value="BENCH"' + (st === 'BENCH' ? ' selected' : '') + '>روی میز کار</option><option value="WAIT_PART"' + (st === 'WAIT_PART' ? ' selected' : '') + '>منتظر قطعه</option><option value="OUTSOURCE"' + (st === 'OUTSOURCE' ? ' selected' : '') + '>دست همکار</option><option value="READY"' + (st === 'READY' ? ' selected' : '') + '>آماده تحویل</option><option value="UNREPAIRABLE"' + (st === 'UNREPAIRABLE' ? ' selected' : '') + '>غیرقابل تعمیر</option></select></div><div class="action-row"><button type="button" class="btn-print" onclick="printIntakeReceipt(' + q.id + ')" style="flex:1;min-width:80px;">🖨 فاکتور A5</button><button type="button" onclick="openEditQuoteModal(' + q.id + ', event)" style="background:#0284c7;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;min-width:70px;">✏️ ویرایش</button>' + (isOverdue ? '<button type="button" onclick="sendOverdueAlertSMS(' + q.id + ')" style="background:#dc2626;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">⚠️ اخطار</button>' : '') + '<button type="button" onclick="openEvidenceModal(' + q.id + ', event)" style="background:#7c3aed;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">📸 عکس</button><button type="button" onclick="sendIntakeDirectSMS(' + q.id + ')" style="background:#0284c7;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">✉️ پیامک</button><button type="button" onclick="shareQuoteReceipt(' + q.id + ')" style="background:#059669;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">📱 اشتراک</button><button type="button" onclick="openSignatureModal(' + q.id + ')" style="background:#10b981;padding:9px;font-size:.82rem;margin:0;flex:1.4;border-radius:8px;">✍️ تحویل</button></div>';
+div.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;"><div style="flex:1;"><div style="font-weight:800;font-size:1rem;color:#1e293b;"><span dir="auto" style="unicode-bidi:isolate;">' + getDeviceDisplayNameShort(q) + '</span> ' + colorTag + '</div>' + markerTag + '<div style="font-size:.83rem;color:#475569;margin-top:2px;"><b>ایراد: </b><span dir="auto" style="unicode-bidi:isolate;">' + esc(itemsDesc) + '</span></div><div style="font-size:.82rem;color:#64748b;margin-top:3px;">مشتری: <b>' + esc(c.name) + '</b> (' + esc(c.phone || '---') + ') ' + callBtn + ' • اشتراک: <b>' + esc(loyalty.custCode) + '</b></div><div style="font-size:.75rem;color:#0284c7;margin-top:2px;">قبض: <b style="direction:ltr;display:inline-block;">' + esc(q.intakeCode || '---') + '</b> | پیگیری: <b style="direction:ltr;display:inline-block;">' + esc(q.trackCode || '---') + '</b> | ' + esc(q.date) + ' (' + daysOld + ' روز)</div>' + evidenceTag + receiptBtn + '</div><div style="text-align:center;margin-right:8px;"><img src="' + qrImgSrc + '" style="width:46px;height:46px;border:1px solid #cbd5e1;border-radius:6px;display:block;" alt="QR"><div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:4px;"><button type="button" class="action-btn" onclick="openQuickNoteModal(' + q.id + ', event)" style="color:#10b981;font-size:1rem;padding:2px;" title="افزودن یادداشت">📝</button><button type="button" class="action-btn" onclick="viewTimeline(' + q.id + ', event)" style="color:#8b5cf6;font-size:1rem;padding:2px;" title="تایملاین">📋</button></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:4px;"><div><span class="badge ' + badgeCls + '">' + (statusLabels[st] || st) + '</span> ' + loyaltyTag + overdueTag + '</div><span style="font-size:.75rem;color:#64748b;">(لمس برای جزئیات)</span></div><div class="workshop-details-box" id="ws-details-' + q.id + '"><div><b>🔒 قفل:</b> ' + esc(lockInfo) + '</div><div><b>⚠️ شروط:</b> ' + esc(condsStr) + '</div>' + (q.imei ? '<div><b>IMEI:</b> ' + esc(q.imei) + '</div>' : '') + (q.dueDate ? '<div style="color:#b45309;"><b>موعد:</b> ' + esc(q.dueDate) + '</div>' : '') + (q.qcSummary ? '<div style="color:#0284c7;"><b>QC:</b> ' + esc(q.qcSummary) + '</div>' : '') + (q.internalDiagnosis ? '<div style="color:#be185d;"><b>🔒 تشخیص داخلی:</b> ' + esc(q.internalDiagnosis) + '</div>' : '') + (q.internalNotes ? '<div style="color:#be185d;"><b>🔒 یادداشت داخلی:</b> ' + esc(q.internalNotes) + '</div>' : '') + (q.timeline && q.timeline.length > 0 ? '<button type="button" onclick="viewTimeline(' + q.id + ', event)" style="background:#f5f3ff;color:#7c3aed;border:1px dashed #c4b5fd;padding:6px 10px;font-size:0.78rem;border-radius:8px;width:100%;font-weight:bold;margin:8px 0 0 0;box-shadow:none;">📋 مشاهده تایملاین (' + q.timeline.length + ' رویداد)</button>' : '') + '</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;"><span style="font-size:.92rem;font-weight:800;color:var(--primary);">' + formatToman(q.amount) + (totalDep > 0 ? ' (بیعانه: ' + formatToman(totalDep) + ' | مانده: ' + formatToman(remain) + ')' : '') + '</span><select onchange="updateQuoteStatus(' + q.id + ', this.value)" style="width:auto;padding:6px 10px;font-size:.8rem;margin:0;border-radius:8px;font-weight:bold;"><option value="QUEUE"' + (st === 'QUEUE' ? ' selected' : '') + '>در نوبت</option><option value="WAIT_APPROVAL"' + (st === 'WAIT_APPROVAL' ? ' selected' : '') + '>⏳ منتظر تایید هزینه</option><option value="BENCH"' + (st === 'BENCH' ? ' selected' : '') + '>روی میز کار</option><option value="WAIT_PART"' + (st === 'WAIT_PART' ? ' selected' : '') + '>منتظر قطعه</option><option value="OUTSOURCE"' + (st === 'OUTSOURCE' ? ' selected' : '') + '>دست همکار</option><option value="READY"' + (st === 'READY' ? ' selected' : '') + '>آماده تحویل</option><option value="UNREPAIRABLE"' + (st === 'UNREPAIRABLE' ? ' selected' : '') + '>غیرقابل تعمیر</option></select></div><div class="action-row"><button type="button" class="btn-print" onclick="printIntakeReceipt(' + q.id + ')" style="flex:1;min-width:80px;">🖨 فاکتور A5</button><button type="button" onclick="openEditQuoteModal(' + q.id + ', event)" style="background:#0284c7;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;min-width:70px;">✏️ ویرایش</button>' + (isOverdue ? '<button type="button" onclick="sendOverdueAlertSMS(' + q.id + ')" style="background:#dc2626;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">⚠️ اخطار</button>' : '') + '<button type="button" onclick="openEvidenceModal(' + q.id + ', event)" style="background:#7c3aed;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">📸 عکس</button><button type="button" onclick="sendIntakeDirectSMS(' + q.id + ')" style="background:#0284c7;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">✉️ پیامک</button><button type="button" onclick="shareQuoteReceipt(' + q.id + ')" style="background:#059669;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">📱 اشتراک</button><button type="button" onclick="openSignatureModal(' + q.id + ')" style="background:#10b981;padding:9px;font-size:.82rem;margin:0;flex:1.4;border-radius:8px;">✍️ تحویل</button></div>';
     container.appendChild(div);
   });
 }
 
-function sendIntakeDirectSMS(qId) {
-  var q = quotes.find(x => x.id === qId && !x.deleted); if (!q) return;
-  var c = customers.find(x => x.id === q.customerId && !x.deleted); if (!c || !c.phone) return showToast('شماره تماس مشتری ثبت نشده است.', 'warning');
-  window.location.href = buildSmsLink(c.phone, 'موبایل پرشیا\n' + c.name + ' عزیز، دستگاه ' + (q.model || '') + ' پذیرش شد.\nقبض: ' + (q.intakeCode || '') + '\np-mob.ir/' + (q.intakeCode || q.trackCode));
-}
 
-function sendReadyDeviceSMS(qId) {
-  var q = quotes.find(x => x.id === qId && !x.deleted); if (!q) return;
-  var c = customers.find(x => x.id === q.customerId && !x.deleted); if (!c || !c.phone) return showToast('شماره تماس مشتری ثبت نشده است.', 'warning');
-  var cashDep = Number(q.cashDeposit != null ? q.cashDeposit : (q.deposit || 0)); var onlineDep = Number(q.onlineDeposit || 0);
-  var remain = Math.max(0, Number(q.amount) - (cashDep + onlineDep));
-  window.location.href = buildSmsLink(c.phone, 'تعمیرات موبایل پرشیا\n' + c.name + ' عزیز، دستگاه ' + (q.model || '') + ' آماده تحویل است.\n' + (remain > 0 ? ('مانده: ' + formatToman(remain) + '\n') : 'تسویه شده است.\n') + 'p-mob.ir/' + (q.intakeCode || q.trackCode));
-}
-
-function sendOverdueAlertSMS(qId) {
-  var q = quotes.find(x => x.id === qId && !x.deleted); if (!q) return;
-  var c = customers.find(x => x.id === q.customerId && !x.deleted); if (!c || !c.phone) return showToast('شماره تماس ثبت نشده است.', 'warning');
-  window.location.href = buildSmsLink(c.phone, 'اخطار ترخیص دستگاه - تعمیرات پرشیا\nمشتری گرامی ' + c.name + '؛ دستگاه ' + (q.model || '') + ' (قبض: ' + q.intakeCode + ') بیش از ۲۰ روز در تعمیرگاه بلاتکلیف مانده است.');
-}
 
 function shareQuoteReceipt(qId) {
   var q = quotes.find(x => x.id === qId && !x.deleted); if (!q) return;
@@ -4538,11 +5045,89 @@ function shareQuoteReceipt(qId) {
   else { if (navigator.clipboard) navigator.clipboard.writeText(text); showToast('متن رسید کپی شد.', 'info'); }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// 📱 سیستم پیامک هوشمند وضعیت‌محور (پچ SMS-Standard)
+// ═══════════════════════════════════════════════════════════════
+
+// هدر مشترک همه پیامک‌ها
+var SMS_HEADER = '✦ موبایل پرشیا ✦\n';
+
+// ⚙️ تنظیمات لینک استعلام (اگه دامنه خریدی، اینجا عوض کن)
+var SMS_TRACK_DOMAIN = 'p-mob.ir'; // یا مثلاً 'reza8943799.github.io/persia-mobile/#q='
+
+// ساخت متن پیامک بر اساس وضعیت فعلی دستگاه
+function getStatusSMSMessage(q, c) {
+  var st = q.deviceStatus || 'QUEUE';
+  var device = (q.model || 'دستگاه') + (q.color ? ' ' + q.color : '');
+  var name = (c.name || 'مشتری') + ' عزیز، ';
+  var footer = '\nقبض: ' + (q.intakeCode || '---');
+  var link = q.intakeCode ? ('\n🌐 ' + SMS_TRACK_DOMAIN + '/' + q.intakeCode) : '';
+
+  switch (st) {
+    case 'QUEUE':
+      return SMS_HEADER + name + 'دستگاه ' + device + ' پذیرش شد.' + footer + link;
+    case 'WAIT_APPROVAL':
+      return SMS_HEADER + name + 'دستگاه ' + device + ' منتظر تایید هزینه توسط شماست. لطفاً هرچه سریع‌تر پاسخ دهید.' + footer;
+    case 'BENCH':
+      return SMS_HEADER + name + 'دستگاه ' + device + ' در حال تعمیر است.' + footer;
+    case 'WAIT_PART':
+      return SMS_HEADER + name + 'دستگاه ' + device + ' منتظر قطعه از بازار است.' + footer;
+    case 'OUTSOURCE':
+      return SMS_HEADER + name + 'دستگاه ' + device + ' برای تعمیر تخصصی به همکار ارجاع شد.' + footer;
+    case 'READY':
+      return SMS_HEADER + name + 'دستگاه ' + device + ' آماده تحویل است.\nلطفاً برای تحویل مراجعه فرمایید.' + footer;
+    case 'UNREPAIRABLE':
+      return SMS_HEADER + name + 'دستگاه ' + device + ' متأسفانه قابل تعمیر نیست.\nلطفاً برای تحویل مراجعه فرمایید.' + footer;
+    default:
+      return SMS_HEADER + name + 'وضعیت دستگاه ' + device + ' بروزرسانی شد.' + footer;
+  }
+}
+
+// ✅ دکمه ✉️ روی هر کارت/قبض → پیامک وضعیت‌محور
+function sendIntakeDirectSMS(qId) {
+  var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+  if (!q) return showToast('پرونده یافت نشد', 'error');
+  var c = customers.find(function(x) { return x.id === q.customerId && !x.deleted; });
+  if (!c) return showToast('مشتری یافت نشد', 'error');
+  if (!c.phone) return showToast('شماره تماس مشتری ثبت نشده است.', 'warning');
+
+  var msg = getStatusSMSMessage(q, c);
+  window.location.href = buildSmsLink(c.phone, msg);
+}
+
+// ✅ پیامک آماده تحویل (تعریف گمشده — رفع باگ «پیامک تحویل باز نمیشه»)
+function sendReadyDeviceSMS(qId) {
+  var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+  if (!q) return;
+  var c = customers.find(function(x) { return x.id === q.customerId && !x.deleted; });
+  if (!c) return showToast('مشتری یافت نشد', 'error');
+  if (!c.phone) return showToast('شماره تماس مشتری ثبت نشده است.', 'warning');
+
+  var device = (q.model || 'دستگاه') + (q.color ? ' ' + q.color : '');
+  var msg = SMS_HEADER + (c.name || 'مشتری') + ' عزیز، دستگاه ' + device +
+            ' آماده تحویل است.\nلطفاً برای تحویل مراجعه فرمایید.\nقبض: ' + (q.intakeCode || '---');
+  window.location.href = buildSmsLink(c.phone, msg);
+}
+
+// ✅ اخطار رسوب (>۲۰ روز) — هدر یکدست شده
+function sendOverdueAlertSMS(qId) {
+  var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+  if (!q) return;
+  var c = customers.find(function(x) { return x.id === q.customerId && !x.deleted; });
+  if (!c || !c.phone) return showToast('شماره تماس ثبت نشده است.', 'warning');
+  var msg = SMS_HEADER + (c.name || 'مشتری') + ' عزیز، دستگاه ' + (q.model || '') +
+            ' (قبض: ' + (q.intakeCode || '') + ')\nبیش از ۲۰ روز در تعمیرگاه مانده است.\nلطفاً هرچه سریع‌تر مراجعه کنید.';
+  window.location.href = buildSmsLink(c.phone, msg);
+}
+
+// ✅ پیامک تسویه/بدهی — هدر یکدست شده
 function sendDebtSMS() {
-  var c = customers.find(x => x.id === activeCustomerId && !x.deleted); if (!c || !c.phone) return showToast('شماره تماس ثبت نشده است', 'warning');
-  var bal = getBalance(activeCustomerId); if (bal <= 0) return showToast('این پرونده مانده بدهی ندارد', 'info');
-  var loyalty = getCustomerLoyalty(c.id);
-  window.location.href = buildSmsLink(c.phone, 'سلام ' + c.name + ' عزیز (اشتراک: ' + loyalty.custCode + ')\nمانده حساب شما در تعمیرات موبایل پرشیا: ' + formatToman(bal) + '\n' + (customPaymentText ? customPaymentText + '\n' : '') + 'با تشکر');
+  var c = customers.find(function(x) { return x.id === activeCustomerId && !x.deleted; });
+  if (!c || !c.phone) return showToast('شماره تماس ثبت نشده است', 'warning');
+  var bal = getBalance(activeCustomerId);
+  if (bal <= 0) return showToast('این پرونده مانده بدهی ندارد', 'info');
+  var msg = SMS_HEADER + (c.name || 'مشتری') + ' عزیز، مانده حساب شما: ' + formatToman(bal) + ' تومان';
+  window.location.href = buildSmsLink(c.phone, msg);
 }
 
 function shareInvoice() {
@@ -5679,13 +6264,29 @@ prefersDark.addEventListener('change', function(e) {
   }
 });
 
-// اصلاح دکمه تغییر پوسته (تا انتخاب کاربر ذخیره شود)
+// ۲. تم خودکار و تغییر رنگ نوار باتری گوشی (Dynamic Status Bar)
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
   var isDark = document.body.classList.contains('dark-mode');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  hapticVibrate(50);
+  
+  // همرنگ کردن نوار وضعیت گوشی (ساعت و باتری) با تم
+  var metaThemeColor = document.querySelector("meta[name=theme-color]");
+  if (metaThemeColor) {
+    metaThemeColor.setAttribute("content", isDark ? "#0f172a" : "#0b132b");
+  }
+  
+  if (typeof hapticVibrate === 'function') hapticVibrate(50);
 }
+
+// تنظیم رنگ نوار گوشی در لحظه ورود به برنامه
+document.addEventListener('DOMContentLoaded', function() {
+  var metaThemeColor = document.querySelector("meta[name=theme-color]");
+  if (metaThemeColor && document.body.classList.contains('dark-mode')) {
+    metaThemeColor.setAttribute("content", "#0f172a");
+  }
+});
+
 
 // ۳. اضافه کردن بخش «بستن دخل شبانه» به تب گزارشات
 var originalRenderReports = renderReports;
@@ -5791,7 +6392,7 @@ printIntakeReceipt = function(qId) {
     '<div class="r-header"><span class="r-badge">مشتری</span><div class="r-title">تعمیرات تخصصی موبایل پرشیا</div><div style="font-size:6pt;margin-top:0.5mm;">قبض: <b>' + esc(q.intakeCode || '---') + '</b> | پیگیری: <b>' + esc(q.trackCode || '---') + '</b> | ' + esc(q.date) + '</div></div>' +
     '<div class="r-meta"><table>' +
       '<tr><td><b>مشتری:</b> ' + esc(c.name) + '</td><td style="text-align:left;"><b>تلفن:</b> ' + esc(c.phone || '---') + '</td></tr>' +
-      '<tr><td colspan="2"><b>دستگاه:</b> ' + esc(q.model || '---') + ' | <b>سطح:</b> ' + esc(loyalty.tier) + ' (' + esc(loyalty.custCode) + ')</td></tr>' +
+      '<tr><td colspan="2"><b>دستگاه:</b> ' + esc(getDeviceDisplayName(q)) + ' | <b>سطح:</b> ' + esc(loyalty.tier) + ' (' + esc(loyalty.custCode) + ')</td></tr>' +
       '<tr><td colspan="2"><b>ایراد:</b> ' + esc(q.problem || '---') + '</td></tr>' +
     '</table></div>' +
     '<table class="r-table"><thead><tr><th style="text-align:right;">شرح خدمات / قطعه</th><th style="text-align:left;width:32%;">مبلغ</th></tr></thead><tbody>' + itemsRows + '</tbody></table>' +
@@ -5810,7 +6411,7 @@ printIntakeReceipt = function(qId) {
     '<div class="r-tech">' +
       '<div><b>مشتری:</b> ' + esc(c.name) + ' (' + esc(c.phone || '---') + ')</div>' +
       '<div><b>سطح:</b> ' + esc(loyalty.tier) + ' | <b>اشتراک:</b> ' + esc(loyalty.custCode) + '</div>' +
-      '<div><b>مدل:</b> ' + esc(q.model || '---') + '</div>' +
+      '<div><b>مدل:</b> ' + esc(getDeviceDisplayName(q)) + '</div>' +
       (q.imei ? '<div><b>IMEI:</b> ' + esc(q.imei) + '</div>' : '') +
       '<div><b>🔒 قفل:</b> ' + esc(lockInfo) + '</div>' +
       '<div><b>لوازم:</b> ' + esc(q.acc || 'ندارد') + '</div>' +
@@ -5826,7 +6427,104 @@ printIntakeReceipt = function(qId) {
   setTimeout(() => window.print(), 200);
 };
 
-
+function printCustomerInvoice(txId) {
+  var t = transactions.find(function(x) { return x.id === txId && !x.deleted && x.type === 'DEBT'; });
+  if (!t) return showToast('فاکتور یافت نشد', 'error');
+  
+  var c = customers.find(function(x) { return x.id === t.customerId && !x.deleted; }) 
+       || { name: 'نامشخص', phone: '---' };
+  
+  var model = t.model || '';
+var brand = t.brand || '';
+if (!model && t.title) {
+  var m = t.title.match(/^([^-–]+)\s*[-–]\s*/);
+  if (m) model = m[1].trim();
+}
+var deviceDisplay = (brand && brand !== 'سایر') ? (brand + ' ' + model) : model;
+  
+  var itemsRows = '';
+  if (t.items && t.items.length > 0) {
+    t.items.forEach(function(it) {
+      itemsRows += '<tr><td>' + esc(it.title) + '</td><td style="text-align:left;white-space:nowrap;" dir="ltr">' + formatToman(it.amount) + '</td></tr>';
+    });
+  } else {
+    itemsRows += '<tr><td>' + esc(t.title || 'خدمات تعمیر') + '</td><td style="text-align:left;" dir="ltr">' + formatToman(t.totalWork || t.amount) + '</td></tr>';
+  }
+  
+  var totalWork = Number(t.totalWork || t.amount || 0);
+  var discount = Number(t.loyaltyDiscountAmount || 0);
+  var subtotal = Number(t.rawAmount || (totalWork + discount));
+  
+  var paidForThisInvoice = 0;
+  if (t.intakeCode) {
+    transactions.forEach(function(px) {
+      if (!px.deleted && px.type === 'PAY' && px.intakeCode === t.intakeCode) {
+        paidForThisInvoice += Number(px.amount || 0);
+      }
+    });
+  } else {
+    paidForThisInvoice = Number(t.deposit || 0);
+  }
+  var remaining = Math.max(0, totalWork - paidForThisInvoice);
+  
+  var invoiceHtml = 
+    '<div class="r-watermark">PERSIA</div>' +
+    '<div class="r-header">' +
+      '<div class="r-title" style="font-size:11pt;">تعمیرات تخصصی موبایل پرشیا</div>' +
+      '<div style="font-size:7.5pt;margin-top:1mm;color:#333;">فاکتور رسمی خدمات</div>' +
+      '<div style="font-size:6.5pt;margin-top:1mm;border-top:1px solid #ccc;padding-top:1mm;">' +
+        'شماره فاکتور: <b dir="ltr">' + esc(t.intakeCode || '---') + '</b>' +
+        (t.trackCode ? ' | کد پیگیری: <b dir="ltr">' + esc(t.trackCode) + '</b>' : '') +
+        ' | تاریخ: <b>' + esc(t.date) + '</b>' +
+      '</div>' +
+    '</div>' +
+    '<div class="r-meta" style="margin-top:2mm;"><table>' +
+      '<tr>' +
+        '<td><b>مشتری:</b> ' + esc(c.name) + '</td>' +
+        '<td style="text-align:left;"><b>تلفن:</b> <span dir="ltr">' + esc(c.phone || '---') + '</span></td>' +
+      '</tr>' +
+      (deviceDisplay ? '<tr><td colspan="2"><b>دستگاه:</b> ' + esc(deviceDisplay) + '</td></tr>' : '') +
+    '</table></div>' +
+    '<table class="r-table" style="margin-top:2mm;">' +
+      '<thead><tr>' +
+        '<th style="text-align:right;">شرح خدمات / قطعه</th>' +
+        '<th style="text-align:left;width:35%;">مبلغ (تومان)</th>' +
+      '</tr></thead>' +
+      '<tbody>' + itemsRows + '</tbody>' +
+    '</table>' +
+    '<div class="r-totals" style="margin-top:2mm;font-size:8pt;">' +
+      (discount > 0 ? '<div><span>جمع اقلام:</span><b dir="ltr">' + formatToman(subtotal) + '</b></div>' : '') +
+      (discount > 0 ? '<div style="color:#15803d;"><span>تخفیف وفاداری:</span><b dir="ltr">- ' + formatToman(discount) + '</b></div>' : '') +
+      '<div class="r-total-final" style="font-size:9.5pt;"><span>مبلغ قابل پرداخت:</span><b dir="ltr">' + formatToman(totalWork) + '</b></div>' +
+      (paidForThisInvoice > 0 ? '<div style="margin-top:1mm;color:#15803d;"><span>پرداخت‌شده:</span><b dir="ltr">' + formatToman(paidForThisInvoice) + '</b></div>' : '') +
+      '<div style="margin-top:1mm;font-size:9pt;"><span>مانده حساب:</span><b style="color:' + (remaining > 0 ? '#b91c1c' : '#15803d') + ';" dir="ltr">' + formatToman(remaining) + '</b></div>' +
+    '</div>' +
+    '<div style="margin-top:4mm;padding:2mm;background:#f9fafb;border:1px dashed #d1d5db;border-radius:3px;text-align:center;font-size:7pt;color:#374151;">' +
+      '🙏 از اعتماد و همراهی شما صمیمانه سپاسگزاریم' +
+    '</div>' +
+    '<div class="r-sign" style="margin-top:5mm;">' +
+      '<div><div class="line"></div><div style="text-align:center;margin-top:1mm;font-size:7pt;">امضای فروشنده</div></div>' +
+      '<div><div class="line"></div><div style="text-align:center;margin-top:1mm;font-size:7pt;">مهر تعمیرگاه</div></div>' +
+    '</div>';
+  
+  // 🔧 راه‌حل: کل print-section رو موقتاً جایگزین می‌کنیم
+  var printSection = document.getElementById('print-section');
+  var backupHTML = printSection.innerHTML;
+  
+  printSection.innerHTML = 
+  '<div class="print-page">' +
+    '<div class="print-half" style="padding:5mm 7mm;">' + invoiceHtml + '</div>' +
+  '</div>';
+  
+  // چاپ با انیمیشن، و بعد بازگردانی
+  setTimeout(function() {
+    window.print();
+    // ۵ ثانیه فرصت (انیمیشن 1.8s + پرینت دیالوگ + بستن)
+    setTimeout(function() {
+      printSection.innerHTML = backupHTML;
+    }, 2500);
+  }, 200);
+}
 // ==========================================
 // سیستم بارش کاغذ رنگی (نسخه مستقل و تضمینی)
 function fireConfetti() {
@@ -5957,15 +6655,15 @@ addTimelineEvent(q, 'STATUS', '🔄', 'تغییر وضعیت', (statusLabels[old
   renderDepositsStream();
 
   // اگر وضعیت آماده تحویل بود، پیامک بده
-  if (newStatus === 'READY' && oldStatus !== 'READY') {
-    setTimeout(function() {
-      if (confirm('دستگاه آماده تحویل شد.\nپیامک اطلاع‌رسانی برای مشتری باز شود؟')) {
-        sendReadyDeviceSMS(qId);
-      }
-    }, 400); // ۴۰۰ میلی‌ثانیه صبر می‌کنیم تا ارسال به وب قطعی شود بعد اپ پیامک را باز می‌کنیم
-  } else {
-    showToast('✅ وضعیت به «' + (statusLabels[newStatus] || newStatus) + '» تغییر یافت.', 'success');
-  }
+if (newStatus === 'READY' && oldStatus !== 'READY') {
+  setTimeout(function() {
+    var wantsSms = confirm('دستگاه آماده تحویل شد.\nپیامک اطلاع‌رسانی باز شود؟');
+    if (wantsSms) sendReadyDeviceSMS(qId);
+    else showToast('✅ وضعیت به «آماده تحویل» تغییر یافت.', 'success');
+  }, 400);
+} else {
+  showToast('✅ وضعیت به «' + (statusLabels[newStatus] || newStatus) + '» تغییر یافت.', 'success');
+}
 };
 
 // ==========================================

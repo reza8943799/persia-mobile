@@ -4,12 +4,14 @@
   "description": "سیستم حسابداری و مدیریت تعمیرات موبایل",
   "start_url": "./",
   "scope": "./",
+  "id": "/persia-mobile/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0b132b",
   "theme_color": "#0b132b",
   "lang": "fa",
   "dir": "rtl",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon.png",

@@ -42,10 +42,6 @@ jobs:
           mkdir -p www/font
           cp -r font/* www/font/ 2>/dev/null || true
 
-      - name: Init Capacitor
-        run: |
-          npx cap init "Persia Mobile" "com.persia.mobile" --web-dir=www
-
       - name: Add Android platform
         run: npx cap add android
 

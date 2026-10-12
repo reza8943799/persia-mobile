@@ -49,54 +49,6 @@
   }
 })();
 </script>
-<script>
-(function() {
-  if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) return;
-  if (window._apkBootstrapped) return;
-  window._apkBootstrapped = true;
-
-  var GITHUB_URL = 'https://reza8943799.github.io/persia-mobile/';
-  var CACHE_KEY = 'db_apk_cached_ui_v2';
-  var TS_KEY = 'db_apk_cache_ts_v2';
-  var CHECK_INTERVAL = 3 * 60 * 1000; // هر ۳ دقیقه چک کن
-
-  var now = Date.now();
-  var cachedHTML = null, lastCheck = 0;
-  try {
-    cachedHTML = localStorage.getItem(CACHE_KEY);
-    lastCheck = Number(localStorage.getItem(TS_KEY) || 0);
-  } catch(e) {}
-
-  var freshHTML = null;
-  if (navigator.onLine && (now - lastCheck > CHECK_INTERVAL)) {
-    try {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', GITHUB_URL + 'index.html?_=' + now, false);
-      xhr.send();
-      if (xhr.status === 200 && xhr.responseText.length > 500) {
-        freshHTML = xhr.responseText;
-        try {
-          localStorage.setItem(CACHE_KEY, freshHTML);
-          localStorage.setItem(TS_KEY, String(now));
-        } catch(e) {}
-      }
-    } catch(e) { console.warn('[APK] fetch failed:', e); }
-  }
-
-  var html = freshHTML || cachedHTML;
-  if (html) {
-    // حذف base قدیمی و اضافه کردن base جدید برای لینک‌های نسبی
-    html = html.replace(/<base[^>]*>/gi, '');
-    html = html.replace(/<head([^>]*)>/i, '<head$1><base href="' + GITHUB_URL + '">');
-    document.open();
-    document.write(html);
-    document.close();
-    console.log('[APK] Loaded from ' + (freshHTML ? 'GitHub ✨' : 'cache'));
-  } else {
-    console.log('[APK] Using internal version');
-  }
-})();
-</script>
     <script src="brands-db.js"></script>
 <script src="patch.js"></script>
 <meta charset="UTF-8">

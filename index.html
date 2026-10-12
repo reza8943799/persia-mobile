@@ -1,6 +1,102 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
+<script>
+(function() {
+  if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) return;
+  if (window._apkBootstrapped) return;
+  window._apkBootstrapped = true;
+
+  var GITHUB_URL = 'https://reza8943799.github.io/persia-mobile/';
+  var CACHE_KEY = 'db_apk_cached_ui_v2';
+  var TS_KEY = 'db_apk_cache_ts_v2';
+  var CHECK_INTERVAL = 3 * 60 * 1000; // هر ۳ دقیقه چک کن
+
+  var now = Date.now();
+  var cachedHTML = null, lastCheck = 0;
+  try {
+    cachedHTML = localStorage.getItem(CACHE_KEY);
+    lastCheck = Number(localStorage.getItem(TS_KEY) || 0);
+  } catch(e) {}
+
+  var freshHTML = null;
+  if (navigator.onLine && (now - lastCheck > CHECK_INTERVAL)) {
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', GITHUB_URL + 'index.html?_=' + now, false);
+      xhr.send();
+      if (xhr.status === 200 && xhr.responseText.length > 500) {
+        freshHTML = xhr.responseText;
+        try {
+          localStorage.setItem(CACHE_KEY, freshHTML);
+          localStorage.setItem(TS_KEY, String(now));
+        } catch(e) {}
+      }
+    } catch(e) { console.warn('[APK] fetch failed:', e); }
+  }
+
+  var html = freshHTML || cachedHTML;
+  if (html) {
+    // حذف base قدیمی و اضافه کردن base جدید برای لینک‌های نسبی
+    html = html.replace(/<base[^>]*>/gi, '');
+    html = html.replace(/<head([^>]*)>/i, '<head$1><base href="' + GITHUB_URL + '">');
+    document.open();
+    document.write(html);
+    document.close();
+    console.log('[APK] Loaded from ' + (freshHTML ? 'GitHub ✨' : 'cache'));
+  } else {
+    console.log('[APK] Using internal version');
+  }
+})();
+</script>
+<script>
+(function() {
+  if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) return;
+  if (window._apkBootstrapped) return;
+  window._apkBootstrapped = true;
+
+  var GITHUB_URL = 'https://reza8943799.github.io/persia-mobile/';
+  var CACHE_KEY = 'db_apk_cached_ui_v2';
+  var TS_KEY = 'db_apk_cache_ts_v2';
+  var CHECK_INTERVAL = 3 * 60 * 1000; // هر ۳ دقیقه چک کن
+
+  var now = Date.now();
+  var cachedHTML = null, lastCheck = 0;
+  try {
+    cachedHTML = localStorage.getItem(CACHE_KEY);
+    lastCheck = Number(localStorage.getItem(TS_KEY) || 0);
+  } catch(e) {}
+
+  var freshHTML = null;
+  if (navigator.onLine && (now - lastCheck > CHECK_INTERVAL)) {
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', GITHUB_URL + 'index.html?_=' + now, false);
+      xhr.send();
+      if (xhr.status === 200 && xhr.responseText.length > 500) {
+        freshHTML = xhr.responseText;
+        try {
+          localStorage.setItem(CACHE_KEY, freshHTML);
+          localStorage.setItem(TS_KEY, String(now));
+        } catch(e) {}
+      }
+    } catch(e) { console.warn('[APK] fetch failed:', e); }
+  }
+
+  var html = freshHTML || cachedHTML;
+  if (html) {
+    // حذف base قدیمی و اضافه کردن base جدید برای لینک‌های نسبی
+    html = html.replace(/<base[^>]*>/gi, '');
+    html = html.replace(/<head([^>]*)>/i, '<head$1><base href="' + GITHUB_URL + '">');
+    document.open();
+    document.write(html);
+    document.close();
+    console.log('[APK] Loaded from ' + (freshHTML ? 'GitHub ✨' : 'cache'));
+  } else {
+    console.log('[APK] Using internal version');
+  }
+})();
+</script>
     <script src="brands-db.js"></script>
 <script src="patch.js"></script>
 <meta charset="UTF-8">
@@ -113,6 +209,87 @@ body.dark-mode input[type="checkbox"]:checked { background: var(--primary); }
 body.dark-mode .repair-timeline::before { background: #334155; }
 body.dark-mode .rt-dot { background: #1e293b; border-color: #475569; }
 
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🌙 فیکس حالت تاریک: متن‌های مشکی و پس‌زمینه‌های سفید */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* فیکس متن‌های تیره (inline styles) */
+body.dark-mode [style*="color:#1e293b"] { color: #f8fafc !important; }
+body.dark-mode [style*="color:#334155"] { color: #e2e8f0 !important; }
+body.dark-mode [style*="color:#0f172a"] { color: #f8fafc !important; }
+body.dark-mode [style*="color:#475569"] { color: #cbd5e1 !important; }
+body.dark-mode [style*="color:#64748b"] { color: #94a3b8 !important; }
+body.dark-mode [style*="color:#1e40af"] { color: #93c5fd !important; }
+body.dark-mode [style*="color:#1d4ed8"] { color: #93c5fd !important; }
+
+/* فیکس پس‌زمینه‌های روشن */
+body.dark-mode [style*="background:#fff;"],
+body.dark-mode [style*="background: #fff;"],
+body.dark-mode [style*="background:#ffffff"],
+body.dark-mode [style*="background: #ffffff"] {
+  background: #1e293b !important;
+}
+body.dark-mode [style*="background:#f8fafc"],
+body.dark-mode [style*="background: #f8fafc"] {
+  background: #0f172a !important;
+}
+body.dark-mode [style*="background:#f1f5f9"],
+body.dark-mode [style*="background: #f1f5f9"] {
+  background: #0f172a !important;
+}
+
+/* کارت‌های رنگی (زرد/سبز/آبی روشن) → نسخه تیره */
+body.dark-mode [style*="background:#fffbeb"],
+body.dark-mode [style*="background: #fffbeb"] {
+  background: #422006 !important;
+  border-color: #78350f !important;
+}
+body.dark-mode [style*="background:#fef3c7"],
+body.dark-mode [style*="background: #fef3c7"] {
+  background: #451a03 !important;
+  border-color: #92400e !important;
+}
+body.dark-mode [style*="background:#f0fdf4"],
+body.dark-mode [style*="background: #f0fdf4"] {
+  background: #052e16 !important;
+  border-color: #166534 !important;
+}
+body.dark-mode [style*="background:#eff6ff"],
+body.dark-mode [style*="background: #eff6ff"] {
+  background: #172554 !important;
+  border-color: #1e40af !important;
+}
+body.dark-mode [style*="background:#fef2f2"],
+body.dark-mode [style*="background: #fef2f2"] {
+  background: #450a0a !important;
+  border-color: #991b1b !important;
+}
+body.dark-mode [style*="background:#f5f3ff"],
+body.dark-mode [style*="background: #f5f3ff"] {
+  background: #2e1065 !important;
+  border-color: #5b21b6 !important;
+}
+body.dark-mode [style*="background:#ffedd5"],
+body.dark-mode [style*="background: #ffedd5"] {
+  background: #431407 !important;
+  border-color: #9a3412 !important;
+}
+
+/* عنوان‌های مودال و کارت */
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode .modal-content h3 {
+  color: #f8fafc !important;
+}
+
+/* یادداشت و توضیحات داخلی */
+body.dark-mode .note-box { color: #cbd5e1 !important; }
+body.dark-mode .summary-box { color: #e2e8f0 !important; }
+body.dark-mode .stat-card div { color: #94a3b8 !important; }
+body.dark-mode .workshop-details-box { color: #cbd5e1 !important; }
+body.dark-mode .workshop-details-box b { color: #f1f5f9 !important; }
+body.dark-mode .quote-box { color: #e2e8f0 !important; }
+body.dark-mode .invoice-row { color: #e2e8f0 !important; }
 /* دکمه‌های فرم و UI */
 .container{max-width:560px;margin:0 auto;padding:14px}
 .card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:14px;border:1px solid var(--border);box-shadow:var(--shadow-sm);transition:transform .15s ease,box-shadow .15s ease}
@@ -569,6 +746,72 @@ body.dark-mode .model-suggestion-item.active {
 body.dark-mode .learned-brand-section { background: #0f172a; }
 body.dark-mode .learned-model-row { background: #1e293b; }
 
+/* 🔔 استایل بنر یادآور لوکس (شناور) */
+.glass-reminder {
+  position: sticky;
+  top: 76px; /* کمی پایین‌تر از هدر برای حالت شناور */
+  z-index: 99;
+  margin: 12px 14px;
+  background: rgba(254, 243, 199, 0.85) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25);
+  animation: slideDownFade 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.reminder-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+}
+.reminder-icon-box {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 1.2rem; flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.4);
+}
+.reminder-text-box {
+  flex: 1; min-width: 0; text-align: right;
+}
+.reminder-close-btn {
+  width: 30px !important; height: 30px !important;
+  border-radius: 50% !important; padding: 0 !important; margin: 0 !important;
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #b45309 !important; font-size: 0.9rem !important;
+  display: flex !important; justify-content: center !important; align-items: center !important;
+  box-shadow: none !important; border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  transition: all 0.2s;
+}
+.reminder-close-btn:active { 
+  transform: scale(0.85) !important; 
+  background: rgba(245, 158, 11, 0.3) !important; 
+}
+
+@keyframes bellShake {
+  0%, 100% { transform: rotate(0deg); }
+  10%, 30%, 50% { transform: rotate(15deg); }
+  20%, 40% { transform: rotate(-15deg); }
+  60% { transform: rotate(0deg); }
+}
+@keyframes slideDownFade {
+  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 🌙 حالت تاریک یادآور */
+body.dark-mode .glass-reminder {
+  background: rgba(69, 26, 3, 0.75) !important;
+  border-color: rgba(146, 64, 14, 0.5);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+body.dark-mode .glass-reminder .reminder-text-box div:first-child { color: #fcd34d !important; }
+body.dark-mode .glass-reminder #reminder-banner-text { color: #fef3c7 !important; }
+body.dark-mode .reminder-close-btn { background: rgba(146, 64, 14, 0.3) !important; color: #fcd34d !important; border-color: rgba(146, 64, 14, 0.5) !important; }
+
 </style>
 </head>
 
@@ -721,6 +964,20 @@ body.dark-mode .learned-model-row { background: #1e293b; }
     </div>
   </div>
 </header>
+
+<!-- 📌 بنر یادآور روزانه (شناور و لوکس) -->
+<div id="reminder-banner" class="glass-reminder" style="display:none;">
+  <div class="reminder-content">
+    <div class="reminder-icon-box">
+      <span style="animation: bellShake 2.5s infinite; display: inline-block;">🔔</span>
+    </div>
+    <div class="reminder-text-box">
+      <div style="font-size: 0.7rem; color: #b45309; font-weight: 900; margin-bottom: 2px;">یادآور روزانه</div>
+      <div id="reminder-banner-text" style="font-size: 0.85rem; font-weight: bold; color: #78350f; line-height: 1.5;"></div>
+    </div>
+    <button class="reminder-close-btn" onclick="clearReminder()">✕</button>
+  </div>
+</div>
 
 
 <!-- 📢 بنر یادآور معوق‌ها -->
@@ -1432,6 +1689,18 @@ body.dark-mode .learned-model-row { background: #1e293b; }
 <div class="card" style="display:flex; justify-content:space-between; align-items:center; border:2px solid var(--primary);">
   <div style="font-weight:800;font-size:1.05rem;">🌙 حالت تاریک (Dark Mode)</div>
   <button type="button" onclick="toggleDarkMode()" style="width:auto; padding:8px 16px; margin:0; background:#334155; color:#fff; border-radius:12px;">تغییر پوسته</button>
+</div>
+
+<div class="card" style="border:1.5px solid #fcd34d;background:#fffbeb;">
+  <div style="font-weight:800;font-size:1.05rem;margin-bottom:8px;color:#92400e;">📌 یادآور روزانه</div>
+  <div style="font-size:0.82rem;color:#78350f;margin-bottom:8px;line-height:1.6;">
+    این متن بالای منوی اصلی به عنوان یادآور نمایش داده می‌شود.
+  </div>
+  <textarea id="cfg-reminder-text" placeholder="مثال: خرید آی‌سی شارژ برای آقای ایرانپور" maxlength="200" style="border-color:#fde68a;background:#fff;min-height:60px;font-family:inherit;"></textarea>
+  <div class="row" style="margin-top:8px;">
+    <button type="button" onclick="saveReminder()" style="background:#f59e0b;color:#fff;flex:1;">💾 ذخیره یادآور</button>
+    <button type="button" onclick="clearReminder()" style="background:#64748b;color:#fff;flex:1;">🗑️ پاک کردن</button>
+  </div>
 </div>
 
 <div class="card" style="border:2px solid #3b82f6;background:#eff6ff;">
@@ -3523,22 +3792,35 @@ function getCustomerLoyalty(customerId) {
 }
 
 function forceAppRefresh() {
-  showToast('🔄 در حال بررسی و دریافت نسخه جدید...', 'info');
+  showToast('🔄 در حال دریافت نسخه جدید...', 'info');
   var hideProgress = showProgress();
+
+  // ✅ پاک کردن کش APK (اضافه شده)
+  try {
+    localStorage.removeItem('db_apk_cached_ui_v2');
+    localStorage.removeItem('db_apk_cache_ts_v2');
+  } catch(e) {}
+
+  // پاک کردن کش Service Worker
   var cleanupSW = Promise.resolve();
   if ('serviceWorker' in navigator) {
-    cleanupSW = navigator.serviceWorker.getRegistrations().then(regs => Promise.all(regs.map(r => r.unregister()))).catch(() => {});
+    cleanupSW = navigator.serviceWorker.getRegistrations()
+      .then(function(regs) { return Promise.all(regs.map(function(r) { return r.unregister(); })); })
+      .catch(function() {});
   }
   var cleanupCache = Promise.resolve();
   if ('caches' in window) {
-    cleanupCache = caches.keys().then(names => Promise.all(names.map(name => caches.delete(name)))).catch(() => {});
+    cleanupCache = caches.keys()
+      .then(function(names) { return Promise.all(names.map(function(n) { return caches.delete(n); })); })
+      .catch(function() {});
   }
+
   Promise.all([cleanupSW, cleanupCache]).then(function() {
     hideProgress();
     var url = new URL(window.location.href);
     url.searchParams.set('_v', Date.now());
-    setTimeout(() => window.location.replace(url.toString()), 500);
-  }).catch(() => { hideProgress(); window.location.reload(); });
+    setTimeout(function() { window.location.replace(url.toString()); }, 500);
+  }).catch(function() { hideProgress(); window.location.reload(); });
 }
 
 function switchCustomerSubView(mode) {
@@ -5527,6 +5809,10 @@ function openTab(tabName) {
   if (tabName === 'reports') renderReports();
   if (tabName === 'backup') {
     var cardTextEl = document.getElementById('cfg-card-text'); if (cardTextEl) cardTextEl.value = customPaymentText || '';
+    var remTextEl = document.getElementById('cfg-reminder-text');
+if (remTextEl) {
+  try { remTextEl.value = localStorage.getItem('db_daily_reminder') || ''; } catch(e) {}
+}
     var driveUrlEl = document.getElementById('cfg-drive-url'); if (driveUrlEl) driveUrlEl.value = driveScriptUrl || defaultDriveUrl;
     var qrUrlEl = document.getElementById('cfg-qr-base-url'); if (qrUrlEl) qrUrlEl.value = qrBaseUrl || '';
     countOrphanImages().then(n => {
@@ -5545,12 +5831,29 @@ function mergeArraysById(localList, remoteList) {
       if (!rem || !rem.id) return;
       var loc = map[rem.id];
       if (!loc) { map[rem.id] = rem; return; }
-      var locTime = loc.updatedAt || loc.id || 0; var remTime = rem.updatedAt || rem.id || 0;
-      if (remTime > locTime) map[rem.id] = rem;
-      else if (remTime === locTime && loc.deleted && !rem.deleted) map[rem.id] = rem;
+
+      var locTime = loc.updatedAt || loc.id || 0;
+      var remTime = rem.updatedAt || rem.id || 0;
+
+      // ✅ اگر محلی حذف شده، همون‌طور حذف‌شده بمونه
+      if (loc.deleted && !rem.deleted) {
+        if (remTime > locTime) {
+          map[rem.id] = rem; // سرور نسخه جدیدتری داره که حذف نشده
+        }
+        // در غیر این صورت محلی (حذف‌شده) رو نگه دار
+      }
+      // ✅ اگر ریموت جدیدتره، جایگزین کن
+      else if (remTime > locTime) {
+        map[rem.id] = rem;
+      }
+      // ✅ اگر هر دو حذف‌شده هستن، جدیدتر رو نگه دار
+      else if (loc.deleted && rem.deleted) {
+        if (remTime > locTime) map[rem.id] = rem;
+      }
     });
   }
-  var merged = []; for (var k in map) merged.push(map[k]);
+  var merged = [];
+  for (var k in map) merged.push(map[k]);
   return merged.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
 }
 
@@ -6088,7 +6391,8 @@ openAppDB().then(db => {
 
 // چک یادآور معوق‌ها بعد از لود دیتا
 setTimeout(function() { try { checkOverdueAlerts(); } catch(e) {} }, 800);
-
+// 📌 بارگذاری یادآور روزانه
+setTimeout(function() { try { renderReminderBanner(); } catch(e) {} }, 900);
 // ==========================================
 // ویژگی جدید: جستجوی سراسری IMEI و تاریخچه
 // ==========================================
@@ -7261,6 +7565,41 @@ renderWorkshopBoard = function() {
   _originalRenderWorkshopBoard();
   setTimeout(enhanceWorkshopCards, 100);
 };
+
+
+// ═══════════════════════════════════════════════════════════════
+// 📌 سیستم یادآور روزانه
+// ═══════════════════════════════════════════════════════════════
+
+function saveReminder() {
+  var text = (document.getElementById('cfg-reminder-text').value || '').trim();
+  if (!text) return showToast('متن یادآور را وارد کنید', 'warning');
+  try { localStorage.setItem('db_daily_reminder', text); } catch(e) {}
+  renderReminderBanner();
+  showToast('✅ یادآور ذخیره شد', 'success');
+}
+
+function clearReminder() {
+  try { localStorage.removeItem('db_daily_reminder'); } catch(e) {}
+  var el = document.getElementById('cfg-reminder-text');
+  if (el) el.value = '';
+  renderReminderBanner();
+  showToast('🗑️ یادآور پاک شد', 'info');
+}
+
+function renderReminderBanner() {
+  var text = '';
+  try { text = localStorage.getItem('db_daily_reminder') || ''; } catch(e) {}
+  var banner = document.getElementById('reminder-banner');
+  var bannerText = document.getElementById('reminder-banner-text');
+  if (!banner || !bannerText) return;
+  if (text && text.trim()) {
+    bannerText.innerText = ' ' + text;
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
+  }
+}
 
 </script>
 </body>

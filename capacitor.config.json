@@ -1,0 +1,18 @@
+{
+  "appId": "com.persia.mobile",
+  "appName": "Persia Mobile",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": [
+      "reza8943799.github.io",
+      "script.google.com",
+      "script.googleusercontent.com",
+      "api.qrserver.com",
+      "cdn.jsdelivr.net",
+      "fonts.googleapis.com",
+      "fonts.gstatic.com",
+      "cdn-icons-png.flaticon.com"
+    ]
+  }
+}

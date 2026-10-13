@@ -698,6 +698,7 @@ body.dark-mode .model-suggestion-item.active {
 body.dark-mode .learned-brand-section { background: #0f172a; }
 body.dark-mode .learned-model-row { background: #1e293b; }
 
+
 /* 🔔 استایل بنر یادآور لوکس (شناور) */
 .glass-reminder {
   position: sticky;
@@ -763,6 +764,75 @@ body.dark-mode .glass-reminder {
 body.dark-mode .glass-reminder .reminder-text-box div:first-child { color: #fcd34d !important; }
 body.dark-mode .glass-reminder #reminder-banner-text { color: #fef3c7 !important; }
 body.dark-mode .reminder-close-btn { background: rgba(146, 64, 14, 0.3) !important; color: #fcd34d !important; border-color: rgba(146, 64, 14, 0.5) !important; }
+
+
+/* ۲. کارت‌های ویجتی (Apple Widget Style) */
+.card, .quote-box {
+  border: none !important;
+  border-radius: 24px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  padding: 20px !important;
+}
+/* کارت‌های کارگاه */
+.workshop-card { border-right-width: 6px !important; }
+/* حالت تاریک کارت‌ها */
+body.dark-mode .card, body.dark-mode .quote-box {
+  background: #1e293b !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255,255,255,0.03) !important;
+}
+
+
+  /* ========================================= */
+  /* 🎨 نوار رنگی دور کارت‌های کارگاه بر اساس وضعیت */
+  /* ========================================= */
+  
+  /* ۱. در نوبت بررسی (آبی) */
+  .workshop-card:has(.badge-blue) {
+    border: 2px solid #bfdbfe !important;
+    border-right: 6px solid #3b82f6 !important;
+  }
+  
+  /* ۲. روی میز کار (نارنجی) */
+  .workshop-card:has(.badge-orange) {
+    border: 2px solid #fde68a !important;
+    border-right: 6px solid #f59e0b !important;
+  }
+  
+  /* ۳. منتظر قطعه / منتظر تایید هزینه (بنفش) */
+  .workshop-card:has(.badge-purple) {
+    border: 2px solid #e9d5ff !important;
+    border-right: 6px solid #a855f7 !important;
+  }
+  
+  /* ۴. آماده تحویل (سبز) */
+  .workshop-card:has(.badge-green) {
+    border: 2px solid #bbf7d0 !important;
+    border-right: 6px solid #10b981 !important;
+  }
+  
+  /* ۵. غیرقابل تعمیر / رسوب کرده (قرمز) */
+  .workshop-card:has(.badge-red), .workshop-card.overdue {
+    border: 2px solid #fecaca !important;
+    border-right: 6px solid #ef4444 !important;
+    background-color: #fffafa !important; /* پس‌زمینه خیلی محو قرمز */
+  }
+  
+  /* ۶. ارجاع به همکار (آجری) */
+  .workshop-card:has(.badge-collab) {
+    border: 2px solid #fed7aa !important;
+    border-right: 6px solid #ea580c !important;
+  }
+
+  /* 🌙 هماهنگی با حالت تاریک (Dark Mode) */
+  body.dark-mode .workshop-card:has(.badge-blue) { border-color: rgba(59, 130, 246, 0.3) !important; }
+  body.dark-mode .workshop-card:has(.badge-orange) { border-color: rgba(245, 158, 11, 0.3) !important; }
+  body.dark-mode .workshop-card:has(.badge-purple) { border-color: rgba(168, 85, 247, 0.3) !important; }
+  body.dark-mode .workshop-card:has(.badge-green) { border-color: rgba(16, 185, 129, 0.3) !important; }
+  body.dark-mode .workshop-card:has(.badge-red) { border-color: rgba(239, 68, 68, 0.3) !important; background-color: rgba(239, 68, 68, 0.05) !important; }
+  body.dark-mode .workshop-card:has(.badge-collab) { border-color: rgba(234, 88, 12, 0.3) !important; }
+
+
 
 </style>
 </head>
@@ -2243,591 +2313,6 @@ body.dark-mode .reminder-close-btn { background: rgba(146, 64, 14, 0.3) !importa
 if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
 
 
-
-// ═══════════════════════════════════════════════════════════════
-// 🔍 تابع جستجو در دیتابیس برند (برای autocomplete)
-// ═══════════════════════════════════════════════════════════════
-
-function searchBrandModels(brand, query) {
-  var list = PHONE_BRANDS_DB[brand] || [];
-  var q = (query || '').trim().toLowerCase();
-  if (!q) return list.slice(0, 10); // بدون تایپ → ۱۰ مدل اول
-
-  // حذف فاصله و تطبیق ساده
-  var qCompact = q.replace(/\s+/g, '');
-  return list.filter(function(m) {
-    var mCompact = m.toLowerCase().replace(/\s+/g, '');
-    return mCompact.indexOf(qCompact) !== -1;
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 📚 بارگذاری و ذخیره‌سازی
-// ═══════════════════════════════════════════════════════════════
-function loadLearnedModels() {
-  if (_learnedModels) return _learnedModels;
-  try {
-    var raw = localStorage.getItem(LEARNED_MODELS_KEY);
-    _learnedModels = raw ? JSON.parse(raw) : {};
-  } catch(e) { _learnedModels = {}; }
-  return _learnedModels;
-}
-
-function saveLearnedModels() {
-  try {
-    localStorage.setItem(LEARNED_MODELS_KEY, JSON.stringify(_learnedModels || {}));
-  } catch(e) {}
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ✅ یادگیری مدل جدید
-// ═══════════════════════════════════════════════════════════════
-function learnBrandModel(brand, model) {
-  if (!brand || !model || brand === 'سایر') return false;
-  var m = (model || '').trim();
-  if (!m) return false;
-
-  var learned = loadLearnedModels();
-  if (!learned[brand]) learned[brand] = [];
-
-  // چک: توی DB پیش‌فرض هست؟
-  var defaultList = PHONE_BRANDS_DB[brand] || [];
-  if (defaultList.indexOf(m) !== -1) return false;
-
-  // چک: قبلاً یاد گرفته شده؟
-  var existing = learned[brand].find(function(x) { return x.model === m; });
-  if (existing) {
-    existing.lastUsed = Date.now();
-    saveLearnedModels();
-    return false;
-  }
-
-  learned[brand].push({ model: m, createdAt: Date.now(), lastUsed: Date.now() });
-  saveLearnedModels();
-  return true;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 🧹 پاکسازی خودکار مدل‌های قدیمی (۳۶۵ روز)
-// ═══════════════════════════════════════════════════════════════
-function cleanupLearnedModels() {
-  var learned = loadLearnedModels();
-  var now = Date.now();
-  var yearMs = 365 * 24 * 60 * 60 * 1000;
-  var removed = 0;
-
-  for (var brand in learned) {
-    var before = learned[brand].length;
-    learned[brand] = learned[brand].filter(function(x) {
-      return (now - (x.lastUsed || x.createdAt || 0)) < yearMs;
-    });
-    removed += (before - learned[brand].length);
-    if (learned[brand].length === 0) delete learned[brand];
-  }
-
-  if (removed > 0) {
-    _learnedModels = learned;
-    saveLearnedModels();
-  }
-  return removed;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 🔍 جستجو در هر دو دیتابیس
-// ═══════════════════════════════════════════════════════════════
-function searchBrandModels(brand, query) {
-  var defaultList = PHONE_BRANDS_DB[brand] || [];
-  var learnedList = (loadLearnedModels()[brand] || []).map(function(x) { return x.model; });
-
-  // ادغام: یادگرفته‌ها اول
-  var allModels = [];
-  learnedList.forEach(function(m) { allModels.push({ name: m, learned: true }); });
-  defaultList.forEach(function(m) {
-    if (learnedList.indexOf(m) === -1) allModels.push({ name: m, learned: false });
-  });
-
-  var q = (query || '').trim().toLowerCase();
-  if (!q) return allModels.slice(0, 15);
-
-  var qCompact = q.replace(/\s+/g, '');
-  return allModels.filter(function(item) {
-    var mCompact = item.name.toLowerCase().replace(/\s+/g, '');
-    return mCompact.indexOf(qCompact) !== -1;
-  }).slice(0, 15);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 📝 helper: نمایش کامل دستگاه
-// ═══════════════════════════════════════════════════════════════
-function getDeviceDisplayName(item) {
-  if (!item) return 'نامشخص';
-  var brand = item.brand || '';
-  var model = item.model || '';
-  if (brand && brand !== 'سایر' && model) return brand + ' ' + model;
-  if (model) return model;
-  return 'نامشخص';
-}
-
-function getDeviceDisplayNameShort(item) {
-  if (!item) return 'نامشخص';
-  var model = item.model || '';
-  var brand = item.brand || '';
-  if (model) {
-    // اگه مدل با نام برند شروع می‌شه، دیگه برند رو نچسبون
-    if (brand === 'اپل' && model.indexOf('iPhone') === 0) return '🍏 ' + model;
-    if (brand === 'سامسونگ' && model.indexOf('Galaxy') === 0) return '🌌 ' + model;
-    if (brand && brand !== 'سایر') return BRAND_EMOJIS[brand] + ' ' + model;
-    return '📱 ' + model;
-  }
-  return '📱 نامشخص';
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 🎨 چیپ‌های برند
-// ═══════════════════════════════════════════════════════════════
-function renderBrandChips(containerId, selectedBrand, onSelect) {
-  var container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = '';
-
-  BRAND_LIST.forEach(function(brand) {
-    var chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'brand-chip' + (brand === selectedBrand ? ' active' : '');
-    chip.innerHTML = '<span class="brand-emoji">' + (BRAND_EMOJIS[brand] || '📱') + '</span>' + brand;
-    chip.onclick = function() { onSelect(brand); };
-    container.appendChild(chip);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 🔍 Autocomplete مدل
-// ═══════════════════════════════════════════════════════════════
-var _modelSuggestionIndex = -1;
-
-function setupModelAutocomplete(inputId, suggestionsId, getBrandFn) {
-  var input = document.getElementById(inputId);
-  var box = document.getElementById(suggestionsId);
-  if (!input || !box) return;
-
-  function showSuggestions() {
-    var brand = getBrandFn();
-    if (!brand) {
-      box.innerHTML = '<div class="model-suggestion-empty">اول برند رو انتخاب کن 📱</div>';
-      box.style.display = 'block';
-      return;
-    }
-    if (brand === 'سایر') {
-      box.style.display = 'none';
-      return;
-    }
-
-    var results = searchBrandModels(brand, input.value);
-
-    if (results.length === 0) {
-      box.innerHTML = '<div class="model-suggestion-empty">' +
-        'مدل جدید — موقع ثبت، خودکار یاد گرفته می‌شه ✨' +
-        '</div>';
-      box.style.display = 'block';
-      return;
-    }
-
-    box.innerHTML = '';
-    results.forEach(function(item) {
-      var row = document.createElement('div');
-      row.className = 'model-suggestion-item' + (item.learned ? ' learned' : '');
-      var right = '<span>' + esc(item.name) + '</span>';
-      var left = item.learned ? '<span class="learned-tag">⭐ یادگرفته</span>' : '';
-      row.innerHTML = right + left;
-      row.onclick = function() {
-        input.value = item.name;
-        box.style.display = 'none';
-        _modelSuggestionIndex = -1;
-      };
-      box.appendChild(row);
-    });
-    box.style.display = 'block';
-    _modelSuggestionIndex = -1;
-  }
-
-  input.addEventListener('focus', showSuggestions);
-  input.addEventListener('input', showSuggestions);
-
-  input.addEventListener('keydown', function(e) {
-    if (box.style.display === 'none') return;
-    var items = box.querySelectorAll('.model-suggestion-item');
-    if (items.length === 0) return;
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      _modelSuggestionIndex = Math.min(_modelSuggestionIndex + 1, items.length - 1);
-      items.forEach(function(it, idx) {
-        it.classList.toggle('active', idx === _modelSuggestionIndex);
-      });
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      _modelSuggestionIndex = Math.max(_modelSuggestionIndex - 1, -1);
-      items.forEach(function(it, idx) {
-        it.classList.toggle('active', idx === _modelSuggestionIndex);
-      });
-    } else if (e.key === 'Enter') {
-      if (_modelSuggestionIndex >= 0) {
-        e.preventDefault();
-        items[_modelSuggestionIndex].click();
-      }
-    } else if (e.key === 'Escape') {
-      box.style.display = 'none';
-    }
-  });
-
-  // بستن با کلیک بیرون
-  document.addEventListener('click', function(e) {
-    if (!input.contains(e.target) && !box.contains(e.target)) {
-      box.style.display = 'none';
-    }
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 📱 پچ کامل Brand-Autocomplete (متغیرها + دیتابیس + توابع گمشده)
-// ═══════════════════════════════════════════════════════════════
-
-// ─── ۱. لیست برندها ───
-var BRAND_LIST = ['سامسونگ', 'اپل', 'شیائومی', 'هواوی', 'آنر', 'نوکیا', 'ال جی', 'سایر'];
-var BRAND_EMOJIS = {
-  'سامسونگ': '🌌',
-  'اپل': '🍏',
-  'شیائومی': '🟠',
-  'هواوی': '🌸',
-  'آنر': '⭐',
-  'نوکیا': '📞',
-  'ال جی': '📺',
-  'سایر': '📱'
-};
-
-// ─── ۲. متغیرهای یادگیری ───
-var LEARNED_MODELS_KEY = 'db_learned_models_v1';
-var _learnedModels = null;
-var currentDevBrand = '';
-var currentEqBrand = '';
-var _modelSuggestionIndex = -1;
-
-// ─── ۳. دیتابیس برندها (کامل) ───
-var PHONE_BRANDS_DB = {
-  'سامسونگ': [
-    'Galaxy S6', 'Galaxy S6 Edge', 'Galaxy S6 Edge+', 'Galaxy Note 5',
-    'Galaxy A3', 'Galaxy A5', 'Galaxy A7', 'Galaxy A8', 'Galaxy J1', 'Galaxy J2', 'Galaxy J5', 'Galaxy J7',
-    'Galaxy S7', 'Galaxy S7 Edge', 'Galaxy Note 7',
-    'Galaxy A3 (2016)', 'Galaxy A5 (2016)', 'Galaxy A7 (2016)', 'Galaxy A9', 'Galaxy A9 Pro',
-    'Galaxy J1 (2016)', 'Galaxy J2 (2016)', 'Galaxy J3', 'Galaxy J5 (2016)', 'Galaxy J7 (2016)', 'Galaxy J7 Prime', 'Galaxy J2 Prime',
-    'Galaxy S8', 'Galaxy S8+', 'Galaxy Note 8',
-    'Galaxy A3 (2017)', 'Galaxy A5 (2017)', 'Galaxy A7 (2017)', 'Galaxy A8 (2018)', 'Galaxy A8+ (2018)',
-    'Galaxy J3 (2017)', 'Galaxy J5 (2017)', 'Galaxy J7 (2017)', 'Galaxy J7+', 'Galaxy J7 Pro', 'Galaxy J7 Prime 2', 'Galaxy J7 Neo', 'Galaxy J7 Duo',
-    'Galaxy C5', 'Galaxy C7', 'Galaxy C9 Pro',
-    'Galaxy S9', 'Galaxy S9+', 'Galaxy Note 9',
-    'Galaxy A6', 'Galaxy A6+', 'Galaxy A7 (2018)', 'Galaxy A8 Star', 'Galaxy A9 (2018)',
-    'Galaxy J4', 'Galaxy J4+', 'Galaxy J6', 'Galaxy J6+', 'Galaxy J8',
-    'Galaxy M10', 'Galaxy M20',
-    'Galaxy S10', 'Galaxy S10+', 'Galaxy S10e', 'Galaxy S10 5G', 'Galaxy S10 Lite',
-    'Galaxy Note 10', 'Galaxy Note 10+', 'Galaxy Note 10 Lite',
-    'Galaxy Fold',
-    'Galaxy A10', 'Galaxy A10s', 'Galaxy A20', 'Galaxy A20s', 'Galaxy A30', 'Galaxy A30s',
-    'Galaxy A40', 'Galaxy A50', 'Galaxy A50s', 'Galaxy A60', 'Galaxy A70', 'Galaxy A70s', 'Galaxy A80', 'Galaxy A90 5G',
-    'Galaxy M10s', 'Galaxy M30', 'Galaxy M30s', 'Galaxy M40',
-    'Galaxy S20', 'Galaxy S20+', 'Galaxy S20 Ultra', 'Galaxy S20 FE',
-    'Galaxy Note 20', 'Galaxy Note 20 Ultra',
-    'Galaxy Z Flip', 'Galaxy Z Fold2',
-    'Galaxy A01', 'Galaxy A01 Core', 'Galaxy A11', 'Galaxy A21', 'Galaxy A21s',
-    'Galaxy A31', 'Galaxy A41', 'Galaxy A51', 'Galaxy A51 5G', 'Galaxy A71', 'Galaxy A71 5G',
-    'Galaxy M01', 'Galaxy M11', 'Galaxy M21', 'Galaxy M21s', 'Galaxy M31', 'Galaxy M31s', 'Galaxy M51',
-    'Galaxy S21', 'Galaxy S21+', 'Galaxy S21 Ultra', 'Galaxy S21 FE',
-    'Galaxy Z Flip3', 'Galaxy Z Fold3',
-    'Galaxy A02', 'Galaxy A02s', 'Galaxy A03', 'Galaxy A03s', 'Galaxy A03 Core',
-    'Galaxy A12', 'Galaxy A22', 'Galaxy A22 5G', 'Galaxy A32 5G',
-    'Galaxy A52', 'Galaxy A52 5G', 'Galaxy A52s 5G', 'Galaxy A72',
-    'Galaxy M02', 'Galaxy M02s', 'Galaxy M12', 'Galaxy M22', 'Galaxy M32', 'Galaxy M42', 'Galaxy M52',
-    'Galaxy S22', 'Galaxy S22+', 'Galaxy S22 Ultra',
-    'Galaxy Z Flip4', 'Galaxy Z Fold4',
-    'Galaxy A04', 'Galaxy A04s', 'Galaxy A04e', 'Galaxy A13', 'Galaxy A23',
-    'Galaxy A33 5G', 'Galaxy A53 5G', 'Galaxy A73 5G',
-    'Galaxy M04', 'Galaxy M13', 'Galaxy M23', 'Galaxy M33', 'Galaxy M53',
-    'Galaxy S23', 'Galaxy S23+', 'Galaxy S23 Ultra', 'Galaxy S23 FE',
-    'Galaxy Z Flip5', 'Galaxy Z Fold5',
-    'Galaxy A05', 'Galaxy A05s', 'Galaxy A14', 'Galaxy A14 5G', 'Galaxy A24',
-    'Galaxy A34 5G', 'Galaxy A54 5G',
-    'Galaxy M14 5G', 'Galaxy M34 5G', 'Galaxy M54 5G',
-    'Galaxy S24', 'Galaxy S24+', 'Galaxy S24 Ultra', 'Galaxy S24 FE',
-    'Galaxy Z Flip6', 'Galaxy Z Fold6',
-    'Galaxy A06', 'Galaxy A16', 'Galaxy A16 5G', 'Galaxy A25 5G', 'Galaxy A35 5G', 'Galaxy A55 5G',
-    'Galaxy M15 5G', 'Galaxy M35 5G', 'Galaxy M55 5G',
-    'Galaxy S25', 'Galaxy S25+', 'Galaxy S25 Ultra', 'Galaxy S25 Edge',
-    'Galaxy Z Flip7', 'Galaxy Z Fold7',
-    'Galaxy A06 5G', 'Galaxy A17', 'Galaxy A17 5G', 'Galaxy A26', 'Galaxy A36', 'Galaxy A56',
-    'Galaxy M16', 'Galaxy M36', 'Galaxy M56',
-    'Galaxy S26', 'Galaxy S26+', 'Galaxy S26 Ultra'
-  ],
-  'اپل': [
-    'iPhone 6s', 'iPhone 6s Plus',
-    'iPhone SE (1st Gen)', 'iPhone 7', 'iPhone 7 Plus',
-    'iPhone 8', 'iPhone 8 Plus', 'iPhone X',
-    'iPhone XS', 'iPhone XS Max', 'iPhone XR',
-    'iPhone 11', 'iPhone 11 Pro', 'iPhone 11 Pro Max',
-    'iPhone SE (2nd Gen)', 'iPhone 12 mini', 'iPhone 12', 'iPhone 12 Pro', 'iPhone 12 Pro Max',
-    'iPhone 13 mini', 'iPhone 13', 'iPhone 13 Pro', 'iPhone 13 Pro Max',
-    'iPhone SE (3rd Gen)', 'iPhone 14', 'iPhone 14 Plus', 'iPhone 14 Pro', 'iPhone 14 Pro Max',
-    'iPhone 15', 'iPhone 15 Plus', 'iPhone 15 Pro', 'iPhone 15 Pro Max',
-    'iPhone 16', 'iPhone 16 Plus', 'iPhone 16 Pro', 'iPhone 16 Pro Max',
-    'iPhone 16e', 'iPhone 17', 'iPhone 17 Plus', 'iPhone 17 Pro', 'iPhone 17 Pro Max', 'iPhone 17 Air',
-    'iPhone 18', 'iPhone 18 Pro', 'iPhone 18 Pro Max'
-  ],
-  'شیائومی': [
-    'Mi 4', 'Mi 4i', 'Mi 4c', 'Mi 4s', 'Mi 5', 'Mi 5s', 'Mi 5s Plus', 'Mi 5X', 'Mi 5c',
-    'Mi 6', 'Mi 6X', 'Mi Max', 'Mi Max 2', 'Mi Max 3', 'Mi Mix', 'Mi Mix 2', 'Mi Mix 2S', 'Mi Mix 3',
-    'Mi 8', 'Mi 8 Lite', 'Mi 8 Pro', 'Mi 8 SE', 'Mi 9', 'Mi 9 SE', 'Mi 9T', 'Mi 9T Pro', 'Mi 9 Lite',
-    'Mi 10', 'Mi 10 Pro', 'Mi 10 Lite', 'Mi 10T', 'Mi 10T Pro', 'Mi 10T Lite', 'Mi Note 10', 'Mi Note 10 Lite', 'Mi Note 10 Pro',
-    'Mi 11', 'Mi 11 Pro', 'Mi 11 Ultra', 'Mi 11 Lite', 'Mi 11 Lite 5G', 'Mi 11i', 'Mi 11X', 'Mi 11X Pro', 'Mi 11T', 'Mi 11T Pro',
-    'Xiaomi 12', 'Xiaomi 12X', 'Xiaomi 12 Pro', 'Xiaomi 12S', 'Xiaomi 12S Pro', 'Xiaomi 12S Ultra', 'Xiaomi 12T', 'Xiaomi 12T Pro', 'Xiaomi 12 Lite',
-    'Xiaomi 13', 'Xiaomi 13 Lite', 'Xiaomi 13 Pro', 'Xiaomi 13 Ultra', 'Xiaomi 13T', 'Xiaomi 13T Pro',
-    'Xiaomi 14', 'Xiaomi 14 Pro', 'Xiaomi 14 Ultra', 'Xiaomi 14T', 'Xiaomi 14T Pro',
-    'Xiaomi 15', 'Xiaomi 15 Pro', 'Xiaomi 15 Ultra', 'Xiaomi 15T', 'Xiaomi 15T Pro',
-    'Xiaomi 16', 'Xiaomi 16 Pro', 'Xiaomi 16 Ultra',
-    'Redmi Note 2', 'Redmi Note 3', 'Redmi Note 3 Pro',
-    'Redmi Note 4', 'Redmi Note 4X',
-    'Redmi Note 5', 'Redmi Note 5 Pro', 'Redmi Note 5A',
-    'Redmi Note 6 Pro',
-    'Redmi Note 7', 'Redmi Note 7 Pro', 'Redmi Note 7S',
-    'Redmi Note 8', 'Redmi Note 8 Pro', 'Redmi Note 8T',
-    'Redmi Note 9', 'Redmi Note 9 Pro', 'Redmi Note 9 Pro Max', 'Redmi Note 9S', 'Redmi Note 9 5G', 'Redmi Note 9T',
-    'Redmi Note 10', 'Redmi Note 10 Pro', 'Redmi Note 10 Pro Max', 'Redmi Note 10S', 'Redmi Note 10 5G', 'Redmi Note 10 Lite',
-    'Redmi Note 11', 'Redmi Note 11S', 'Redmi Note 11 Pro', 'Redmi Note 11 Pro+', 'Redmi Note 11T Pro', 'Redmi Note 11E',
-    'Redmi Note 12', 'Redmi Note 12S', 'Redmi Note 12 Pro', 'Redmi Note 12 Pro+', 'Redmi Note 12 Turbo', 'Redmi Note 12 5G',
-    'Redmi Note 13', 'Redmi Note 13 Pro', 'Redmi Note 13 Pro+', 'Redmi Note 13 5G',
-    'Redmi Note 14', 'Redmi Note 14 Pro', 'Redmi Note 14 Pro+', 'Redmi Note 14 5G',
-    'Redmi Note 15', 'Redmi Note 15 Pro', 'Redmi Note 15 Pro+',
-    'Redmi 4', 'Redmi 4A', 'Redmi 4X',
-    'Redmi 5', 'Redmi 5 Plus', 'Redmi 5A',
-    'Redmi 6', 'Redmi 6A', 'Redmi 6 Pro',
-    'Redmi 7', 'Redmi 7A',
-    'Redmi 8', 'Redmi 8A',
-    'Redmi 9', 'Redmi 9A', 'Redmi 9C', 'Redmi 9T', 'Redmi 9 Power',
-    'Redmi 10', 'Redmi 10A', 'Redmi 10C', 'Redmi 10 5G',
-    'Redmi 11 Prime',
-    'Redmi 12', 'Redmi 12C', 'Redmi 12 5G',
-    'Redmi 13', 'Redmi 13C', 'Redmi 13C 5G', 'Redmi 13 5G',
-    'Redmi 14C', 'Redmi 14C 5G',
-    'Redmi 15', 'Redmi 15C', 'Redmi 15 5G',
-    'Redmi A1', 'Redmi A1+', 'Redmi A2', 'Redmi A2+', 'Redmi A3', 'Redmi A3x', 'Redmi A4', 'Redmi A5',
-    'Pocophone F1', 'Poco F2 Pro', 'Poco F3', 'Poco F3 GT', 'Poco F4', 'Poco F4 GT',
-    'Poco F5', 'Poco F5 Pro', 'Poco F6', 'Poco F6 Pro', 'Poco F7', 'Poco F7 Pro', 'Poco F7 Ultra',
-    'Poco X2', 'Poco X3', 'Poco X3 NFC', 'Poco X3 Pro', 'Poco X3 GT',
-    'Poco X4 Pro', 'Poco X4 GT', 'Poco X5', 'Poco X5 Pro', 'Poco X6', 'Poco X6 Pro', 'Poco X7', 'Poco X7 Pro',
-    'Poco M2', 'Poco M2 Pro', 'Poco M3', 'Poco M3 Pro', 'Poco M4 5G', 'Poco M4 Pro',
-    'Poco M5', 'Poco M5s', 'Poco M6', 'Poco M6 Pro', 'Poco M6 Plus', 'Poco M6 5G', 'Poco M7', 'Poco M7 Pro',
-    'Poco C3', 'Poco C31', 'Poco C40', 'Poco C50', 'Poco C51', 'Poco C55', 'Poco C61', 'Poco C65', 'Poco C75'
-  ],
-  'هواوی': [
-    'Mate 8', 'Mate S', 'Mate 9', 'Mate 9 Pro', 'Mate 10', 'Mate 10 Pro', 'Mate 10 Lite',
-    'Mate 20', 'Mate 20 Pro', 'Mate 20 Lite', 'Mate 20 X',
-    'Mate 30', 'Mate 30 Pro', 'Mate 30 Lite',
-    'Mate 40', 'Mate 40 Pro', 'Mate 40 Pro+', 'Mate 40E',
-    'Mate 50', 'Mate 50 Pro', 'Mate 50E',
-    'Mate 60', 'Mate 60 Pro', 'Mate 60 Pro+',
-    'Mate X', 'Mate X2', 'Mate X3', 'Mate X5', 'Mate X6',
-    'P8', 'P8 Lite', 'P8 Lite (2017)', 'P8 Max',
-    'P9', 'P9 Lite', 'P9 Plus', 'P9 Lite 2017',
-    'P10', 'P10 Lite', 'P10 Plus',
-    'P20', 'P20 Lite', 'P20 Pro',
-    'P30', 'P30 Lite', 'P30 Pro',
-    'P40', 'P40 Lite', 'P40 Lite 5G', 'P40 Pro', 'P40 Pro+',
-    'P50', 'P50 Pocket', 'P50 Pro', 'P50E',
-    'P60', 'P60 Art', 'P60 Pro',
-    'Pura 70', 'Pura 70 Pro', 'Pura 70 Pro+', 'Pura 70 Ultra',
-    'Nova', 'Nova Plus', 'Nova 2', 'Nova 2 Plus', 'Nova 2s', 'Nova 2i', 'Nova 2 Lite',
-    'Nova 3', 'Nova 3i', 'Nova 3e',
-    'Nova 4', 'Nova 4e',
-    'Nova 5', 'Nova 5 Pro', 'Nova 5i', 'Nova 5T', 'Nova 5z',
-    'Nova 6', 'Nova 6 5G', 'Nova 6 SE',
-    'Nova 7', 'Nova 7 5G', 'Nova 7 Pro', 'Nova 7 SE', 'Nova 7i',
-    'Nova 8', 'Nova 8 5G', 'Nova 8 Pro', 'Nova 8 SE', 'Nova 8i',
-    'Nova 9', 'Nova 9 Pro', 'Nova 9 SE',
-    'Nova 10', 'Nova 10 Pro', 'Nova 10 SE',
-    'Nova 11', 'Nova 11 Pro', 'Nova 11i', 'Nova 11 Ultra',
-    'Nova 12', 'Nova 12 Pro', 'Nova 12 Ultra', 'Nova 12 Lite', 'Nova 12i', 'Nova 12s', 'Nova 12 SE',
-    'Nova 13', 'Nova 13 Pro', 'Nova 13i',
-    'Y3', 'Y3 II', 'Y3 (2017)', 'Y3 (2018)',
-    'Y5', 'Y5 II', 'Y5 (2017)', 'Y5 Prime (2018)', 'Y5 Lite (2018)', 'Y5p',
-    'Y6', 'Y6 II', 'Y6 (2017)', 'Y6 (2018)', 'Y6 Prime (2018)', 'Y6 Pro (2017)', 'Y6 Pro (2019)', 'Y6p', 'Y6s',
-    'Y7', 'Y7 Prime', 'Y7 (2018)', 'Y7 Prime (2018)', 'Y7 Pro (2019)', 'Y7 (2019)', 'Y7p', 'Y7a',
-    'Y8p', 'Y8s',
-    'Y9 (2018)', 'Y9 (2019)', 'Y9 Prime (2019)', 'Y9s', 'Y9a'
-  ],
-  'آنر': [
-    'Magic', 'Magic 2', 'Magic 3', 'Magic 3 Pro',
-    'Magic 4', 'Magic 4 Pro', 'Magic 5', 'Magic 5 Pro', 'Magic 5 Ultimate',
-    'Magic 6', 'Magic 6 Pro', 'Magic 6 Ultimate', 'Magic 6 RSR',
-    'Magic 7', 'Magic 7 Pro',
-    'Magic V', 'Magic Vs', 'Magic V2', 'Magic V3', 'Magic V Flip',
-    'Honor 7', 'Honor 7i', 'Honor 7X',
-    'Honor 8', 'Honor 8 Pro', 'Honor 8X', 'Honor 8X Max',
-    'Honor 9', 'Honor 9N', 'Honor 9X', 'Honor 9X Pro',
-    'Honor 10', 'Honor 10 Lite',
-    'Honor 20', 'Honor 20 Pro', 'Honor 20 Lite', 'Honor 20i', 'Honor 20S',
-    'Honor 30', 'Honor 30 Pro', 'Honor 30 Pro+', 'Honor 30S', 'Honor 30i',
-    'Honor 50', 'Honor 50 Pro', 'Honor 50 Lite', 'Honor 50 SE',
-    'Honor 60', 'Honor 60 Pro',
-    'Honor 70', 'Honor 70 Pro', 'Honor 70 Pro+',
-    'Honor 80', 'Honor 80 Pro', 'Honor 80 SE',
-    'Honor 90', 'Honor 90 Pro', 'Honor 90 Lite', 'Honor 90 GT',
-    'Honor 100', 'Honor 100 Pro',
-    'Honor 200', 'Honor 200 Pro', 'Honor 200 Lite',
-    'Honor X5', 'Honor X5 Plus', 'Honor X6', 'Honor X6a', 'Honor X6b',
-    'Honor X7', 'Honor X7a', 'Honor X7b',
-    'Honor X8', 'Honor X8a', 'Honor X8b',
-    'Honor X9', 'Honor X9a', 'Honor X9b', 'Honor X9c',
-    'Honor X10', 'Honor X10 5G', 'Honor X20', 'Honor X20 SE', 'Honor X30', 'Honor X40', 'Honor X50',
-    'Honor Play', 'Honor Play 3', 'Honor Play 4', 'Honor Play 4T', 'Honor Play 5', 'Honor Play 5T', 'Honor Play 6', 'Honor Play 7'
-  ],
-  'نوکیا': [
-    'Nokia 1', 'Nokia 1 Plus', 'Nokia 2', 'Nokia 2.1', 'Nokia 2.2', 'Nokia 2.3', 'Nokia 2.4',
-    'Nokia 3', 'Nokia 3.1', 'Nokia 3.1 Plus', 'Nokia 3.2', 'Nokia 3.4',
-    'Nokia 4.2',
-    'Nokia 5', 'Nokia 5.1', 'Nokia 5.1 Plus', 'Nokia 5.2', 'Nokia 5.3', 'Nokia 5.4',
-    'Nokia 6', 'Nokia 6.1', 'Nokia 6.1 Plus', 'Nokia 6.2',
-    'Nokia 7', 'Nokia 7 Plus', 'Nokia 7.1', 'Nokia 7.2',
-    'Nokia 8', 'Nokia 8 Sirocco', 'Nokia 8.1', 'Nokia 8.3 5G', 'Nokia 9 PureView',
-    'Nokia X10', 'Nokia X20', 'Nokia X30', 'Nokia XR20', 'Nokia XR21',
-    'Nokia G10', 'Nokia G11', 'Nokia G11 Plus', 'Nokia G20', 'Nokia G21', 'Nokia G22',
-    'Nokia G42', 'Nokia G50', 'Nokia G60',
-    'Nokia C1', 'Nokia C1 Plus', 'Nokia C2', 'Nokia C3', 'Nokia C5 Endi',
-    'Nokia C10', 'Nokia C12', 'Nokia C20', 'Nokia C21', 'Nokia C21 Plus', 'Nokia C22',
-    'Nokia C30', 'Nokia C31', 'Nokia C32'
-  ],
-  'ال جی': [
-    'LG G4', 'LG G4 Stylus', 'LG G4c', 'LG G5', 'LG G5 SE', 'LG G6',
-    'LG G7 ThinQ', 'LG G7 Fit', 'LG G7 One', 'LG G8 ThinQ', 'LG G8s ThinQ', 'LG G8X ThinQ',
-    'LG V10', 'LG V20', 'LG V30', 'LG V30+', 'LG V30S ThinQ', 'LG V35 ThinQ',
-    'LG V40 ThinQ', 'LG V50 ThinQ', 'LG V50S ThinQ', 'LG V60 ThinQ',
-    'LG K4', 'LG K7', 'LG K8', 'LG K10', 'LG K10 (2017)', 'LG K10 (2018)',
-    'LG K11', 'LG K11 Plus', 'LG K12', 'LG K20', 'LG K22', 'LG K30', 'LG K40',
-    'LG K41s', 'LG K42', 'LG K50', 'LG K50S', 'LG K51', 'LG K52', 'LG K61', 'LG K62', 'LG K71', 'LG K92',
-    'LG Q6', 'LG Q6+', 'LG Q6a', 'LG Q7', 'LG Q7+', 'LG Q7a', 'LG Q8',
-    'LG Q51', 'LG Q52', 'LG Q60', 'LG Q61', 'LG Q70', 'LG Q92',
-    'LG Stylo 4', 'LG Stylo 5', 'LG Stylo 6',
-    'LG Aristo 2', 'LG Aristo 3', 'LG Aristo 4+', 'LG Aristo 5',
-    'LG Velvet', 'LG Wing'
-  ],
-  'سایر': ['سایر']
-};
-
-// ─── ۴. تابع‌های انتخاب برند ───
-function selectDevBrand(brand) {
-  currentDevBrand = brand;
-  document.getElementById('dev-brand').value = brand;
-  renderBrandChips('dev-brand-chips', brand, selectDevBrand);
-  document.getElementById('dev-model').value = '';
-  var sbox = document.getElementById('dev-model-suggestions');
-  if (sbox) sbox.style.display = 'none';
-  setTimeout(function() {
-    try { document.getElementById('dev-model').focus(); } catch(e) {}
-  }, 100);
-}
-
-function selectEqBrand(brand) {
-  currentEqBrand = brand;
-  document.getElementById('eq-brand').value = brand;
-  renderBrandChips('eq-brand-chips', brand, selectEqBrand);
-  document.getElementById('eq-model').value = '';
-  var sbox = document.getElementById('eq-model-suggestions');
-  if (sbox) sbox.style.display = 'none';
-}
-
-// ─── ۵. تابع رندر مدل‌های یادگرفته در تنظیمات ───
-function renderLearnedModels() {
-  var container = document.getElementById('learned-models-list');
-  if (!container) return;
-  container.innerHTML = '';
-
-  var learned = loadLearnedModels();
-  var totalModels = 0;
-  Object.keys(learned).forEach(function(b) { totalModels += learned[b].length; });
-
-  if (totalModels === 0) {
-    container.innerHTML = '<div style="text-align:center;color:#92400e;padding:20px;font-size:0.85rem;">' +
-      '<div style="font-size:2rem;margin-bottom:8px;">📭</div>' +
-      'هنوز مدل سفارشی نداری.' +
-      '</div>';
-    return;
-  }
-
-  BRAND_LIST.forEach(function(brand) {
-    if (!learned[brand] || learned[brand].length === 0) return;
-    var section = document.createElement('div');
-    section.className = 'learned-brand-section';
-
-    var title = document.createElement('div');
-    title.className = 'learned-brand-title';
-    title.innerHTML = (BRAND_EMOJIS[brand] || '📱') + ' ' + brand +
-      ' <span style="background:#fef3c7;color:#92400e;padding:1px 8px;border-radius:10px;font-size:0.7rem;">' +
-      learned[brand].length + ' مدل</span>';
-    section.appendChild(title);
-
-    learned[brand].sort(function(a, b) { return (b.lastUsed || 0) - (a.lastUsed || 0); }).forEach(function(item) {
-      var row = document.createElement('div');
-      row.className = 'learned-model-row';
-      row.innerHTML = '<span>' + esc(item.model) + '</span>';
-      var delBtn = document.createElement('button');
-      delBtn.type = 'button';
-      delBtn.innerHTML = '🗑 حذف';
-      delBtn.onclick = function() {
-        if (!confirm('مدل «' + item.model + '» حذف شود؟')) return;
-        var l = loadLearnedModels();
-        if (l[brand]) {
-          l[brand] = l[brand].filter(function(x) { return x.model !== item.model; });
-          if (l[brand].length === 0) delete l[brand];
-          _learnedModels = l;
-          saveLearnedModels();
-        }
-        renderLearnedModels();
-        showToast('✅ مدل حذف شد', 'success');
-      };
-      row.appendChild(delBtn);
-      section.appendChild(row);
-    });
-
-    container.appendChild(section);
-  });
-}
-
-// ─── ۶. راه‌اندازی chip‌ها و autocomplete بعد از لود DOM ───
-document.addEventListener('DOMContentLoaded', function() {
-  // فرم پذیرش
-  if (document.getElementById('dev-brand-chips')) {
-    renderBrandChips('dev-brand-chips', currentDevBrand, selectDevBrand);
-  }
-  if (document.getElementById('dev-model') && document.getElementById('dev-model-suggestions')) {
-    setupModelAutocomplete('dev-model', 'dev-model-suggestions', function() {
-      return document.getElementById('dev-brand').value || currentDevBrand;
-    });
-  }
-
-  // فرم ویرایش
-  if (document.getElementById('eq-brand-chips')) {
-    renderBrandChips('eq-brand-chips', '', selectEqBrand);
-  }
-  if (document.getElementById('eq-model') && document.getElementById('eq-model-suggestions')) {
-    setupModelAutocomplete('eq-model', 'eq-model-suggestions', function() {
-      return document.getElementById('eq-brand').value || currentEqBrand;
-    });
-  }
-});
-
-// ─── ۷. پاکسازی خودکار مدل‌های قدیمی (۳۶۵ روز) ───
-setTimeout(function() {
-  try {
-    var removed = cleanupLearnedModels();
-    if (removed > 0) console.log('🧹 ' + removed + ' learned model(s) cleaned up');
-  } catch(e) {}
-}, 2500);
 
 // ═══════════════════════════════════════════════════════════════
 
@@ -7546,7 +7031,7 @@ function renderReminderBanner() {
   var bannerText = document.getElementById('reminder-banner-text');
   if (!banner || !bannerText) return;
   if (text && text.trim()) {
-    bannerText.innerText = ' ' + text;
+    bannerText.innerText = '📌 یادآور: ' + text;
     banner.style.display = 'block';
   } else {
     banner.style.display = 'none';

@@ -51,13 +51,7 @@
 </script>
     <script src="brands-db.js"></script>
 <script src="patch.js"></script>
-<script>
-window.onerror = function(msg, url, line, col) {
-  setTimeout(function() {
-    alert('JS Error:\n' + msg + '\n\nLine: ' + line + ':' + col);
-  }, 100);
-};
-</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>تعمیرات تخصصی موبایل پرشیا</title>
@@ -1065,7 +1059,7 @@ body.dark-mode .card, body.dark-mode .quote-box {
 
 <div id="toast-box"></div>
 
-<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="handleIframeLoad()"></iframe>
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 <form id="drive_form" method="POST" target="hidden_iframe" style="display:none;">
 <input type="hidden" name="data" id="drive_form_data">
 </form>

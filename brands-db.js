@@ -104,15 +104,4 @@ window.getAllBrands = function() {
   return Object.keys(window.PHONE_BRANDS_DB);
 };
 
-// تابع جستجوی مدل در یک برند خاص
-window.searchBrandModels = function(brand, query) {
-  if (!brand || !window.PHONE_BRANDS_DB[brand]) return [];
-  var db = window.PHONE_BRANDS_DB[brand];
-  if (!query || !query.trim()) return db.slice(0, 20);
-  var q = query.trim().toLowerCase();
-  return db.filter(function(m) {
-    return m.toLowerCase().indexOf(q) !== -1;
-  }).slice(0, 15);
-};
-
 console.log('✅ brands-db.js بارگذاری شد — ' + Object.keys(window.PHONE_BRANDS_DB).length + ' برند');

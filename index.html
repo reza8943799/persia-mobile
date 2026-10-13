@@ -51,6 +51,13 @@
 </script>
     <script src="brands-db.js"></script>
 <script src="patch.js"></script>
+<script>
+window.onerror = function(msg, url, line, col) {
+  setTimeout(function() {
+    alert('JS Error:\n' + msg + '\n\nLine: ' + line + ':' + col);
+  }, 100);
+};
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>تعمیرات تخصصی موبایل پرشیا</title>
@@ -4705,51 +4712,7 @@ function renderExpenses() {
   });
 }
 
-function renderWorkshopBoard() {
-  var container = document.getElementById('workshop-cards-container'); if (!container) return;
-  container.innerHTML = '';
-  var query = (document.getElementById('workshop-search').value || '').toLowerCase();
-  var overdueCount = 0;
-  var filtered = quotes.filter(q => {
-    if (q.deleted) return false;
-    var orphanCust = customers.find(x => x.id === q.customerId && !x.deleted); if (!orphanCust) return false;
-    var daysOld = getDaysPassed(q.date);
-    var isOverdue = daysOld >= 20 && (q.deviceStatus === 'READY' || q.deviceStatus === 'UNREPAIRABLE' || q.deviceStatus === 'WAIT_APPROVAL');
-    if (isOverdue) overdueCount++;
-    var matchesFilter = (currentWorkshopFilter === 'ALL') || (currentWorkshopFilter === 'OVERDUE' && isOverdue) || ((q.deviceStatus || 'QUEUE') === currentWorkshopFilter) || (currentWorkshopFilter === 'OUTSOURCE' && (q.deviceStatus === 'OUTSOURCE' || q.workType === 'OUTSOURCE'));
-    var c = customers.find(x => x.id === q.customerId && !x.deleted) || {}; var loyalty = getCustomerLoyalty(c.id);
-    return matchesFilter && ((q.model || '').toLowerCase().includes(query) || (q.color || '').toLowerCase().includes(query) || (q.marker || '').toLowerCase().includes(query) || (q.problem || '').toLowerCase().includes(query) || String(q.intakeCode || '').includes(query) || String(q.trackCode || '').includes(query) || String(loyalty.custCode || '').includes(query) || (c.name || '').toLowerCase().includes(query));
-  });
-  var counterBadge = document.getElementById('overdue-counter');
-  if (counterBadge) { counterBadge.style.display = overdueCount > 0 ? 'inline-block' : 'none'; counterBadge.innerText = '⚠️ ' + overdueCount + ' دستگاه رسوب‌کرده (>۲۰ روز)'; }
-  if (filtered.length === 0) { container.innerHTML = '<div class="card" style="text-align:center;color:#94a3b8;padding:24px;">هیچ دستگاهی یافت نشد.</div>'; return; }
-  filtered.forEach(q => {
-    var c = customers.find(x => x.id === q.customerId && !x.deleted) || { name: 'نامشخص', phone: '' };
-    var loyalty = getCustomerLoyalty(c.id); var st = q.deviceStatus || 'QUEUE'; var badgeCls = statusBadges[st] || 'badge-blue';
-    var cashDep = Number(q.cashDeposit != null ? q.cashDeposit : (q.deposit || 0)); var onlineDep = Number(q.onlineDeposit || 0);
-    var totalDep = cashDep + onlineDep; var remain = Math.max(0, Number(q.amount) - totalDep);
-    var qrImgSrc = getQrCodeUrl(q.trackCode); var daysOld = getDaysPassed(q.date);
-    var isOverdue = daysOld >= 20 && (st === 'READY' || st === 'UNREPAIRABLE' || st === 'WAIT_APPROVAL');
-    var lockInfo = q.lockType === 'PIN' ? ('پین: ' + (q.lockVal || '---')) : (q.lockType === 'PATTERN' ? ('پترن: ' + (q.patternPath || 'ثبت نشده')) : 'بدون رمز');
-    var conds = []; if (q.isDead) conds.push('مرگ برد'); if (q.isWater) conds.push('آب‌خورده'); if (q.isLcdRisk) conds.push('ریسک LCD'); if (q.isScratch) conds.push('ضربه'); if (q.isOpened) conds.push('دست‌خورده'); if (q.hasSim) conds.push('سیم/رم');
-    var condsStr = conds.length > 0 ? conds.join(' • ') : 'سالم';
-    var overdueTag = isOverdue ? '<span class="badge badge-overdue" style="margin-right:4px;">⚠️ رسوب (' + daysOld + ' روز)</span>' : '';
-    var loyaltyTag = '<span class="badge ' + loyalty.tagClass + '" style="margin-right:4px;">' + loyalty.tier + '</span>';
-    var callBtn = c.phone ? '<a href="tel:' + cleanNumber(c.phone) + '" style="background:#e0f2fe;color:#0284c7;padding:2px 8px;border-radius:6px;font-size:.75rem;text-decoration:none;font-weight:bold;margin-right:4px;">📞</a>' : '';
-    var itemsDesc = (q.items && q.items.length > 0) ? q.items.map(it => it.title).join(' ، ') : (q.problem || 'تعمیرات گوشی');
-var problemTag = q.problem ? '<div style="font-size:.74rem;color:#92400e;background:#fffbeb;border-right:2px solid #f59e0b;padding:4px 8px;border-radius:4px;margin-top:4px;"><b>🔍 ایراد اعلامی:</b> ' + esc(q.problem) + '</div>' : '';
-var evidenceCount = (q.evidenceList && q.evidenceList.length > 0) ? q.evidenceList.length : 0;
-    var evidenceTag = evidenceCount > 0 ? '<div style="font-size:.75rem;color:#7c3aed;font-weight:bold;margin-top:4px;">🔍 دارای ' + evidenceCount + ' مستند</div>' : '';
-    var receiptBtn = q.depositReceiptUrl ? (q.depositReceiptVerified ? '<div style="margin-top:6px;background:#ecfdf5;border:1px solid #6ee7b7;padding:6px 10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:0.75rem;color:#065f46;font-weight:bold;">✅ بیعانه تایید شد</span><a href="' + q.depositReceiptUrl + '" target="_blank" onclick="event.stopPropagation();" style="background:#10b981;color:#fff;padding:2px 8px;border-radius:6px;font-size:0.72rem;text-decoration:none;font-weight:bold;">🖼️ فیش</a></div>' : '<div style="margin-top:6px;background:#fffbeb;border:1.5px solid #fde68a;padding:8px;border-radius:8px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:0.78rem;color:#92400e;font-weight:bold;">📩 فیش ارسال شده:</span><a href="' + q.depositReceiptUrl + '" target="_blank" onclick="event.stopPropagation();" style="background:#0284c7;color:#fff;padding:2px 8px;border-radius:6px;font-size:0.72rem;text-decoration:none;font-weight:bold;">🖼️ باز کردن</a></div><div style="display:flex;gap:6px;"><button type="button" onclick="verifyCustomerReceipt(' + q.id + ', true)" style="background:#10b981;color:#fff;padding:6px;font-size:0.75rem;border-radius:6px;flex:1;margin:0;">✓ تایید</button><button type="button" onclick="verifyCustomerReceipt(' + q.id + ', false)" style="background:#ef4444;color:#fff;padding:6px;font-size:0.75rem;border-radius:6px;flex:1;margin:0;">✕ رد</button></div></div>') : '';
-    
-    var div = document.createElement('div'); div.className = 'card workshop-card' + (isOverdue ? ' overdue' : '');
-    div.onclick = e => toggleWorkshopDetails(q.id, e);
-    var colorTag = q.color ? '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:bold;margin-right:4px;">🎨 ' + esc(q.color) + '</span>' : '';
-var markerTag = q.marker ? '<div style="font-size:.75rem;color:#7c3aed;background:#f5f3ff;border-right:2px solid #8b5cf6;padding:4px 8px;border-radius:4px;margin-top:4px;"><b>🔍 نشانه:</b> ' + esc(q.marker.replace(/\n/g, ' • ')) + '</div>' : '';
-div.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;"><div style="flex:1;"><div style="font-weight:800;font-size:1rem;color:#1e293b;"><span dir="auto" style="unicode-bidi:isolate;">' + getDeviceDisplayNameShort(q) + '</span> ' + colorTag + '</div>' + markerTag + '<div style="font-size:.83rem;color:#475569;margin-top:2px;"><b>ایراد: </b><span dir="auto" style="unicode-bidi:isolate;">' + esc(itemsDesc) + '</span></div><div style="font-size:.82rem;color:#64748b;margin-top:3px;">مشتری: <b>' + esc(c.name) + '</b> (' + esc(c.phone || '---') + ') ' + callBtn + ' • اشتراک: <b>' + esc(loyalty.custCode) + '</b></div><div style="font-size:.75rem;color:#0284c7;margin-top:2px;">قبض: <b style="direction:ltr;display:inline-block;">' + esc(q.intakeCode || '---') + '</b> | پیگیری: <b style="direction:ltr;display:inline-block;">' + esc(q.trackCode || '---') + '</b> | ' + esc(q.date) + ' (' + daysOld + ' روز)</div>' + evidenceTag + receiptBtn + '</div><div style="text-align:center;margin-right:8px;"><img src="' + qrImgSrc + '" style="width:46px;height:46px;border:1px solid #cbd5e1;border-radius:6px;display:block;" alt="QR"><div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:4px;"><button type="button" class="action-btn" onclick="openQuickNoteModal(' + q.id + ', event)" style="color:#10b981;font-size:1rem;padding:2px;" title="افزودن یادداشت">📝</button><button type="button" class="action-btn" onclick="viewTimeline(' + q.id + ', event)" style="color:#8b5cf6;font-size:1rem;padding:2px;" title="تایملاین">📋</button></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:4px;"><div><span class="badge ' + badgeCls + '">' + (statusLabels[st] || st) + '</span> ' + loyaltyTag + overdueTag + '</div><span style="font-size:.75rem;color:#64748b;">(لمس برای جزئیات)</span></div><div class="workshop-details-box" id="ws-details-' + q.id + '"><div><b>🔒 قفل:</b> ' + esc(lockInfo) + '</div><div><b>⚠️ شروط:</b> ' + esc(condsStr) + '</div>' + (q.imei ? '<div><b>IMEI:</b> ' + esc(q.imei) + '</div>' : '') + (q.dueDate ? '<div style="color:#b45309;"><b>موعد:</b> ' + esc(q.dueDate) + '</div>' : '') + (q.qcSummary ? '<div style="color:#0284c7;"><b>QC:</b> ' + esc(q.qcSummary) + '</div>' : '') + (q.internalDiagnosis ? '<div style="color:#be185d;"><b>🔒 تشخیص داخلی:</b> ' + esc(q.internalDiagnosis) + '</div>' : '') + (q.internalNotes ? '<div style="color:#be185d;"><b>🔒 یادداشت داخلی:</b> ' + esc(q.internalNotes) + '</div>' : '') + (q.timeline && q.timeline.length > 0 ? '<button type="button" onclick="viewTimeline(' + q.id + ', event)" style="background:#f5f3ff;color:#7c3aed;border:1px dashed #c4b5fd;padding:6px 10px;font-size:0.78rem;border-radius:8px;width:100%;font-weight:bold;margin:8px 0 0 0;box-shadow:none;">📋 مشاهده تایملاین (' + q.timeline.length + ' رویداد)</button>' : '') + '</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;"><span style="font-size:.92rem;font-weight:800;color:var(--primary);">' + formatToman(q.amount) + (totalDep > 0 ? ' (بیعانه: ' + formatToman(totalDep) + ' | مانده: ' + formatToman(remain) + ')' : '') + '</span><select onchange="updateQuoteStatus(' + q.id + ', this.value)" style="width:auto;padding:6px 10px;font-size:.8rem;margin:0;border-radius:8px;font-weight:bold;"><option value="QUEUE"' + (st === 'QUEUE' ? ' selected' : '') + '>در نوبت</option><option value="WAIT_APPROVAL"' + (st === 'WAIT_APPROVAL' ? ' selected' : '') + '>⏳ منتظر تایید هزینه</option><option value="BENCH"' + (st === 'BENCH' ? ' selected' : '') + '>روی میز کار</option><option value="WAIT_PART"' + (st === 'WAIT_PART' ? ' selected' : '') + '>منتظر قطعه</option><option value="OUTSOURCE"' + (st === 'OUTSOURCE' ? ' selected' : '') + '>دست همکار</option><option value="READY"' + (st === 'READY' ? ' selected' : '') + '>آماده تحویل</option><option value="UNREPAIRABLE"' + (st === 'UNREPAIRABLE' ? ' selected' : '') + '>غیرقابل تعمیر</option></select></div><div class="action-row"><button type="button" class="btn-print" onclick="printIntakeReceipt(' + q.id + ')" style="flex:1;min-width:80px;">🖨 فاکتور A5</button><button type="button" onclick="openEditQuoteModal(' + q.id + ', event)" style="background:#0284c7;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;min-width:70px;">✏️ ویرایش</button>' + (isOverdue ? '<button type="button" onclick="sendOverdueAlertSMS(' + q.id + ')" style="background:#dc2626;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">⚠️ اخطار</button>' : '') + '<button type="button" onclick="openEvidenceModal(' + q.id + ', event)" style="background:#7c3aed;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">📸 عکس</button><button type="button" onclick="sendIntakeDirectSMS(' + q.id + ')" style="background:#0284c7;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">✉️ پیامک</button><button type="button" onclick="shareQuoteReceipt(' + q.id + ')" style="background:#059669;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">📱 اشتراک</button><button type="button" onclick="openSignatureModal(' + q.id + ')" style="background:#10b981;padding:9px;font-size:.82rem;margin:0;flex:1.4;border-radius:8px;">✍️ تحویل</button></div>';
-    container.appendChild(div);
-  });
-}
+
 
 
 
@@ -6792,62 +6755,246 @@ function upgradeEmptyState(containerId, icon, text) {
   }
 }
 
-// ==========================================
-// افزونه شمارنده فیلترها و رنگ‌بندی زنده کارت‌ها
-// ==========================================
-var originalRenderWorkshopForDynamicColors = renderWorkshopBoard;
-renderWorkshopBoard = function() {
-  originalRenderWorkshopForDynamicColors(); 
+// ═══════════════════════════════════════════════════════════════
+// 🎨 renderWorkshopBoard یکپارچه
+// (جایگزین ۳ لایه wrapper — بج متحرک + Timeline + TechUI + بج زمان)
+// ═══════════════════════════════════════════════════════════════
+function renderWorkshopBoard() {
+  var container = document.getElementById('workshop-cards-container');
+  if (!container) return;
+  container.innerHTML = '';
 
-  // ۱. آپدیت شمارنده‌های حباب فیلتر
+  var query = (document.getElementById('workshop-search').value || '').toLowerCase();
+
+  // ═══ شمارش ═══
   var counts = { 'ALL': 0, 'QUEUE': 0, 'WAIT_APPROVAL': 0, 'BENCH': 0, 'WAIT_PART': 0, 'OUTSOURCE': 0, 'READY': 0, 'UNREPAIRABLE': 0, 'OVERDUE': 0 };
-  quotes.forEach(q => {
-    if (!q.deleted) {
-      counts['ALL']++;
-      var st = q.deviceStatus || 'QUEUE';
-      if (counts[st] !== undefined) counts[st]++;
-      
-      // شمارش رسوب‌کرده‌ها
-      var daysOld = getDaysPassed(q.date);
-      if (daysOld >= 20 && (st === 'READY' || st === 'UNREPAIRABLE' || st === 'WAIT_APPROVAL')) {
-         counts['OVERDUE']++;
-      }
-    }
+  var overdueCount = 0;
+
+  var filtered = quotes.filter(function(q) {
+    if (q.deleted) return false;
+    var c = customers.find(function(x) { return x.id === q.customerId && !x.deleted; });
+    if (!c) return false;
+
+    var daysOld = getDaysPassed(q.date);
+    var st = q.deviceStatus || 'QUEUE';
+    var isOverdue = daysOld >= 20 && (st === 'READY' || st === 'UNREPAIRABLE' || st === 'WAIT_APPROVAL');
+
+    counts['ALL']++;
+    if (counts[st] !== undefined) counts[st]++;
+    if (isOverdue) { counts['OVERDUE']++; overdueCount++; }
+
+    var matchesFilter = (currentWorkshopFilter === 'ALL')
+      || (currentWorkshopFilter === 'OVERDUE' && isOverdue)
+      || (st === currentWorkshopFilter)
+      || (currentWorkshopFilter === 'OUTSOURCE' && (st === 'OUTSOURCE' || q.workType === 'OUTSOURCE'));
+
+    var loyalty = getCustomerLoyalty(c.id);
+    var matchesSearch = !query ||
+      (q.model || '').toLowerCase().includes(query) ||
+      (q.color || '').toLowerCase().includes(query) ||
+      (q.marker || '').toLowerCase().includes(query) ||
+      (q.problem || '').toLowerCase().includes(query) ||
+      String(q.intakeCode || '').includes(query) ||
+      String(q.trackCode || '').includes(query) ||
+      String(loyalty.custCode || '').includes(query) ||
+      (c.name || '').toLowerCase().includes(query);
+
+    return matchesFilter && matchesSearch;
   });
 
+  // ═══ شمارنده‌های فیلتر ═══
   var filterBar = document.getElementById('workshop-filter-bar');
   if (filterBar) {
-    filterBar.querySelectorAll('.filter-btn').forEach(btn => {
+    filterBar.querySelectorAll('.filter-btn').forEach(function(btn) {
       var stat = btn.getAttribute('data-status');
       var badge = btn.querySelector('.filter-badge');
       if (badge && counts[stat] !== undefined) badge.innerText = counts[stat];
     });
   }
 
-  // ۲. اعمال رنگ‌بندی زنده و برچسب زمان به کارت‌ها
-  setTimeout(function() {
-    document.querySelectorAll('.workshop-card').forEach(function(card) {
-      var detailsBox = card.querySelector('.workshop-details-box');
-      if (detailsBox && detailsBox.id) {
-        var qId = Number(detailsBox.id.replace('ws-details-', ''));
-        var q = quotes.find(x => x.id === qId && !x.deleted);
-        if (q) {
-           var daysOld = getDaysPassed(q.date);
-           var timeColor = daysOld <= 3 ? '#10b981' : (daysOld <= 7 ? '#f59e0b' : '#ef4444');
-           var timeText = daysOld === 0 ? 'امروز' : daysOld + ' روز پیش';
-           
-           
-           // اضافه کردن بج زمان در کنار متن تاریخ
-           var headerDiv = card.querySelector('div > div > div:nth-child(4)'); 
-           if (headerDiv && !headerDiv.querySelector('.time-badge')) {
-              var timeBadge = '<div class="time-badge" style="font-size:0.75rem; color:' + timeColor + '; font-weight:bold; background:' + timeColor + '15; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; margin-right:6px;">⏱ ' + timeText + '</div>';
-              headerDiv.innerHTML = headerDiv.innerHTML + timeBadge;
-           }
-        }
-      }
-    });
-  }, 100);
-};
+  // ═══ بنر رسوب ═══
+  var counterBadge = document.getElementById('overdue-counter');
+  if (counterBadge) {
+    counterBadge.style.display = overdueCount > 0 ? 'inline-block' : 'none';
+    counterBadge.innerText = '⚠️ ' + overdueCount + ' دستگاه رسوب‌کرده (>۲۰ روز)';
+  }
+
+  // ═══ حالت خالی ═══
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="card" style="text-align:center;color:#94a3b8;padding:24px;">هیچ دستگاهی یافت نشد.</div>';
+    return;
+  }
+
+  // ═══ ساخت کارت‌ها ═══
+  filtered.forEach(function(q) {
+    var c = customers.find(function(x) { return x.id === q.customerId && !x.deleted; }) || { name: 'نامشخص', phone: '' };
+    var loyalty = getCustomerLoyalty(c.id);
+    var st = q.deviceStatus || 'QUEUE';
+    var badgeCls = statusBadges[st] || 'badge-blue';
+
+    var cashDep = Number(q.cashDeposit != null ? q.cashDeposit : (q.deposit || 0));
+    var onlineDep = Number(q.onlineDeposit || 0);
+    var totalDep = cashDep + onlineDep;
+    var remain = Math.max(0, Number(q.amount) - totalDep);
+
+    var qrImgSrc = getQrCodeUrl(q.trackCode);
+    var daysOld = getDaysPassed(q.date);
+    var isOverdue = daysOld >= 20 && (st === 'READY' || st === 'UNREPAIRABLE' || st === 'WAIT_APPROVAL');
+
+    var lockInfo = q.lockType === 'PIN' ? ('پین: ' + (q.lockVal || '---'))
+      : (q.lockType === 'PATTERN' ? ('پترن: ' + (q.patternPath || 'ثبت نشده')) : 'بدون رمز');
+
+    var conds = [];
+    if (q.isDead) conds.push('مرگ برد');
+    if (q.isWater) conds.push('آب‌خورده');
+    if (q.isLcdRisk) conds.push('ریسک LCD');
+    if (q.isScratch) conds.push('ضربه');
+    if (q.isOpened) conds.push('دست‌خورده');
+    if (q.hasSim) conds.push('سیم/رم');
+    var condsStr = conds.length > 0 ? conds.join(' • ') : 'سالم';
+
+    var overdueTag = isOverdue ? '<span class="badge badge-overdue" style="margin-right:4px;">⚠️ رسوب (' + daysOld + ' روز)</span>' : '';
+    var loyaltyTag = '<span class="badge ' + loyalty.tagClass + '" style="margin-right:4px;">' + loyalty.tier + '</span>';
+    var callBtn = c.phone ? '<a href="tel:' + cleanNumber(c.phone) + '" style="background:#e0f2fe;color:#0284c7;padding:2px 8px;border-radius:6px;font-size:.75rem;text-decoration:none;font-weight:bold;margin-right:4px;">📞</a>' : '';
+
+    var itemsDesc = (q.items && q.items.length > 0)
+      ? q.items.map(function(it) { return it.title; }).join(' ، ')
+      : (q.problem || 'تعمیرات گوشی');
+
+    // ═══ بج متحرک ═══
+    var badgeContent = statusLabels[st] || st;
+    if (st === 'READY') {
+      badgeContent = '<span class="status-dot-ready"></span>' + badgeContent;
+    } else if (st === 'BENCH') {
+      badgeContent = '<span class="status-icon-bench" style="font-size:0.75rem;">⚙️</span> ' + badgeContent;
+    } else if (st === 'WAIT_APPROVAL' || st === 'WAIT_PART') {
+      badgeContent = '<span class="status-icon-wait" style="font-size:0.75rem;">⏳</span> ' + badgeContent;
+    }
+
+    // ═══ Timeline ═══
+    var step1 = 'active', step2 = '', step3 = '';
+    var barWidth = '0%';
+    var step2Text = 'در حال تعمیر';
+    var step2Color = '';
+    if (['BENCH', 'WAIT_PART', 'OUTSOURCE'].indexOf(st) !== -1) {
+      step1 = 'done'; step2 = 'active'; barWidth = '50%';
+    } else if (st === 'READY') {
+      step1 = 'done'; step2 = 'done'; step3 = 'active'; barWidth = '100%';
+    } else if (st === 'UNREPAIRABLE') {
+      step1 = 'done'; step2 = 'active'; barWidth = '50%';
+      step2Text = 'غیرقابل تعمیر'; step2Color = '#ef4444';
+    }
+    var timelineHtml = '<div class="repair-timeline">' +
+      '<div class="rt-progress" style="width:' + barWidth + ';' + (st === 'UNREPAIRABLE' ? 'background:#ef4444;' : '') + '"></div>' +
+      '<div class="rt-step ' + step1 + '"><div class="rt-dot"></div><span>پذیرش</span></div>' +
+      '<div class="rt-step ' + step2 + '"><div class="rt-dot" style="' + (st === 'UNREPAIRABLE' ? 'border-color:#ef4444;background:#fee2e2;' : '') + '"></div><span style="color:' + step2Color + ';">' + step2Text + '</span></div>' +
+      '<div class="rt-step ' + step3 + '"><div class="rt-dot"></div><span style="' + (st === 'READY' ? 'color:#10b981;' : '') + '">آماده تحویل</span></div>' +
+    '</div>';
+
+    // ═══ بج زمان ═══
+    var timeColor = daysOld <= 3 ? '#10b981' : (daysOld <= 7 ? '#f59e0b' : '#ef4444');
+    var timeText = daysOld === 0 ? 'امروز' : daysOld + ' روز پیش';
+    var timeBadge = '<span class="time-badge" style="font-size:0.72rem; color:' + timeColor + '; font-weight:bold; background:' + timeColor + '15; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; margin-right:4px;">⏱ ' + timeText + '</span>';
+
+    // ═══ Brand Icon ═══
+    var brandIcon = getBrandIcon(q.model || '');
+    var deviceNameShort = getDeviceDisplayNameShort(q);
+    if (brandIcon !== '📱' && deviceNameShort.indexOf('📱') === 0) {
+      deviceNameShort = brandIcon + deviceNameShort.substring(2);
+    }
+
+    // ═══ TechUI / ترمینال محرمانه ═══
+    var internalDiagHtml = q.internalDiagnosis
+      ? '<div class="secret-terminal"><b>🔒 تشخیص داخلی:</b> ' + esc(q.internalDiagnosis) + '</div>' : '';
+    var internalNotesHtml = q.internalNotes
+      ? '<div class="secret-terminal"><b>🔒 یادداشت داخلی:</b> ' + esc(q.internalNotes) + '</div>' : '';
+
+    // ═══ دکمه IMEI History ═══
+    var imeiHistBtn = q.imei
+      ? '<button type="button" onclick="event.stopPropagation();showImeiHistory(\'' + esc(q.imei) + '\')" style="background:#8b5cf6;color:#fff;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;min-width:70px;">🕒 سابقه</button>'
+      : '';
+
+    // ═══ Tags ═══
+    var colorTag = q.color ? '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:bold;margin-right:4px;">🎨 ' + esc(q.color) + '</span>' : '';
+    var markerTag = q.marker ? '<div style="font-size:.75rem;color:#7c3aed;background:#f5f3ff;border-right:2px solid #8b5cf6;padding:4px 8px;border-radius:4px;margin-top:4px;"><b>🔍 نشانه:</b> ' + esc(q.marker.replace(/\n/g, ' • ')) + '</div>' : '';
+
+    var evidenceCount = (q.evidenceList && q.evidenceList.length > 0) ? q.evidenceList.length : 0;
+    var evidenceTag = evidenceCount > 0 ? '<div style="font-size:.75rem;color:#7c3aed;font-weight:bold;margin-top:4px;">🔍 دارای ' + evidenceCount + ' مستند</div>' : '';
+
+    var receiptBtn = q.depositReceiptUrl ? (q.depositReceiptVerified
+      ? '<div style="margin-top:6px;background:#ecfdf5;border:1px solid #6ee7b7;padding:6px 10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:0.75rem;color:#065f46;font-weight:bold;">✅ بیعانه تایید شد</span><a href="' + q.depositReceiptUrl + '" target="_blank" onclick="event.stopPropagation();" style="background:#10b981;color:#fff;padding:2px 8px;border-radius:6px;font-size:0.72rem;text-decoration:none;font-weight:bold;">🖼️ فیش</a></div>'
+      : '<div style="margin-top:6px;background:#fffbeb;border:1.5px solid #fde68a;padding:8px;border-radius:8px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:0.78rem;color:#92400e;font-weight:bold;">📩 فیش ارسال شده:</span><a href="' + q.depositReceiptUrl + '" target="_blank" onclick="event.stopPropagation();" style="background:#0284c7;color:#fff;padding:2px 8px;border-radius:6px;font-size:0.72rem;text-decoration:none;font-weight:bold;">🖼️ باز کردن</a></div><div style="display:flex;gap:6px;"><button type="button" onclick="verifyCustomerReceipt(' + q.id + ', true)" style="background:#10b981;color:#fff;padding:6px;font-size:0.75rem;border-radius:6px;flex:1;margin:0;">✓ تایید</button><button type="button" onclick="verifyCustomerReceipt(' + q.id + ', false)" style="background:#ef4444;color:#fff;padding:6px;font-size:0.75rem;border-radius:6px;flex:1;margin:0;">✕ رد</button></div></div>') : '';
+
+    // ═══ Action Row ═══
+    var actionRow = '<div class="action-row">' +
+      '<button type="button" class="btn-print" onclick="printIntakeReceipt(' + q.id + ')" style="flex:1;min-width:80px;">🖨 فاکتور A5</button>' +
+      '<button type="button" onclick="openEditQuoteModal(' + q.id + ', event)" style="background:#0284c7;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;min-width:70px;">✏️ ویرایش</button>' +
+      (isOverdue ? '<button type="button" onclick="sendOverdueAlertSMS(' + q.id + ')" style="background:#dc2626;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">⚠️ اخطار</button>' : '') +
+      '<button type="button" onclick="openEvidenceModal(' + q.id + ', event)" style="background:#7c3aed;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">📸 عکس</button>' +
+      '<button type="button" onclick="sendIntakeDirectSMS(' + q.id + ')" style="background:#0284c7;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">✉️ پیامک</button>' +
+      '<button type="button" onclick="shareQuoteReceipt(' + q.id + ')" style="background:#059669;padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;">📱 اشتراک</button>' +
+      imeiHistBtn +
+      '<button type="button" onclick="openSignatureModal(' + q.id + ')" style="background:#10b981;padding:9px;font-size:.82rem;margin:0;flex:1.4;border-radius:8px;">✍️ تحویل</button>' +
+    '</div>';
+
+    // ═══ ساخت کارت ═══
+    var div = document.createElement('div');
+    div.className = 'card workshop-card' + (isOverdue ? ' overdue' : '');
+    div.onclick = function(e) { toggleWorkshopDetails(q.id, e); };
+
+    div.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
+        '<div style="flex:1;">' +
+          '<div style="font-weight:800;font-size:1rem;color:#1e293b;">' +
+            '<span dir="auto" style="unicode-bidi:isolate;">' + deviceNameShort + '</span> ' + colorTag +
+          '</div>' +
+          markerTag +
+          '<div style="font-size:.83rem;color:#475569;margin-top:2px;"><b>ایراد: </b><span dir="auto" style="unicode-bidi:isolate;">' + esc(itemsDesc) + '</span></div>' +
+          '<div style="font-size:.82rem;color:#64748b;margin-top:3px;">مشتری: <b>' + esc(c.name) + '</b> (' + esc(c.phone || '---') + ') ' + callBtn + ' • اشتراک: <b>' + esc(loyalty.custCode) + '</b></div>' +
+          '<div style="font-size:.75rem;color:#0284c7;margin-top:2px;">قبض: <b style="direction:ltr;display:inline-block;">' + esc(q.intakeCode || '---') + '</b> | پیگیری: <b style="direction:ltr;display:inline-block;">' + esc(q.trackCode || '---') + '</b> | ' + esc(q.date) + ' ' + timeBadge + '</div>' +
+          evidenceTag +
+          receiptBtn +
+        '</div>' +
+        '<div style="text-align:center;margin-right:8px;">' +
+          '<div class="qr-scanner-box"><img src="' + qrImgSrc + '" style="width:46px;height:46px;border:1px solid #cbd5e1;border-radius:6px;display:block;" alt="QR"></div>' +
+          '<div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:4px;">' +
+            '<button type="button" class="action-btn" onclick="openQuickNoteModal(' + q.id + ', event)" style="color:#10b981;font-size:1rem;padding:2px;" title="افزودن یادداشت">📝</button>' +
+            '<button type="button" class="action-btn" onclick="viewTimeline(' + q.id + ', event)" style="color:#8b5cf6;font-size:1rem;padding:2px;" title="تایملاین">📋</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:4px;">' +
+        '<div><span class="badge ' + badgeCls + '">' + badgeContent + '</span> ' + loyaltyTag + overdueTag + '</div>' +
+        '<span style="font-size:.75rem;color:#64748b;">(لمس برای جزئیات)</span>' +
+      '</div>' +
+      '<div class="workshop-details-box" id="ws-details-' + q.id + '">' +
+        '<div><b>🔒 قفل:</b> ' + esc(lockInfo) + '</div>' +
+        '<div><b>⚠️ شروط:</b> ' + esc(condsStr) + '</div>' +
+        (q.imei ? '<div><b>IMEI:</b> ' + esc(q.imei) + '</div>' : '') +
+        (q.dueDate ? '<div style="color:#b45309;"><b>موعد:</b> ' + esc(q.dueDate) + '</div>' : '') +
+        (q.qcSummary ? '<div style="color:#0284c7;"><b>QC:</b> ' + esc(q.qcSummary) + '</div>' : '') +
+        internalDiagHtml +
+        internalNotesHtml +
+        (q.timeline && q.timeline.length > 0 ? '<button type="button" onclick="viewTimeline(' + q.id + ', event)" style="background:#f5f3ff;color:#7c3aed;border:1px dashed #c4b5fd;padding:6px 10px;font-size:0.78rem;border-radius:8px;width:100%;font-weight:bold;margin:8px 0 0 0;box-shadow:none;">📋 مشاهده تایملاین (' + q.timeline.length + ' رویداد)</button>' : '') +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">' +
+        '<span style="font-size:.92rem;font-weight:800;color:var(--primary);">' + formatToman(q.amount) + (totalDep > 0 ? ' (بیعانه: ' + formatToman(totalDep) + ' | مانده: ' + formatToman(remain) + ')' : '') + '</span>' +
+        '<select onchange="updateQuoteStatus(' + q.id + ', this.value)" class="smart-dropdown ' + getDropdownColorClass(st) + '" style="width:auto;padding:6px 10px;font-size:.8rem;margin:0;border-radius:8px;font-weight:bold;">' +
+          '<option value="QUEUE"' + (st === 'QUEUE' ? ' selected' : '') + '>در نوبت</option>' +
+          '<option value="WAIT_APPROVAL"' + (st === 'WAIT_APPROVAL' ? ' selected' : '') + '>⏳ منتظر تایید هزینه</option>' +
+          '<option value="BENCH"' + (st === 'BENCH' ? ' selected' : '') + '>روی میز کار</option>' +
+          '<option value="WAIT_PART"' + (st === 'WAIT_PART' ? ' selected' : '') + '>منتظر قطعه</option>' +
+          '<option value="OUTSOURCE"' + (st === 'OUTSOURCE' ? ' selected' : '') + '>دست همکار</option>' +
+          '<option value="READY"' + (st === 'READY' ? ' selected' : '') + '>آماده تحویل</option>' +
+          '<option value="UNREPAIRABLE"' + (st === 'UNREPAIRABLE' ? ' selected' : '') + '>غیرقابل تعمیر</option>' +
+        '</select>' +
+      '</div>' +
+      timelineHtml +
+      actionRow;
+
+    container.appendChild(div);
+  });
+}
 
 // ═══════════════════════════════════════════════════════════════
 // 🎨 ENHANCER یکپارچه تابلوی وضعیت

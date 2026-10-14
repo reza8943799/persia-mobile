@@ -1192,6 +1192,39 @@ body.dark-mode .empty-state-box {
   from { transform: translateY(0); opacity: 1; }
   to { transform: translateY(-30px); opacity: 0; }
 }
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 📂 بخش قابل باز/بسته شدن کارت‌های کارگاه */
+/* ═══════════════════════════════════════════════════════════════ */
+.workshop-expandable {
+  display: none !important;
+}
+.workshop-expandable.open {
+  display: block !important;
+  animation: fadeIn 0.25s ease-out;
+}
+.expand-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: bold;
+  padding: 3px 8px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  transition: all 0.2s;
+  user-select: none;
+}
+.workshop-card:active .expand-indicator {
+  background: #dbeafe;
+  color: var(--primary);
+}
+body.dark-mode .expand-indicator {
+  background: #334155;
+  color: #cbd5e1;
+}
+
 </style>
 <div class="nav-tabs">
   <button type="button" class="nav-tab active" id="btn-tab-customers" onclick="openTab('customers')">
@@ -3533,9 +3566,24 @@ function selectPartForInvoice(partId) {
 }
 
 function toggleWorkshopDetails(qId, event) {
-  if (event.target.tagName === 'BUTTON' || event.target.tagName === 'SELECT' || event.target.tagName === 'A') return;
-  var el = document.getElementById('ws-details-' + qId);
-  if (el) el.classList.toggle('open');
+  var tag = event.target.tagName;
+  if (tag === 'BUTTON' || tag === 'SELECT' || tag === 'A' || tag === 'INPUT' || tag === 'OPTION' || tag === 'IMG') return;
+
+  var details = document.getElementById('ws-details-' + qId);
+  var expand = document.getElementById('ws-expand-' + qId);
+  var card = document.getElementById('ws-card-' + qId);
+
+  if (expand) expand.classList.toggle('open');
+  if (details) details.classList.toggle('open');
+
+  if (card) {
+    var indicator = card.querySelector('.expand-indicator');
+    if (indicator) {
+      var isOpen = expand && expand.classList.contains('open');
+      indicator.innerHTML = isOpen ? '🔼 بستن' : '🔽 جزئیات';
+    }
+  }
+  if (navigator.vibrate) navigator.vibrate(15);
 }
 
 function setWorkshopFilter(status, btn) {
@@ -7157,13 +7205,14 @@ function renderWorkshopBoard() {
       '<button type="button" onclick="openSignatureModal(' + q.id + ')" style="background:#10b981;padding:9px;font-size:.82rem;margin:0;flex:1.4;border-radius:8px;">✍️ تحویل</button>' +
     '</div>';
 
-    // ═══ ساخت کارت ═══
-    var div = document.createElement('div');
-    div.className = 'card workshop-card' + (isOverdue ? ' overdue' : '');
-    div.onclick = function(e) { toggleWorkshopDetails(q.id, e); };
+// ═══ ساخت کارت ═══
+var div = document.createElement('div');
+div.className = 'card workshop-card' + (isOverdue ? ' overdue' : '');
+div.id = 'ws-card-' + q.id;
+div.onclick = function(e) { toggleWorkshopDetails(q.id, e); };
 
-    div.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
+div.innerHTML =
+  '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
         '<div style="flex:1;">' +
           '<div style="font-weight:800;font-size:1rem;color:#1e293b;">' +
             '<span dir="auto" style="unicode-bidi:isolate;">' + deviceNameShort + '</span> ' + colorTag +
@@ -7184,10 +7233,11 @@ function renderWorkshopBoard() {
         '</div>' +
       '</div>' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:4px;">' +
-        '<div><span class="badge ' + badgeCls + '">' + badgeContent + '</span> ' + loyaltyTag + overdueTag + '</div>' +
-        '<span style="font-size:.75rem;color:#64748b;">(لمس برای جزئیات)</span>' +
-      '</div>' +
-      '<div class="workshop-details-box" id="ws-details-' + q.id + '">' +
+  '<div><span class="badge ' + badgeCls + '">' + badgeContent + '</span> ' + loyaltyTag + overdueTag + '</div>' +
+  '<span class="expand-indicator">🔽 جزئیات</span>' +
+'</div>' +
+'<div class="workshop-expandable" id="ws-expand-' + q.id + '">' +
+'<div class="workshop-details-box" id="ws-details-' + q.id + '">' +
         '<div><b>🔒 قفل:</b> ' + esc(lockInfo) + '</div>' +
         '<div><b>⚠️ شروط:</b> ' + esc(condsStr) + '</div>' +
         (q.imei ? '<div><b>IMEI:</b> ' + esc(q.imei) + '</div>' : '') +
@@ -7210,9 +7260,10 @@ function renderWorkshopBoard() {
         '</select>' +
       '</div>' +
       timelineHtml +
-      actionRow;
+  actionRow +
+  '</div>';
 
-    container.appendChild(div);
+container.appendChild(div);
   });
 }
 

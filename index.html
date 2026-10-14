@@ -833,7 +833,83 @@ body.dark-mode .card, body.dark-mode .quote-box {
   body.dark-mode .workshop-card:has(.badge-red) { border-color: rgba(239, 68, 68, 0.3) !important; background-color: rgba(239, 68, 68, 0.05) !important; }
   body.dark-mode .workshop-card:has(.badge-collab) { border-color: rgba(234, 88, 12, 0.3) !important; }
 
+/* ═══════════════════════════════════════════════════════════════ */
+/* 📋 منوی «بیشتر» (شناور از پایین) */
+/* ═══════════════════════════════════════════════════════════════ */
+.more-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: none;
+  z-index: 998;
+  animation: fadeIn 0.2s ease-out;
+}
+.more-menu-overlay.open { display: block; }
 
+.more-menu-box {
+  position: fixed;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  left: 14px;
+  right: 14px;
+  max-width: 400px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  z-index: 999;
+  display: none;
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.more-menu-box.open { display: block; }
+
+.more-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 800;
+  color: #1e293b;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+.more-menu-item:last-child { margin-bottom: 0; }
+.more-menu-item:hover,
+.more-menu-item:active {
+  background: #eff6ff;
+  color: #1e40af;
+}
+.more-menu-item .mm-icon {
+  font-size: 1.3rem;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.more-menu-item.active {
+  background: #eff6ff;
+  color: #1e40af;
+}
+.more-menu-item.active .mm-icon { background: #dbeafe; }
+
+body.dark-mode .more-menu-box { background: #1e293b; }
+body.dark-mode .more-menu-item { color: #f8fafc; }
+body.dark-mode .more-menu-item:hover,
+body.dark-mode .more-menu-item.active {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}
+body.dark-mode .more-menu-item .mm-icon { background: #0f172a; }
+body.dark-mode .more-menu-item.active .mm-icon { background: rgba(59, 130, 246, 0.25); }
 
 </style>
 </head>
@@ -1040,19 +1116,29 @@ body.dark-mode .card, body.dark-mode .quote-box {
     </div>
     <span>واریزی‌ها</span>
   </button>
-
-  <button type="button" class="nav-tab" id="btn-tab-expenses" onclick="openTab('expenses')">
-    <span class="nav-icon">💸</span><span>هزینه‌ها</span>
-  </button>
-  <button type="button" class="nav-tab" id="btn-tab-parts" onclick="openTab('parts')">
-    <span class="nav-icon">📦</span><span>انبار</span>
-  </button>
-  <button type="button" class="nav-tab" id="btn-tab-reports" onclick="openTab('reports')">
-    <span class="nav-icon">📊</span><span>گزارشات</span>
+  <button type="button" class="nav-tab" id="btn-tab-more" onclick="toggleMoreMenu()">
+    <span class="nav-icon">📋</span><span>بیشتر</span>
   </button>
   <button type="button" class="nav-tab" id="btn-tab-backup" onclick="openTab('backup')">
     <span class="nav-icon">⚙️</span><span>تنظیمات</span>
   </button>
+</div>
+
+<!-- 📋 منوی «بیشتر» (شناور از پایین) -->
+<div class="more-menu-overlay" id="more-menu-overlay" onclick="closeMoreMenu()"></div>
+<div class="more-menu-box" id="more-menu-box">
+  <div class="more-menu-item" data-tab="expenses" onclick="openMoreTab('expenses')">
+    <div class="mm-icon">💸</div>
+    <span>هزینه‌ها</span>
+  </div>
+  <div class="more-menu-item" data-tab="parts" onclick="openMoreTab('parts')">
+    <div class="mm-icon">📦</div>
+    <span>انبار قطعات</span>
+  </div>
+  <div class="more-menu-item" data-tab="reports" onclick="openMoreTab('reports')">
+    <div class="mm-icon">📊</div>
+    <span>گزارشات و سود</span>
+  </div>
 </div>
 
 
@@ -5165,13 +5251,59 @@ function countOrphanImages() {
     req.onerror = () => resolve(0);
   })).catch(() => 0);
 }
+// ═══════════════════════════════════════════════════════════════
+// 📋 منوی «بیشتر» (هزینه‌ها / انبار / گزارشات)
+// ═══════════════════════════════════════════════════════════════
+function toggleMoreMenu() {
+  var box = document.getElementById('more-menu-box');
+  var overlay = document.getElementById('more-menu-overlay');
+  if (!box || !overlay) return;
 
+  var isOpen = box.classList.contains('open');
+  if (isOpen) { closeMoreMenu(); return; }
+
+  box.classList.add('open');
+  overlay.classList.add('open');
+  if (navigator.vibrate) navigator.vibrate(20);
+
+  // مشخص کردن تب فعال داخل منو
+  var currentMoreTab = null;
+  ['expenses', 'parts', 'reports'].forEach(function(t) {
+    var sec = document.getElementById('tab-content-' + t);
+    if (sec && sec.style.display !== 'none') currentMoreTab = t;
+  });
+  box.querySelectorAll('.more-menu-item').forEach(function(item) {
+    item.classList.toggle('active', item.getAttribute('data-tab') === currentMoreTab);
+  });
+}
+
+function closeMoreMenu() {
+  var box = document.getElementById('more-menu-box');
+  var overlay = document.getElementById('more-menu-overlay');
+  if (box) box.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function openMoreTab(tabName) {
+  closeMoreMenu();
+  openTab(tabName);
+}
 function openTab(tabName) {
+  var moreTabs = ['expenses', 'parts', 'reports'];
+  var isMoreTab = moreTabs.indexOf(tabName) !== -1;
+
   ['customers', 'deposits', 'expenses', 'parts', 'reports', 'backup'].forEach(t => {
-    var sec = document.getElementById('tab-content-' + t); var btn = document.getElementById('btn-tab-' + t);
+    var sec = document.getElementById('tab-content-' + t);
     if (sec) sec.style.display = (t === tabName) ? 'block' : 'none';
+  });
+
+  ['customers', 'deposits', 'backup'].forEach(function(t) {
+    var btn = document.getElementById('btn-tab-' + t);
     if (btn) btn.className = (t === tabName) ? 'nav-tab active' : 'nav-tab';
   });
+
+  var moreBtn = document.getElementById('btn-tab-more');
+  if (moreBtn) moreBtn.className = isMoreTab ? 'nav-tab active' : 'nav-tab';
   if (tabName === 'customers') { showCustomerList(); switchCustomerSubView('cust'); }
   if (tabName === 'deposits') renderDepositsStream();
   if (tabName === 'expenses') { var ed1 = document.getElementById('exp-date'); if (ed1) ed1.value = getTodayJalali(); renderExpenses(); }

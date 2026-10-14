@@ -27,7 +27,7 @@ jobs:
       - name: Install Capacitor CLI and dependencies
         run: |
           npm init -y
-          npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
+          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/app
           npm install --save-dev @capacitor/assets
 
       - name: Prepare www folder

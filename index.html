@@ -918,6 +918,133 @@ body.dark-mode .more-menu-item.active {
 body.dark-mode .more-menu-item .mm-icon { background: #0f172a; }
 body.dark-mode .more-menu-item.active .mm-icon { background: rgba(59, 130, 246, 0.25); }
 
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🔍 نوار جستجوی سراسری روی صفحه اصلی */
+/* ═══════════════════════════════════════════════════════════════ */
+.global-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 13px 16px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin-bottom: 14px;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+.global-search-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; right: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.06), transparent);
+  transform: skewX(-20deg);
+  transition: right 0.6s ease;
+}
+.global-search-bar:hover::before,
+.global-search-bar:active::before {
+  right: 150%;
+}
+.global-search-bar:active {
+  transform: scale(0.98);
+}
+.global-search-bar:hover {
+  background: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.12);
+}
+.gsb-icon {
+  font-size: 1.2rem;
+  opacity: 0.75;
+  flex-shrink: 0;
+  transition: transform 0.3s;
+}
+.global-search-bar:hover .gsb-icon {
+  transform: scale(1.15) rotate(-8deg);
+}
+.gsb-text {
+  flex: 1;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* حالت تاریک */
+body.dark-mode .global-search-bar {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+body.dark-mode .global-search-bar:hover {
+  background: #1e293b;
+  border-color: var(--primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 💎 Empty States زیبا (لیست‌های خالی) */
+/* ═══════════════════════════════════════════════════════════════ */
+.empty-state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.01), rgba(0,0,0,0.03));
+  border-radius: 16px;
+  border: 1.5px dashed var(--border);
+  margin-top: 10px;
+}
+.empty-state-icon {
+  font-size: 3.5rem;
+  margin-bottom: 12px;
+  opacity: 0.85;
+  filter: drop-shadow(0 8px 10px rgba(0,0,0,0.1));
+  display: inline-block;
+  animation: emptyFloat 3s ease-in-out infinite;
+}
+@keyframes emptyFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.empty-state-title {
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.empty-state-subtitle {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 16px;
+  line-height: 1.6;
+  max-width: 280px;
+}
+.empty-state-cta {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 11px 22px !important;
+  border-radius: 10px !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  cursor: pointer !important;
+  width: auto !important;
+  margin: 0 !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+}
+.empty-state-cta:active {
+  transform: scale(0.95) !important;
+}
+body.dark-mode .empty-state-box {
+  background: linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0.05));
+}
 </style>
 </head>
 
@@ -1066,6 +1193,13 @@ body.dark-mode .more-menu-item.active .mm-icon { background: rgba(59, 130, 246, 
 </div>
 
 <div id="sub-section-customers">
+
+<!-- 🔍 نوار جستجوی سراسری -->
+<div class="global-search-bar" onclick="openSpotlight()">
+  <span class="gsb-icon">🔍</span>
+  <span class="gsb-text">جستجو در مشتریان، دستگاه‌ها، قطعات...</span>
+</div>
+
 <div class="card sync-card-premium" style="position: relative; overflow: hidden; border: 1.5px solid #c7d2fe; background: linear-gradient(135deg, #f5f3ff 0%, #e0e7ff 100%); padding: 18px; box-shadow: inset 0 2px 10px rgba(255,255,255,0.8);">
   
   <!-- هاله نوری در پس‌زمینه کارت -->
@@ -1110,28 +1244,23 @@ body.dark-mode .more-menu-item.active .mm-icon { background: rgba(59, 130, 246, 
 </div>
 </div>
 
-<!-- 👇 این بلوک رو اضافه کن 👇 -->
-<div class="card" style="background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);padding:14px;border:1px solid #bfdbfe;">
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;">
-    <div>
-      <div style="font-size:1.5rem;font-weight:900;color:var(--primary);line-height:1.1;" id="stat-total-cust">۰</div>
-      <div style="font-size:0.72rem;color:#1e40af;font-weight:bold;margin-top:2px;">👥 کل</div>
+<!-- 📊 آمار کلیک‌پذیر مشتریان (فیلتر سریع) -->
+<div class="card" style="background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);padding:6px 6px !important;margin-bottom:10px !important;border:1px solid #bfdbfe;border-radius:16px !important;">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;text-align:center;">
+    <div onclick="quickFilterCustomers('ALL')" style="padding:4px 2px;border-radius:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.6)'" onmouseout="this.style.background='transparent'">
+      <div style="font-size:1.05rem;font-weight:900;color:var(--primary);line-height:1.1;" id="stat-total-cust">۰</div>
+      <div style="font-size:0.62rem;color:#1e40af;font-weight:bold;margin-top:1px;">👥 کل</div>
     </div>
-    <div>
-      <div style="font-size:1.5rem;font-weight:900;color:#dc2626;line-height:1.1;" id="stat-debt-cust">۰</div>
-      <div style="font-size:0.72rem;color:#991b1b;font-weight:bold;margin-top:2px;">🔴 بدهکار</div>
+    <div onclick="quickFilterCustomers('DEBT')" style="padding:4px 2px;border-radius:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.6)'" onmouseout="this.style.background='transparent'">
+      <div style="font-size:1.05rem;font-weight:900;color:#dc2626;line-height:1.1;" id="stat-debt-cust">۰</div>
+      <div style="font-size:0.62rem;color:#991b1b;font-weight:bold;margin-top:1px;">🔴 بدهکار</div>
     </div>
-    <div>
-      <div style="font-size:1.5rem;font-weight:900;color:#f59e0b;line-height:1.1;" id="stat-overdue-cust">۰</div>
-      <div style="font-size:0.72rem;color:#92400e;font-weight:bold;margin-top:2px;">⚠️ معوق</div>
-    </div>
-    <div>
-      <div style="font-size:1.5rem;font-weight:900;color:#10b981;line-height:1.1;" id="stat-clear-cust">۰</div>
-      <div style="font-size:0.72rem;color:#065f46;font-weight:bold;margin-top:2px;">✅ تسویه</div>
+    <div onclick="quickFilterCustomers('CREDIT')" style="padding:4px 2px;border-radius:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.6)'" onmouseout="this.style.background='transparent'">
+      <div style="font-size:1.05rem;font-weight:900;color:#10b981;line-height:1.1;" id="stat-clear-cust">۰</div>
+      <div style="font-size:0.62rem;color:#065f46;font-weight:bold;margin-top:1px;">✅ تسویه</div>
     </div>
   </div>
 </div>
-<!-- 👆 پایان بلوک 👆 -->
 
 <div class="card">
 <div style="font-weight:800;font-size:.98rem;margin-bottom:8px;">ثبت پرونده جدید (مشتری یا همکار)</div>
@@ -1919,6 +2048,13 @@ body.dark-mode .more-menu-item.active .mm-icon { background: rgba(59, 130, 246, 
 <h3 style="font-size:.95rem;color:#1e293b;">🔬 چک‌لیست سلامت قطعات (QC)</h3>
 <button type="button" onclick="closeQcModal()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">✕</button>
 </div>
+
+<!-- ✅ دکمه‌های میان‌بر -->
+<div style="display:flex;gap:6px;margin-top:10px;">
+  <button type="button" onclick="qcSetAll(true)" style="flex:1.4;background:linear-gradient(135deg,#10b981 0%,#047857 100%);padding:10px;font-size:.85rem;border-radius:10px;font-weight:800;margin:0;">✅ همه سالم</button>
+  <button type="button" onclick="qcSetAll(false)" style="flex:1;background:linear-gradient(135deg,#ef4444 0%,#b91c1c 100%);padding:10px;font-size:.85rem;border-radius:10px;font-weight:800;margin:0;">✕ همه معیوب</button>
+</div>
+
 <div class="qc-grid" id="qc-items-box">
 <label class="check-item"><input type="checkbox" id="qc-touch" checked> تاچ صفحه</label>
 <label class="check-item"><input type="checkbox" id="qc-lcd" checked> نمایش تصویر LCD</label>
@@ -3472,6 +3608,21 @@ function updateExpensesLockUI() {
 function openQcModal() { document.getElementById('modal-qc').style.display = 'flex'; }
 function closeQcModal() { document.getElementById('modal-qc').style.display = 'none'; }
 
+function qcSetAll(isHealthy) {
+  var items = [
+    'qc-touch', 'qc-lcd', 'qc-charge', 'qc-battery', 'qc-mic', 'qc-mic2',
+    'qc-earpiece', 'qc-loudspeaker', 'qc-cam-rear', 'qc-cam-front',
+    'qc-proximity', 'qc-light', 'qc-wifi', 'qc-network',
+    'qc-biometric', 'qc-vibrate', 'qc-buttons', 'qc-flash'
+  ];
+  items.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.checked = isHealthy;
+  });
+  if (navigator.vibrate) navigator.vibrate(isHealthy ? 30 : [30, 40, 30]);
+  showToast(isHealthy ? '✅ همه سالم علامت خورد' : '⚠️ همه معیوب علامت خورد', isHealthy ? 'success' : 'warning');
+}
+
 function saveQcChecklist() {
   var failed = [];
   var items = [
@@ -3765,6 +3916,30 @@ function customerHasOverdueDue(cId) {
   return hasInTx || hasInQuotes;
 }
 
+// 📊 فیلتر سریع مشتریان با کلیک روی آمار
+function quickFilterCustomers(filterMode) {
+  var sel = document.getElementById('cust-filter-status');
+  if (!sel) return;
+  sel.value = filterMode;
+  renderCustomers();
+  if (navigator.vibrate) navigator.vibrate(20);
+  var labels = { ALL: 'همه مخاطبان', DEBT: 'بدهکاران', CREDIT: 'تسویه‌شده‌ها' };
+  showToast('🔍 نمایش: ' + (labels[filterMode] || 'همه'), 'info');
+}
+
+// 💎 ساخت Empty State زیبا
+function buildEmptyState(icon, title, subtitle, ctaText, ctaAction) {
+  var html = '<div class="empty-state-box">';
+  html += '<div class="empty-state-icon">' + icon + '</div>';
+  html += '<div class="empty-state-title">' + title + '</div>';
+  if (subtitle) html += '<div class="empty-state-subtitle">' + subtitle + '</div>';
+  if (ctaText && ctaAction) {
+    html += '<button type="button" class="empty-state-cta" onclick="' + ctaAction + '">' + ctaText + '</button>';
+  }
+  html += '</div>';
+  return html;
+}
+
 function renderCustomers() {
   // 📊 آپدیت آمار بالای لیست مشتریان
   try {
@@ -3780,13 +3955,11 @@ function renderCustomers() {
       }
     });
     var elTotal = document.getElementById('stat-total-cust');
-    var elDebt = document.getElementById('stat-debt-cust');
-    var elOverdue = document.getElementById('stat-overdue-cust');
-    var elClear = document.getElementById('stat-clear-cust');
-    if (elTotal) elTotal.innerText = activeCustomers.length.toLocaleString('fa-IR');
-    if (elDebt) elDebt.innerText = debtCount.toLocaleString('fa-IR');
-    if (elOverdue) elOverdue.innerText = overdueCount.toLocaleString('fa-IR');
-    if (elClear) elClear.innerText = clearCount.toLocaleString('fa-IR');
+var elDebt = document.getElementById('stat-debt-cust');
+var elClear = document.getElementById('stat-clear-cust');
+if (elTotal) elTotal.innerText = activeCustomers.length.toLocaleString('fa-IR');
+if (elDebt) elDebt.innerText = debtCount.toLocaleString('fa-IR');
+if (elClear) elClear.innerText = clearCount.toLocaleString('fa-IR');
   } catch(e) {}
   
   var query = (document.getElementById('search-input').value || '').toLowerCase();
@@ -3824,7 +3997,14 @@ if (sortMode === 'OLDEST') {
   filtered.sort(function(a, b) { return (Number(b.id) || 0) - (Number(a.id) || 0); });
 }
 
-if (filtered.length === 0) { listEl.innerHTML = '<div style="color:#94a3b8;text-align:center;padding:16px;">مخاطبی یافت نشد</div>'; return; }
+if (filtered.length === 0) {
+  if (customers.filter(function(c){return !c.deleted;}).length === 0) {
+    listEl.innerHTML = buildEmptyState('👥', 'هنوز مشتری نداری', 'اولین پرونده مشتری یا همکار رو ثبت کن', '➕ افزودن مشتری', 'document.getElementById("new-name").focus(); document.getElementById("new-name").scrollIntoView({behavior:"smooth",block:"center"});');
+  } else {
+    listEl.innerHTML = buildEmptyState('🔍', 'مخاطبی یافت نشد', 'فیلتر یا عبارت جستجو رو تغییر بده', '🔄 نمایش همه', 'document.getElementById("cust-filter-status").value="ALL"; document.getElementById("search-input").value=""; renderCustomers();');
+  }
+  return;
+}
   filtered.forEach(function(cust) {
     var bal = getBalance(cust.id); var loyalty = getCustomerLoyalty(cust.id); var hasOverdueDue = customerHasOverdueDue(cust.id);
     var badgeClass = bal > 0 ? 'badge-red' : (bal < 0 ? 'badge-green' : '');
@@ -4509,7 +4689,10 @@ function renderTransactions() {
     balEl2.innerText = bal > 0 ? formatToman(bal) : (bal < 0 ? ('بستانکار: ' + formatToman(Math.abs(bal))) : 'تسویه کامل');
     balEl2.style.color = bal > 0 ? 'var(--danger)' : (bal < 0 ? 'var(--success)' : '#64748b');
   }
-  if (custTx.length === 0) { listEl.innerHTML = '<div style="color:#94a3b8;text-align:center;padding:12px;">هنوز فاکتوری ثبت نشده است</div>'; return; }
+  if (custTx.length === 0) {
+  listEl.innerHTML = buildEmptyState('📋', 'هنوز فاکتوری نداری', 'اولین پذیرش یا فروش این مشتری رو ثبت کن', '➕ ثبت پذیرش جدید', 'switchCustTab("new");');
+  return;
+}
   var nowTime = Date.now();
   custTx.forEach(t => {
     var isDebt = t.type === 'DEBT';
@@ -4623,7 +4806,13 @@ function renderDepositsStream() {
   var unverifiedCount = allDeposits.filter(q => !q.depositReceiptVerified).length;
   if (badge) { if (unverifiedCount > 0) { badge.style.display = 'inline-block'; badge.innerText = unverifiedCount; } else badge.style.display = 'none'; }
   var pendingDeposits = (currentDepositsFilter === 'PENDING') ? allDeposits.filter(q => !q.depositReceiptVerified) : ((currentDepositsFilter === 'VERIFIED') ? allDeposits.filter(q => q.depositReceiptVerified) : allDeposits);
-  if (pendingDeposits.length === 0) { container.innerHTML = '<div class="card" style="text-align:center;color:#94a3b8;padding:28px;">فیشی یافت نشد.</div>'; return; }
+  if (pendingDeposits.length === 0) {
+  var emptyIcon = (currentDepositsFilter === 'PENDING') ? '✅' : (currentDepositsFilter === 'VERIFIED' ? '📭' : '💳');
+  var emptyTitle = (currentDepositsFilter === 'PENDING') ? 'همه فیش‌ها بررسی شدن' : (currentDepositsFilter === 'VERIFIED' ? 'هنوز فیش تاییدشده‌ای نداری' : 'هنوز فیشی ارسال نشده');
+  var emptySub = (currentDepositsFilter === 'PENDING') ? 'کاری برای انجام نمونده، عالیه!' : 'وقتی مشتری فیش واریزی بفرسته، اینجا نشون داده میشه';
+  container.innerHTML = '<div class="card" style="padding:0 !important;background:transparent !important;box-shadow:none !important;">' + buildEmptyState(emptyIcon, emptyTitle, emptySub) + '</div>';
+  return;
+}
   pendingDeposits.forEach(q => {
     var c = customers.find(x => x.id === q.customerId && !x.deleted) || { name: 'نامشخص' };
     var depAmt = Number(q.requestedDeposit || q.deposit || Math.round(Number(q.amount || 0) * 0.3));
@@ -4666,7 +4855,10 @@ function renderExpenses() {
   var activeExpenses = expenses.filter(x => !x.deleted); var sum = 0;
   activeExpenses.forEach(x => sum += Number(x.amount || 0));
   if (badge) badge.innerText = 'جمع کل: ' + formatToman(sum);
-  if (activeExpenses.length === 0) { listEl.innerHTML = '<div style="color:#94a3b8;text-align:center;padding:16px;">هیچ هزینه‌ای ثبت نشده.</div>'; return; }
+  if (activeExpenses.length === 0) {
+  listEl.innerHTML = buildEmptyState('💸', 'هنوز هزینه‌ای ثبت نشده', 'اجاره، پیک، ابزار مصرفی و... رو اینجا ثبت کن', '➕ ثبت اولین هزینه', 'document.getElementById("exp-title").focus(); document.getElementById("exp-title").scrollIntoView({behavior:"smooth",block:"center"});');
+  return;
+}
   activeExpenses.forEach(exp => {
     var div = document.createElement('div'); div.className = 'card'; div.style.padding = '10px'; div.style.marginBottom = '6px';
     div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.alignItems = 'center';
@@ -4946,6 +5138,11 @@ function renderParts() {
   var query = (document.getElementById('parts-search') ? document.getElementById('parts-search').value : '').toLowerCase();
   var listEl = document.getElementById('parts-list'); if (!listEl) return; listEl.innerHTML = '';
   var filtered = parts.filter(p => !p.deleted && (p.model || '').toLowerCase().indexOf(query) !== -1);
+  if (filtered.length === 0 && parts.filter(function(p){return !p.deleted;}).length === 0) {
+  listEl.innerHTML = buildEmptyState('📦', 'انبار خالیه', 'اولین قطعه رو ثبت کن تا موجودی و قیمت‌هات مدیریت بشه', '➕ ثبت قطعه جدید', 'document.getElementById("part-model").focus(); document.getElementById("part-model").scrollIntoView({behavior:"smooth",block:"center"});');
+  var cb1 = document.getElementById('parts-count'); if (cb1) cb1.innerText = '۰ قلم';
+  return;
+}
   var countBadge = document.getElementById('parts-count'); if (countBadge) countBadge.innerText = filtered.length + ' قلم';
   var lowStockBox = document.getElementById('low-stock-alert-box'); var lowStockItemsEl = document.getElementById('low-stock-items');
   if (lowStockBox && lowStockItemsEl) {
@@ -5200,6 +5397,7 @@ function openMoreTab(tabName) {
   openTab(tabName);
 }
 function openTab(tabName) {
+  closeMoreMenu();
   var moreTabs = ['expenses', 'parts', 'reports'];
   var isMoreTab = moreTabs.indexOf(tabName) !== -1;
 

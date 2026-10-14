@@ -39,6 +39,7 @@ jobs:
           cp icon.png www/
           cp brands-db.js www/
           cp patch.js www/
+          cp splash.jpg www/ 2>/dev/null || true
           mkdir -p www/font
           cp -r font/* www/font/ 2>/dev/null || true
 
@@ -49,6 +50,10 @@ jobs:
         run: |
           mkdir -p assets
           cp icon.png assets/icon.png
+          cp icon.png assets/icon-foreground.png
+          cp icon.png assets/icon-background.png
+          cp splash.jpg assets/splash.png 2>/dev/null || true
+          cp splash.jpg assets/splash-dark.png 2>/dev/null || true
           npx @capacitor/assets generate --android
         continue-on-error: true
 

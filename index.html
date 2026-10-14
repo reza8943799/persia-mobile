@@ -1055,7 +1055,7 @@ body.dark-mode .card, body.dark-mode .quote-box {
   </button>
 </div>
 
-<button class="fab" id="main-fab" onclick="handleFabClick()">➕</button>
+
 
 <div id="toast-box"></div>
 
@@ -2313,30 +2313,6 @@ body.dark-mode .card, body.dark-mode .quote-box {
 // --- Dark Mode ---
 if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
 
-
-
-// ═══════════════════════════════════════════════════════════════
-
-// --- هوش دکمه شناور (FAB) ---
-function handleFabClick() {
-  if (!activeCustomerId) {
-    openTab('customers');
-    window.scrollTo({top: 0, behavior: 'smooth'});
-    setTimeout(function() {
-      var nameInput = document.getElementById('new-name');
-      if (nameInput) {
-        nameInput.focus();
-        showToast('لطفاً مشخصات مشتری جدید را وارد کنید', 'info');
-      }
-    }, 200);
-  } else {
-    openTab('customers');
-    setTimeout(function() {
-      switchCustTab('new');
-      window.scrollTo({top: 0, behavior: 'smooth'});
-    }, 100);
-  }
-}
 
 
 // --- ساخت افکت موج (Ripple) برای تمام دکمه‌ها ---
@@ -6627,51 +6603,6 @@ openTab = function(tabName) {
   }
 };
 
-// ۲. جایگزینی دکمه شناور قدیمی با منوی ژله‌ای هوشمند
-setTimeout(function() {
-  var oldFab = document.getElementById('main-fab');
-  if(oldFab) {
-     var fabContainer = document.createElement('div');
-     fabContainer.className = 'fab-container';
-     fabContainer.id = 'super-fab';
-     fabContainer.innerHTML = `
-        <button class="fab-main" onclick="toggleSuperFab()">➕</button>
-        <button class="fab-mini" onclick="openMiniAction('intake')" title="پذیرش جدید">🛠️</button>
-        <button class="fab-mini" onclick="openMiniAction('part')" title="ثبت قطعه">📦</button>
-        <button class="fab-mini" onclick="openMiniAction('expense')" title="ثبت هزینه">💸</button>
-     `;
-     oldFab.parentNode.replaceChild(fabContainer, oldFab);
-  }
-}, 500);
-
-function toggleSuperFab() {
-   var fab = document.getElementById('super-fab');
-   if(fab) {
-      fab.classList.toggle('open');
-      if(navigator.vibrate) navigator.vibrate(30);
-   }
-}
-
-// هدایت دکمه‌های کوچکِ منوی شناور
-function openMiniAction(action) {
-   toggleSuperFab(); // بستن منو
-   if(action === 'intake') {
-      openTab('customers');
-      setTimeout(() => { switchCustTab('new'); window.scrollTo(0,0); }, 200);
-   } else if(action === 'part') {
-      openTab('parts');
-   } else if(action === 'expense') {
-      openTab('expenses');
-   }
-}
-
-// بستن منوی شناور در صورت لمسِ هر جای دیگر صفحه
-document.addEventListener('click', function(e) {
-   var fab = document.getElementById('super-fab');
-   if(fab && fab.classList.contains('open') && !e.target.closest('.fab-container')) {
-       fab.classList.remove('open');
-   }
-});
 
 // ۳. چاپگر مینیاتوریِ سه‌بعدی
 // ساخت HTML پرینتر در صفحه

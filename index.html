@@ -4,6 +4,9 @@
 <script>
 (function() {
   if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) return;
+  // 🔕 بوت‌استرپ موقتاً غیرفعال — از فایل لوکال استفاده کن
+  console.log('[APK] Bootstrap disabled — using local version');
+  return;
   if (window._apkBootstrapped) return;
   window._apkBootstrapped = true;
 

@@ -135,10 +135,17 @@ header{
 /* تعاملات خُرد (Micro-interactions) برای رقص ایموجی‌ها */
 #btn-tab-customers.active .nav-icon { transform: translateY(-3px) scale(1.15) rotate(-12deg) !important; }
 #btn-tab-deposits.active .nav-icon { transform: translateY(-3px) scale(1.15) rotate(15deg) !important; }
+#btn-tab-more.active .nav-icon { transform: translateY(-4px) scale(1.2) rotate(-8deg) !important; }
+#btn-tab-backup.active .nav-icon { transform: translateY(-3px) scale(1.15) rotate(-135deg) !important; }
+
+/* وقتی منوی «بیشتر» بازه، آیکون بچرخه (افکت باز شدن) */
+#btn-tab-more.open .nav-icon { transform: translateY(-4px) scale(1.2) rotate(0deg) !important; }
+
+/* آیتم‌های داخلی منوی بیشتر (اگه لازم شد بعداً) */
 #btn-tab-expenses.active .nav-icon { transform: translateY(-3px) scale(1.15) rotate(-15deg) !important; }
 #btn-tab-parts.active .nav-icon { transform: translateY(-6px) scale(1.25) !important; }
 #btn-tab-reports.active .nav-icon { transform: translateY(-3px) scale(1.15) skewY(-8deg) !important; }
-#btn-tab-backup.active .nav-icon { transform: translateY(-3px) scale(1.15) rotate(-135deg) !important; }
+
 
 /* حالت تاریک (Dark Mode) */
 body.dark-mode {
@@ -929,106 +936,6 @@ body.dark-mode .more-menu-item.active .mm-icon { background: rgba(59, 130, 246, 
 </div>
 
 <header>
-<style>
-  @keyframes shineWave { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
-  .text-wave { background: linear-gradient(90deg, #93c5fd 0%, #93c5fd 40%, #ffffff 45%, #e879f9 50%, #ffffff 55%, #93c5fd 60%, #93c5fd 100%); background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text; animation: shineWave 3s linear infinite; }
-
-  /* ========================================= */
-  /* فیکس اورژانسی گرافیک، دکمه‌ها و تابلوی وضعیت */
-  /* ========================================= */
-
-  input[type="checkbox"] { -webkit-appearance: none; appearance: none; width: 44px !important; height: 24px !important; background: #cbd5e1; border-radius: 20px !important; position: relative; cursor: pointer; outline: none; border: none !important; transition: background 0.3s; margin: 0; vertical-align: middle; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
-  input[type="checkbox"]::after { content: ''; position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-  input[type="checkbox"]:checked { background: var(--success); }
-  input[type="checkbox"]:checked::after { transform: translateX(-20px); }
-  body.dark-mode input[type="checkbox"] { background: #475569; }
-  body.dark-mode input[type="checkbox"]:checked { background: var(--primary); }
-
-  .workshop-card { transition: all 0.3s ease; }
-  .workshop-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
-  .workshop-card.overdue { box-shadow: 0 4px 20px rgba(239,68,68,0.15) !important; border: 1px solid rgba(239,68,68,0.3) !important; border-right: 5px solid var(--danger) !important; }
-  .workshop-card:has(.badge-green) { box-shadow: 0 4px 20px rgba(16,185,129,0.12) !important; border-right-color: var(--success) !important; }
-
-  /* اصلاح دراپ‌داون وضعیت (تا کل صفحه را نگیرد) */
-  select.smart-dropdown { width: auto !important; min-width: 130px; padding: 6px 12px !important; display: inline-block !important; }
-
-  /* اصلاح دکمه‌های فیلتر حبابی (جلوگیری از له شدن متن) */
-  .status-filters { display: flex !important; gap: 8px !important; overflow-x: auto !important; padding: 10px 4px !important; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
-  .filter-btn { flex-shrink: 0 !important; min-width: max-content !important; display: inline-flex !important; align-items: center !important; padding: 6px 14px !important; border-radius: 30px !important; font-weight: 800 !important; font-size: 0.8rem !important; background: #f1f5f9 !important; color: #64748b !important; border: 1px solid var(--border) !important; transition: all 0.2s !important; white-space: nowrap !important; margin: 0 !important; }
-  .filter-btn.active { background: var(--primary) !important; color: #fff !important; border-color: var(--primary) !important; transform: scale(1.05); }
-  .filter-badge { display: inline-flex !important; align-items: center; justify-content: center; background: #cbd5e1 !important; color: #1e293b !important; border-radius: 50%; width: 22px !important; height: 22px !important; font-size: 0.75rem !important; margin-right: 6px !important; font-weight: 900 !important; }
-  .filter-btn.active .filter-badge { background: #fff !important; color: var(--primary) !important; }
-
-  /* اصلاح نوار رهگیری زنده (تنظیم دقیق خط و نقطه‌ها) */
-  .repair-timeline { display: flex; justify-content: space-between; position: relative; margin: 15px 0 10px 0; padding-top: 10px; border-top: 1px dashed var(--border); }
-  .repair-timeline::before { content: ''; position: absolute; top: 17px; left: 15px; right: 15px; height: 4px; background: #e2e8f0; z-index: 1; border-radius: 4px; }
-  body.dark-mode .repair-timeline::before { background: #334155; }
-  .rt-progress { position: absolute; top: 17px; right: 15px; height: 4px; background: var(--primary); z-index: 2; border-radius: 4px; transition: width 0.6s ease; }
-  .rt-step { position: relative; z-index: 3; text-align: center; font-size: 0.65rem; color: #94a3b8; font-weight: 800; width: 33.33%; }
-  .rt-dot { width: 16px; height: 16px; background: #fff; border: 3px solid #cbd5e1; border-radius: 50%; margin: 0 auto 4px; transition: all 0.3s; }
-  body.dark-mode .rt-dot { background: #1e293b; border-color: #475569; }
-  .rt-step.active { color: var(--primary); }
-  .rt-step.active .rt-dot { border-color: var(--primary); background: var(--primary-light); box-shadow: 0 0 8px rgba(37,99,235,0.4); transform: scale(1.2); }
-  .rt-step.done .rt-dot { background: var(--primary); border-color: var(--primary); }
-  .rt-step.done { color: var(--text); }
-
-  /* اصلاح قطعی دکمه‌های پایین کارت (۶ تایی منظم) */
-  .action-row { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; margin-top: 12px !important; }
-  .action-row button { width: 100% !important; margin: 0 !important; padding: 8px 2px !important; font-size: 0.75rem !important; border-radius: 8px !important; white-space: nowrap !important; flex: none !important; }
-
-  /* اصلاح علامت پلاس دکمه شناور */
-  #super-fab .fab-main { font-family: Arial, sans-serif !important; line-height: 1 !important; display: flex !important; justify-content: center !important; align-items: center !important; }
-  
-  
-  /* جمع کردن دکمه‌های فیلتر بالا */
-  .status-filters .filter-btn {
-    width: max-content !important;
-    flex: 0 0 auto !important;
-    padding: 6px 16px !important;
-  }
-  
-  /* جمع کردن منوی کشویی وضعیت (در نوبت و...) */
-  .workshop-card select {
-    width: max-content !important;
-    flex: 0 0 auto !important;
-  }
-  
-  /* تنظیم دکمه‌های ۶ تایی پایین کارت */
-  .action-row button {
-    width: 100% !important;
-    padding: 8px 0 !important;
-    font-size: 0.75rem !important;
-  }
-  
-  /* سفید کردن علامت پلاس (+) */
-  .fab-main {
-    color: #ffffff !important;
-    font-family: Arial, sans-serif !important;
-  }
-  /* جمع کردن دکمه‌های فیلتر بالا */
-  .status-filters .filter-btn { width: max-content !important; flex: 0 0 auto !important; padding: 6px 16px !important; }
-  
-  /* جمع کردن منوی کشویی وضعیت */
-  .workshop-card select { width: max-content !important; flex: 0 0 auto !important; }
-  
-  /* تنظیم دکمه‌های ۶ تایی پایین کارت */
-  .action-row button { width: 100% !important; padding: 8px 0 !important; font-size: 0.75rem !important; }
-  
-  /* سفید کردن علامت پلاس */
-  .fab-main { color: #ffffff !important; font-family: Arial, sans-serif !important; }
-  
-  /* فیکس رنگ کادر پیام (Toast) */
-  #toast-box {
-    background: rgba(30, 41, 59, 0.95) !important;
-    backdrop-filter: blur(8px);
-    color: #ffffff !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-</style>
 
 
   <div style="display:flex; align-items:center; gap:14px;">
@@ -5264,8 +5171,10 @@ function toggleMoreMenu() {
 
   box.classList.add('open');
   overlay.classList.add('open');
+  var moreBtn = document.getElementById('btn-tab-more');
+  if (moreBtn) moreBtn.classList.add('open');
   if (navigator.vibrate) navigator.vibrate(20);
-
+  
   // مشخص کردن تب فعال داخل منو
   var currentMoreTab = null;
   ['expenses', 'parts', 'reports'].forEach(function(t) {
@@ -5282,6 +5191,8 @@ function closeMoreMenu() {
   var overlay = document.getElementById('more-menu-overlay');
   if (box) box.classList.remove('open');
   if (overlay) overlay.classList.remove('open');
+  var moreBtn = document.getElementById('btn-tab-more');
+  if (moreBtn) moreBtn.classList.remove('open');
 }
 
 function openMoreTab(tabName) {

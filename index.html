@@ -4179,9 +4179,7 @@ function buildEmptyState(icon, title, subtitle, ctaText, ctaAction) {
 function renderCustomers() {
   // 📊 آپدیت آمار بالای لیست مشتریان
   try {
-    var activeCustomers = customers.filter(function(c) { return !c.deleted; });
-var debtCount = 0, overdueCount = 0, clearCount = 0, dueSoonCount = 0;
-activeCustomers.forEach(function(c) {
+ activeCustomers.forEach(function(c) {
   var b = getBalance(c.id);
   if (b > 0) {
     debtCount++;
@@ -4191,10 +4189,7 @@ activeCustomers.forEach(function(c) {
     clearCount++;
   }
 });
-      }
-    });
-    var elTotal = document.getElementById('stat-total-cust');
-var elDebt = document.getElementById('stat-debt-cust');
+var elTotal = document.getElementById('stat-total-cust');
 var elClear = document.getElementById('stat-clear-cust');
 if (elTotal) elTotal.innerText = activeCustomers.length.toLocaleString('fa-IR');
 if (elDebt) elDebt.innerText = debtCount.toLocaleString('fa-IR');

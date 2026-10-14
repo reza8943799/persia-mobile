@@ -2533,6 +2533,102 @@ body.dark-mode .expand-indicator {
 if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
 
 
+// ═══════════════════════════════════════════════════════════════
+// 🚪 تایید خروج با دکمه Back (APK + PWA)
+// ═══════════════════════════════════════════════════════════════
+(function setupExitGuard() {
+  var _confirming = false;
+  var _enabled = false;
+
+  function doExit() {
+    try {
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+        window.Capacitor.Plugins.App.exitApp();
+        return;
+      }
+    } catch(e) {}
+    try { window.close(); } catch(e) {}
+  }
+
+  function rearm() {
+    try { history.pushState({ pmGuard: Date.now() }, '', location.href); } catch(e) {}
+  }
+
+  function closeTopLayer() {
+    // منوی بیشتر
+    var moreMenu = document.querySelector('.more-menu-box.open');
+    if (moreMenu) { closeMoreMenu(); return true; }
+
+    // Spotlight
+    var sp = document.getElementById('spotlight-modal');
+    if (sp && sp.style.display === 'flex') { closeSpotlight(); return true; }
+
+    // هر مودالی که بازه
+    var modals = document.querySelectorAll('.modal-overlay');
+    for (var i = 0; i < modals.length; i++) {
+      if (modals[i].style.display === 'flex') {
+        modals[i].style.display = 'none';
+        return true;
+      }
+    }
+
+    // صفحه جزئیات مشتری
+    var dv = document.getElementById('view-details');
+    if (dv && dv.style.display === 'block') { showCustomerList(); return true; }
+
+    return false;
+  }
+
+  function handleBack() {
+    if (closeTopLayer()) { rearm(); return; }
+
+    if (_confirming) return;
+    _confirming = true;
+    var wantsExit = confirm('🚪 از برنامه «موبایل پرشیا» خارج می‌شوید؟');
+    _confirming = false;
+
+    if (wantsExit) doExit();
+    else rearm();
+  }
+
+  function init() {
+    rearm();
+    _enabled = true;
+    console.log('[ExitGuard] armed');
+  }
+
+  // نصب گارد — چه صفحه لود شده باشه چه نه
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(init, 400);
+  } else {
+    window.addEventListener('load', function() { setTimeout(init, 400); });
+  }
+
+  // رویداد back در مرورگر و PWA
+  window.addEventListener('popstate', function() {
+    if (!_enabled) { init(); return; }
+    handleBack();
+  });
+
+  // اتصال به Capacitor App plugin (برای APK)
+  function bindCapacitor() {
+    try {
+      var App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+      if (App && App.addListener) {
+        App.addListener('backButton', function() {
+          if (!_enabled) { init(); return; }
+          handleBack();
+        });
+        console.log('[ExitGuard] Capacitor App bound');
+      }
+    } catch(e) { console.warn('[ExitGuard] capacitor bind failed', e); }
+  }
+
+  if (window.Capacitor) bindCapacitor();
+  else setTimeout(bindCapacitor, 800);
+  setTimeout(bindCapacitor, 2500);
+})();
+
 
 // --- ساخت افکت موج (Ripple) برای تمام دکمه‌ها ---
 document.addEventListener('click', function(e) {

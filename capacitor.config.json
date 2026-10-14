@@ -2,6 +2,18 @@
   "appId": "com.persia.mobile",
   "appName": "Persia Mobile",
   "webDir": "www",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2500,
+      "launchAutoHide": true,
+      "backgroundColor": "#0b132b",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "FIT_CENTER",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": true
+    }
+  },
   "server": {
     "androidScheme": "https",
     "allowNavigation": [

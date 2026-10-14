@@ -66,10 +66,26 @@
 <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2830/2830305.png">
 
 <style>
+
 /* ========================================= */
 /* ۱. تنظیمات پایه و متغیرهای رنگی */
 /* ========================================= */
-@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v3.3.0/Vazirmatn-font-face.css');
+
+/* ✅ فونت لوکال (بدون نیاز به اینترنت) */
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('font/Vazirmatn-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('font/Vazirmatn-Bold.woff2') format('woff2');
+}
 
 :root{
   --primary:#2563eb; --primary-dark:#1d4ed8; --primary-light:#eff6ff;
@@ -1314,13 +1330,16 @@ body.dark-mode .expand-indicator {
 <div class="card">
 <div class="row" style="align-items:center;">
 <input type="text" id="search-input" placeholder="🔍 جستجوی نام، تلفن یا کد اشتراک/پیگیری..." oninput="renderCustomers()" style="flex:1.3;margin-top:0;">
+
 <select id="cust-filter-status" onchange="renderCustomers()" style="flex:1.1;margin-top:0;font-weight:bold;border-color:var(--primary);">
 <option value="ALL">📋 همه مخاطبان</option>
 <option value="DEBT">🔴 بدهکاران (طلب شما)</option>
+<option value="DUE_SOON">🟠 نزدیک موعد (۲ روز)</option>
 <option value="OVERDUE_DUE">⚠️ وعده تسویه گذشته</option>
 <option value="CREDIT">🟢 بستانکاران / تسویه</option>
 <option value="COLLAB">🤝 فقط همکاران</option>
 </select>
+
 </div>
 <div class="row" style="align-items:center;margin-top:8px;">
 <select id="cust-sort-order" onchange="renderCustomers()" style="margin-top:0;font-weight:bold;border-color:#8b5cf6;background:#f3e8ff;color:#6b21a8;font-size:0.85rem;">
@@ -3168,6 +3187,15 @@ function isDueDatePast(dueStr) {
   if (!jdn) return false;
   return todayJDN() >= jdn;
 }
+// 🟠 چک میکنه که موعد تسویه تا n روز دیگه است (پیش‌فرض: ۲ روز)
+function isDueSoon(dueStr, daysThreshold) {
+  if (!dueStr) return false;
+  var jdn = jalaliStrToJDN(dueStr);
+  if (!jdn) return false;
+  var diff = jdn - todayJDN();
+  var threshold = (typeof daysThreshold === 'number') ? daysThreshold : 2;
+  return diff >= 0 && diff <= threshold;
+}
 
 function getDaysPassed(dateStr) {
   var jdn = jalaliStrToJDN(dateStr);
@@ -4116,6 +4144,13 @@ function customerHasOverdueDue(cId) {
   var hasInQuotes = quotes.some(q => q.customerId === cId && !q.deleted && isDueDatePast(q.dueDate));
   return hasInTx || hasInQuotes;
 }
+// 🟠 مشتری موعدش نزدیکه (تا ۲ روز دیگه) و بدهی داره
+function customerHasDueSoon(cId) {
+  var b = getBalance(cId); if (b <= 0) return false;
+  var hasInTx = transactions.some(t => t.customerId === cId && !t.deleted && t.type === 'DEBT' && isDueSoon(t.dueDate, 2));
+  var hasInQuotes = quotes.some(q => q.customerId === cId && !q.deleted && isDueSoon(q.dueDate, 2));
+  return hasInTx || hasInQuotes;
+}
 
 // 📊 فیلتر سریع مشتریان با کلیک روی آمار
 function quickFilterCustomers(filterMode) {
@@ -4145,14 +4180,17 @@ function renderCustomers() {
   // 📊 آپدیت آمار بالای لیست مشتریان
   try {
     var activeCustomers = customers.filter(function(c) { return !c.deleted; });
-    var debtCount = 0, overdueCount = 0, clearCount = 0;
-    activeCustomers.forEach(function(c) {
-      var b = getBalance(c.id);
-      if (b > 0) {
-        debtCount++;
-        if (customerHasOverdueDue(c.id)) overdueCount++;
-      } else {
-        clearCount++;
+var debtCount = 0, overdueCount = 0, clearCount = 0, dueSoonCount = 0;
+activeCustomers.forEach(function(c) {
+  var b = getBalance(c.id);
+  if (b > 0) {
+    debtCount++;
+    if (customerHasOverdueDue(c.id)) overdueCount++;
+    else if (customerHasDueSoon(c.id)) dueSoonCount++;
+  } else {
+    clearCount++;
+  }
+});
       }
     });
     var elTotal = document.getElementById('stat-total-cust');
@@ -4174,11 +4212,12 @@ if (elClear) elClear.innerText = clearCount.toLocaleString('fa-IR');
     var matchesSearch = nm.indexOf(query) !== -1 || ph.indexOf(query) !== -1 || cc.indexOf(query) !== -1;
     if (!matchesSearch) return false;
     var bal = getBalance(c.id);
-    if (filterMode === 'DEBT') return bal > 0;
-    if (filterMode === 'OVERDUE_DUE') return customerHasOverdueDue(c.id);
-    if (filterMode === 'CREDIT') return bal <= 0;
-    if (filterMode === 'COLLAB') return c.isCollab === true;
-    return true;
+if (filterMode === 'DEBT') return bal > 0;
+if (filterMode === 'DUE_SOON') return customerHasDueSoon(c.id);
+if (filterMode === 'OVERDUE_DUE') return customerHasOverdueDue(c.id);
+if (filterMode === 'CREDIT') return bal <= 0;
+if (filterMode === 'COLLAB') return c.isCollab === true;
+return true;
   });
   
 // 🔄 مرتب‌سازی لیست
@@ -4213,12 +4252,13 @@ if (filtered.length === 0) {
     var collabTag = cust.isCollab ? '<span class="badge badge-collab" style="margin-right:6px;">🤝 همکار</span>' : '';
     var tierTag = '<span class="badge ' + loyalty.tagClass + '" style="margin-right:6px;">' + loyalty.tier + ' (' + loyalty.custCode + ')</span>';
     var dueAlertTag = hasOverdueDue ? '<span class="badge badge-red" style="margin-right:6px;">⚠️ موعد تسویه گذشته</span>' : '';
+var dueSoonTag = (!hasOverdueDue && customerHasDueSoon(cust.id)) ? '<span class="badge" style="margin-right:6px;background:#fed7aa;color:#9a3412;border:1px solid #fdba74;">🟠 موعد نزدیک</span>' : '';
     var callBtn = cust.phone ? '<a href="tel:' + cleanNumber(cust.phone) + '" onclick="event.stopPropagation();" style="background:#e0f2fe;color:#0284c7;padding:2px 8px;border-radius:6px;font-size:.75rem;text-decoration:none;font-weight:bold;margin-right:4px;">📞 تماس</a>' : '';
     var avatarChar = (cust.name || 'م')[0]; var avatarBg = getAvatarColor(cust.name);
     var div = document.createElement('div');
     div.className = 'card'; div.style.padding = '12px'; div.style.marginBottom = '8px'; div.style.cursor = 'pointer';
     div.onclick = () => openCustomer(cust.id);
-    div.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><div class="cust-avatar" style="background:' + avatarBg + ';">' + avatarChar + '</div><div style="flex:1;"><div style="font-weight:bold;font-size:.95rem;">' + esc(cust.name) + collabTag + tierTag + dueAlertTag + '</div><div style="font-size:.8rem;color:#64748b;margin-top:2px;">' + esc(cust.phone || '') + ' ' + callBtn + ' • کد اشتراک: ' + esc(loyalty.custCode) + '</div><div style="margin-top:4px;"><span class="badge ' + badgeClass + '">' + badgeText + '</span></div></div></div>';
+    div.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><div class="cust-avatar" style="background:' + avatarBg + ';">' + avatarChar + '</div><div style="flex:1;"><div style="font-weight:bold;font-size:.95rem;">' + esc(cust.name) + collabTag + tierTag + dueAlertTag + dueSoonTag + '</div><div style="font-size:.8rem;color:#64748b;margin-top:2px;">' + esc(cust.phone || '') + ' ' + callBtn + ' • کد اشتراک: ' + esc(loyalty.custCode) + '</div><div style="margin-top:4px;"><span class="badge ' + badgeClass + '">' + badgeText + '</span></div></div></div>';
     listEl.appendChild(div);
   });
 }
@@ -4478,11 +4518,13 @@ function saveMultiItemInvoice(type) {
     resetInvoiceForm(); renderCustomerLoyaltyBanner(); renderQuotes(); renderTransactions(); renderWorkshopBoard(); switchCustTab('quotes');
     setTimeout(() => { if (confirm(askPrintText)) printIntakeReceipt(printQuoteId); }, 150);
     return;
-  } else {
+} else {
     transactions.unshift({
       id: Date.now(), customerId: activeCustomerId, intakeCode: currentIntakeCode, trackCode: currentTrackCode,
       // 👇 اضافه شدن brand
       brand: brand, model: model, color: color, marker: marker, imei: imei,
+      problem: problem, acc: acc, lockType: lockType, lockVal: pinVal, patternPath: patternPath,
+      isDead: isDead, isWater: isWater, isLcdRisk: isLcdRisk, isScratch: isScratch, isOpened: isOpened, hasSim: hasSim,
       title: combinedTitle, workType: workType, collabName: collabName, collabCost: collabCost, items: items,
       totalWork: finalWorkAmount, rawAmount: sumRaw, loyaltyTier: loyalty.tier, loyaltyDiscountPercent: discountPercent, loyaltyDiscountAmount: discountAmt,
       deposit: deposit, cashDeposit: deposit, onlineDeposit: 0, requestedDeposit: requestedDeposit, payMethod: payMethod, dueDate: dueDate, amount: finalWorkAmount,
@@ -4816,6 +4858,10 @@ function convertQuoteToDebt(qId, deliverySignature, deliverySignatureDbId, newPa
 transactions.unshift({
   id: Date.now(), customerId: q.customerId, intakeCode: q.intakeCode || '', trackCode: q.trackCode || '',
   imei: q.imei || '', brand: q.brand || '', model: q.model || '',
+  color: q.color || '', marker: q.marker || '', problem: q.problem || '', acc: q.acc || '',
+  lockType: q.lockType || 'NONE', lockVal: q.lockVal || '', patternPath: q.patternPath || '',
+  isDead: q.isDead || false, isWater: q.isWater || false, isLcdRisk: q.isLcdRisk || false,
+  isScratch: q.isScratch || false, isOpened: q.isOpened || false, hasSim: q.hasSim || false,
   title: q.title + ' (تحویل شد)', workType: q.workType || 'NORMAL', collabName: q.collabName || '', collabCost: q.collabCost || 0,
     items: q.items || [], totalWork: totalAmount, rawAmount: q.rawAmount || totalAmount,
     loyaltyTier: q.loyaltyTier || '', loyaltyDiscountPercent: q.loyaltyDiscountPercent || 0, loyaltyDiscountAmount: q.loyaltyDiscountAmount || 0,
@@ -4904,7 +4950,8 @@ function renderTransactions() {
     var amountDisplay = isDebt ? formatToman(t.totalWork || t.amount) : formatToman(t.amount);
     var subInfo = (isDebt && Number(t.deposit) > 0) ? ('<div style="font-size:.72rem;color:#059669;">بیعانه: ' + formatToman(t.deposit) + ' | مانده: ' + formatToman(Math.max(0, Number(t.totalWork) - Number(t.deposit))) + '</div>') : '';
     cardDiv.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;cursor:pointer;" onclick="toggleInvoiceAccordion(' + t.id + ')"><div style="display:flex;align-items:flex-start;gap:6px;flex:1;"><span style="font-size:.75rem;color:#94a3b8;margin-top:2px;" id="inv-arrow-' + t.id + '">▼</span><div><div style="font-weight:bold;font-size:.92rem;"><span dir="auto" style="unicode-bidi:isolate;">' + esc(t.title || '') + '</span></div>' + (t.intakeCode ? '<div style="font-size:.72rem;color:#0284c7;">پذیرش: ' + esc(t.intakeCode) + '</div>' : '') + dueTag + subInfo + '</div></div><div style="text-align:left;flex-shrink:0;"><div style="font-weight:bold;font-size:.92rem;color:' + (isDebt ? 'var(--danger)' : 'var(--success)') + ';">' + (isDebt ? '+ ' : '- ') + amountDisplay + '</div><div style="font-size:.7rem;color:#94a3b8;">' + esc(toEnglishDigits(t.date)) + '</div><div style="margin-top:2px;">' + warrantyTag + '</div></div></div><div class="workshop-details-box" id="inv-body-' + t.id + '" style="margin-top:8px;"><div style="font-size:.8rem;color:#64748b;">نوع: ' + (isDebt ? 'فاکتور قطعی' : 'دریافتی') + ' | روش: ' + (t.payMethod === 'POS' ? 'پوز' : (t.payMethod === 'CARD' ? 'کارت‌به‌کارت' : 'نقد')) + '</div>' + sigBlock + '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:8px;flex-wrap:wrap;">' +
-  (isDebt ? '<button type="button" onclick="printCustomerInvoice(' + t.id + ')" style="background:#059669;color:#fff;padding:7px 14px;width:auto;border-radius:8px;font-size:.82rem;font-weight:800;">🧾 چاپ فاکتور خدمات</button>' : '<span></span>') +
+  (isDebt ? '<button type="button" onclick="printCustomerInvoice(' + t.id + ')" style="background:#059669;color:#fff;padding:7px 12px;width:auto;border-radius:8px;font-size:.78rem;font-weight:800;margin-left:4px;">🧾 فاکتور رسمی</button>' +
+         '<button type="button" onclick="printIntakeReceipt(' + t.id + ')" style="background:#475569;color:#fff;padding:7px 12px;width:auto;border-radius:8px;font-size:.78rem;font-weight:800;">🖨️ قبض پذیرش</button>' : '<span></span>') +
   '<div style="display:flex;gap:6px;">' +
     (!isDebt ? '<button type="button" onclick="openEditPaymentModal(' + t.id + ')" style="background:#dbeafe;color:var(--primary);padding:7px 12px;width:auto;border-radius:8px;font-size:.8rem;font-weight:bold;">✏️ ویرایش</button>' : '') +
     '<button type="button" onclick="deleteTransaction(' + t.id + ')" style="background:#fee2e2;color:var(--danger);padding:7px 12px;width:auto;border-radius:8px;font-size:.8rem;">🗑️ حذف</button>' +
@@ -7417,6 +7464,46 @@ function renderReminderBanner() {
     banner.style.display = 'none';
   }
 }
+
+
+// ═══════════════════════════════════════════════════════════════
+// 🖨️ چاپ مجدد قبض پذیرش از سوابق (DEBT transactions)
+// ═══════════════════════════════════════════════════════════════
+(function setupReprintIntakeFromHistory() {
+  var _originalFn = printIntakeReceipt;
+
+  printIntakeReceipt = function(qId) {
+    var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+    if (q) return _originalFn(qId);
+
+    // fallback: بگرد توی transactions
+    var t = transactions.find(function(x) { return x.id === qId && !x.deleted && x.type === 'DEBT'; });
+    if (!t) return;
+
+    // ساخت یک quote موقت از تراکنش
+    var tmp = Object.assign({}, t);
+    tmp.deviceStatus = 'DELIVERED';
+    if (!tmp.amount) tmp.amount = tmp.totalWork || 0;
+    if (tmp.cashDeposit === undefined) tmp.cashDeposit = tmp.deposit || 0;
+    if (tmp.onlineDeposit === undefined) tmp.onlineDeposit = 0;
+    if (!tmp.lockType) tmp.lockType = 'NONE';
+    if (!tmp.lockVal) tmp.lockVal = '';
+    if (!tmp.patternPath) tmp.patternPath = '';
+    if (!tmp.marker) tmp.marker = '';
+    if (!tmp.acc) tmp.acc = '';
+    ['isDead','isWater','isLcdRisk','isScratch','isOpened','hasSim','oldPartDelivered'].forEach(function(k) {
+      if (tmp[k] === undefined) tmp[k] = false;
+    });
+
+    quotes.push(tmp);
+    try { _originalFn(qId); } finally {
+      setTimeout(function() {
+        var i = quotes.indexOf(tmp);
+        if (i > -1) quotes.splice(i, 1);
+      }, 4000);
+    }
+  };
+})();
 
 </script>
 </body>

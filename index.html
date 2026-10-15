@@ -2699,7 +2699,7 @@ function hideLoader() {
   var loader = document.getElementById('initial-loader');
   if (!loader || loader.classList.contains('fade-out')) return;
   var elapsed = Date.now() - _loaderShownAt;
-  var minDuration = 2500;
+  var minDuration = 4000;
   var remaining = Math.max(0, minDuration - elapsed);
   setTimeout(function() {
     loader.classList.add('fade-out');

@@ -1118,6 +1118,52 @@ body.dark-mode .global-search-bar:hover {
 body.dark-mode .empty-state-box {
   background: linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0.05));
 }
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🎬 ورود پلکانی کارت‌ها (Stagger Animation) */
+/* ═══════════════════════════════════════════════════════════════ */
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.stagger-item {
+  animation: cardSlideIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stagger-item { animation: none !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🔘 Loading داخل دکمه‌ها */
+/* ═══════════════════════════════════════════════════════════════ */
+.btn-loading {
+  position: relative !important;
+  pointer-events: none !important;
+  opacity: 0.85 !important;
+}
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 12px;
+  margin-top: -8px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+.btn-loading-success {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
+}
+
 </style>
 </head>
 
@@ -1379,7 +1425,7 @@ body.dark-mode .expand-indicator {
 <label for="new-is-collab" style="font-size:.85rem;font-weight:bold;color:#c2410c;cursor:pointer;">🤝 این مخاطب همکار / تعمیرکار واسط است</label>
 </div>
 <textarea id="new-notes" placeholder="آدرس یا مشخصات تکمیلی (اختیاری)" style="margin-top:8px;"></textarea>
-<button type="button" onclick="addCustomer()" style="margin-top:10px;">➕ افزودن پرونده</button>
+<button type="button" onclick="withButtonLoading(this, function() { addCustomer(); }, 'در حال افزودن...', '✅ افزوده شد!')" style="margin-top:10px;">➕ افزودن پرونده</button>
 </div>
 
 <div class="card">
@@ -1678,10 +1724,10 @@ body.dark-mode .expand-indicator {
 <label for="tx-oldpart" style="font-size:.85rem;color:#334155;cursor:pointer;">داغی قطعه تحویل مشتری شد</label>
 </div>
 
-<button type="button" class="btn-quote" onclick="saveMultiItemInvoice('QUOTE')" style="margin-top:14px;font-size:.95rem;">📋 ثبت پذیرش دستگاه + کد رهگیری</button>
+<button type="button" class="btn-quote" onclick="withButtonLoading(this, function() { saveMultiItemInvoice('QUOTE'); }, 'در حال ثبت...', '✅ ثبت شد!')" style="margin-top:14px;font-size:.95rem;">📋 ثبت پذیرش دستگاه + کد رهگیری</button>
 
 <div class="row" style="margin-top:8px;">
-<button type="button" class="btn-debt" onclick="saveMultiItemInvoice('DEBT')">ثبت فاکتور قطعی</button>
+<button type="button" class="btn-debt" onclick="withButtonLoading(this, function() { saveMultiItemInvoice('DEBT'); }, 'در حال ثبت...', '✅ ثبت شد!')">ثبت فاکتور قطعی</button>
 <button type="button" class="btn-pay" onclick="saveQuickPayment()">ثبت تسویه نقدی</button>
 </div>
 </div>
@@ -4164,6 +4210,43 @@ function quickFilterCustomers(filterMode) {
   showToast('🔍 نمایش: ' + (labels[filterMode] || 'همه'), 'info');
 }
 
+// 🎬 اعمال ورود پلکانی روی آیتم‌های یک container
+function applyStagger(container, maxDelay) {
+  if (!container) return;
+  var items = container.children;
+  var limit = maxDelay || 400;
+  for (var i = 0; i < items.length; i++) {
+    var delay = Math.min(i * 40, limit);
+    items[i].classList.remove('stagger-item');
+    void items[i].offsetWidth;
+    items[i].style.animationDelay = delay + 'ms';
+    items[i].classList.add('stagger-item');
+  }
+}
+
+// 🔢 انیمیشن شمارش عدد (فارسی)
+function animateCount(el, target, duration) {
+  if (!el) return;
+  duration = duration || 600;
+  var start = parseInt(el.getAttribute('data-prev') || '0', 10) || 0;
+  el.setAttribute('data-prev', String(target));
+  if (start === target) {
+    el.innerText = target.toLocaleString('fa-IR');
+    return;
+  }
+  var startTime = null;
+  function step(ts) {
+    if (!startTime) startTime = ts;
+    var progress = Math.min((ts - startTime) / duration, 1);
+    var eased = 1 - Math.pow(1 - progress, 3);
+    var current = Math.round(start + (target - start) * eased);
+    el.innerText = current.toLocaleString('fa-IR');
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+
 // 💎 ساخت Empty State زیبا
 function buildEmptyState(icon, title, subtitle, ctaText, ctaAction) {
   var html = '<div class="empty-state-box">';
@@ -4192,12 +4275,12 @@ function renderCustomers() {
         clearCount++;
       }
     });
-    var elTotal = document.getElementById('stat-total-cust');
-    var elDebt = document.getElementById('stat-debt-cust');
-    var elClear = document.getElementById('stat-clear-cust');
-    if (elTotal) elTotal.innerText = activeCustomers.length.toLocaleString('fa-IR');
-    if (elDebt) elDebt.innerText = debtCount.toLocaleString('fa-IR');
-    if (elClear) elClear.innerText = clearCount.toLocaleString('fa-IR');
+var elTotal = document.getElementById('stat-total-cust');
+var elDebt = document.getElementById('stat-debt-cust');
+var elClear = document.getElementById('stat-clear-cust');
+animateCount(elTotal, activeCustomers.length, 600);
+animateCount(elDebt, debtCount, 600);
+animateCount(elClear, clearCount, 600);
   } catch(e) {}
   
   var query = (document.getElementById('search-input').value || '').toLowerCase();
@@ -4258,8 +4341,9 @@ var dueSoonTag = (!hasOverdueDue && customerHasDueSoon(cust.id)) ? '<span class=
     div.className = 'card'; div.style.padding = '12px'; div.style.marginBottom = '8px'; div.style.cursor = 'pointer';
     div.onclick = () => openCustomer(cust.id);
     div.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><div class="cust-avatar" style="background:' + avatarBg + ';">' + avatarChar + '</div><div style="flex:1;"><div style="font-weight:bold;font-size:.95rem;">' + esc(cust.name) + collabTag + tierTag + dueAlertTag + dueSoonTag + '</div><div style="font-size:.8rem;color:#64748b;margin-top:2px;">' + esc(cust.phone || '') + ' ' + callBtn + ' • کد اشتراک: ' + esc(loyalty.custCode) + '</div><div style="margin-top:4px;"><span class="badge ' + badgeClass + '">' + badgeText + '</span></div></div></div>';
-    listEl.appendChild(div);
+        listEl.appendChild(div);
   });
+  applyStagger(listEl);
 }
 
 function openCustomer(id) {
@@ -5068,8 +5152,9 @@ function renderDepositsStream() {
     div.style.border = isDone ? '1px solid #86efac' : '2px solid #fde68a';
     div.style.background = isDone ? '#f0fdf4' : '#fffdf5';
     div.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;"><div style="flex:1;"><div style="font-weight:800;font-size:0.95rem;color:#1e293b;">مشتری: ' + esc(c.name) + ' (قبض: <b>' + esc(q.intakeCode) + '</b>)</div><div style="font-size:0.83rem;color:#475569;margin-top:2px;">دستگاه: <b>' + esc(q.model || '-') + '</b></div><div style="font-size:0.83rem;color:#0369a1;margin-top:2px;">مبلغ کل: <b>' + formatToman(q.amount) + '</b></div><div style="font-size:0.83rem;color:' + (isDone ? '#15803d' : '#b45309') + ';margin-top:2px;">' + (isDone ? 'تاییدشده: <b>' + formatToman(verifiedAmt) + '</b>' : 'درخواستی: <b>' + formatToman(depAmt) + '</b>') + '</div><div style="margin-top:4px;">' + (isDone ? '<span class="badge badge-green">✓ تایید شده</span>' : '<span class="badge badge-orange">⏳ منتظر تایید</span>') + '</div></div><a href="' + q.depositReceiptUrl + '" target="_blank" style="text-align:center;text-decoration:none;"><img src="' + q.depositReceiptUrl + '" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid #cbd5e1;display:block;" alt="فیش"><span style="font-size:0.65rem;color:#0284c7;font-weight:bold;margin-top:2px;display:block;">دیدن عکس</span></a></div>' + (!isDone ? '<div style="display:flex;gap:8px;margin-top:10px;border-top:1px dashed #e2e8f0;padding-top:8px;"><button type="button" onclick="verifyCustomerReceipt(' + q.id + ', true)" style="background:#10b981;color:#fff;padding:8px;font-size:0.82rem;border-radius:8px;flex:1.4;margin:0;">✓ تایید و کسر</button><button type="button" onclick="verifyCustomerReceipt(' + q.id + ', false)" style="background:#ef4444;color:#fff;padding:8px;font-size:0.82rem;border-radius:8px;flex:1;margin:0;">✕ رد</button></div>' : '<div style="display:flex;gap:8px;margin-top:10px;border-top:1px dashed #d1fae5;padding-top:8px;"><button type="button" onclick="verifyCustomerReceipt(' + q.id + ', false)" style="background:#f59e0b;color:#fff;padding:8px;font-size:0.82rem;border-radius:8px;flex:1;margin:0;">↺ لغو تایید</button></div>');
-    container.appendChild(div);
+        container.appendChild(div);
   });
+  applyStagger(container);
 }
 
 function addExpense() {

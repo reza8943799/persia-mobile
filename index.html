@@ -1167,6 +1167,66 @@ body.dark-mode .empty-state-box {
   background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
 }
 
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🎨 پکیج ۲-A: کارت‌های کارگاه پریمیوم */
+/* ═══════════════════════════════════════════════════════════════ */
+
+.workshop-card {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* هاله نوری رنگی در گوشه کارت */
+.workshop-card::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: -60px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: var(--ws-glow, #3b82f6);
+  opacity: 0.14;
+  filter: blur(45px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.workshop-card > * { position: relative; z-index: 1; }
+
+/* رنگ هاله بر اساس وضعیت دستگاه */
+.workshop-card:has(.badge-blue)   { --ws-glow: #3b82f6; }
+.workshop-card:has(.badge-orange) { --ws-glow: #f59e0b; }
+.workshop-card:has(.badge-purple) { --ws-glow: #a855f7; }
+.workshop-card:has(.badge-green)  { --ws-glow: #10b981; }
+.workshop-card:has(.badge-red)    { --ws-glow: #ef4444; }
+.workshop-card:has(.badge-collab) { --ws-glow: #ea580c; }
+
+/* بج وضعیت درشت‌تر */
+.workshop-card .badge {
+  padding: 6px 12px !important;
+  font-size: 0.78rem !important;
+  border-radius: 10px !important;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+}
+
+/* دراپ‌داون وضعیت پف‌دار */
+.workshop-card select.smart-dropdown {
+  padding: 8px 14px !important;
+  font-size: 0.82rem !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+/* جعبه جزئیات گرادیانی */
+.workshop-card .workshop-details-box {
+  border-radius: 12px !important;
+  background: linear-gradient(180deg, #f8fafc, #f1f5f9) !important;
+}
+
+/* دارک مود */
+body.dark-mode .workshop-card .workshop-details-box {
+  background: linear-gradient(180deg, #0f172a, #1e293b) !important;
+}
+
 </style>
 </head>
 
@@ -2755,6 +2815,66 @@ function hideLoader() {
     setTimeout(function() { loader.style.display = 'none'; }, 500);
   }, remaining);
 }
+
+// ═══════════════════════════════════════════════════════════════
+// 🔘 Loading داخل دکمه‌ها
+// ═══════════════════════════════════════════════════════════════
+async function withButtonLoading(btn, task, loadingText, successText) {
+  if (!btn || btn.disabled) return;
+  var originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.classList.add('btn-loading');
+  if (loadingText) btn.innerHTML = '<span>' + loadingText + '</span>';
+  try {
+    var result = task();
+    if (result && typeof result.then === 'function') await result;
+    if (successText) {
+      btn.classList.remove('btn-loading');
+      btn.classList.add('btn-loading-success');
+      btn.innerHTML = '<span>' + successText + '</span>';
+      setTimeout(function() {
+        btn.classList.remove('btn-loading-success');
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+      }, 1200);
+    } else {
+      btn.classList.remove('btn-loading');
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+    }
+  } catch(e) {
+    console.error('[withButtonLoading]', e);
+    btn.classList.remove('btn-loading');
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🆘 fallback: اگه توابع patch.js نبود، از اینا استفاده کن
+// ═══════════════════════════════════════════════════════════════
+if (typeof window.getDeviceDisplayName !== 'function') {
+  window.getDeviceDisplayName = function(q) {
+    if (!q) return '---';
+    var brand = (q.brand || '').trim();
+    var model = (q.model || '').trim();
+    var color = (q.color || '').trim();
+    var parts = [];
+    if (brand && brand !== 'سایر') parts.push(brand);
+    if (model) parts.push(model);
+    if (color) parts.push('(' + color + ')');
+    return parts.length > 0 ? parts.join(' ') : 'دستگاه بدون مدل';
+  };
+}
+
+if (typeof window.getDeviceDisplayNameShort !== 'function') {
+  window.getDeviceDisplayNameShort = function(q) {
+    if (!q) return '📱 ---';
+    var model = (q.model || '').trim();
+    return model ? ('📱 ' + model) : '📱 دستگاه بدون مدل';
+  };
+}
+
 
 function esc(s) {
   if (s === null || s === undefined) return '';
@@ -4602,7 +4722,13 @@ function saveMultiItemInvoice(type) {
     var printQuoteId = quoteObj.id;
     var askPrintText = 'پذیرش ثبت شد!\nقبض: ' + currentIntakeCode + '\nپیگیری: ' + currentTrackCode + '\nسطح: ' + loyalty.tier + (deposit > 0 ? '\nبیعانه: ' + formatToman(deposit) : '') + '\n\nفاکتور A5 چاپ شود؟';
     resetInvoiceForm(); renderCustomerLoyaltyBanner(); renderQuotes(); renderTransactions(); renderWorkshopBoard(); switchCustTab('quotes');
-    setTimeout(() => { if (confirm(askPrintText)) printIntakeReceipt(printQuoteId); }, 150);
+    showToast('🔵 قبل از confirm', 'info');
+setTimeout(function() { 
+  showToast('🟡 داخل setTimeout', 'info'); 
+  var r = confirm(askPrintText); 
+  showToast(r ? '🟢 OK زدی' : '🔴 Cancel', 'info'); 
+  if (r) printIntakeReceipt(printQuoteId); 
+}, 150);
     return;
 } else {
     transactions.unshift({
@@ -7507,7 +7633,13 @@ container.appendChild(div);
 var _originalRenderWorkshopBoard = renderWorkshopBoard;
 
 function enhanceWorkshopCards() {
-  // ... (۱۵۰ خط کد)
+  var cards = document.querySelectorAll('#workshop-cards-container .workshop-card');
+  cards.forEach(function(card, i) {
+    if (card.dataset.enhancedV2 === '1') return;
+    card.dataset.enhancedV2 = '1';
+    card.style.animation = 'cardSlideIn 0.4s cubic-bezier(0.34,1.2,0.64,1) backwards';
+    card.style.animationDelay = Math.min(i * 40, 400) + 'ms';
+  });
 }
 
 renderWorkshopBoard = function() {

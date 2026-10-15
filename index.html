@@ -125,7 +125,10 @@ header{
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
   box-shadow:0 -4px 20px rgba(0,0,0,0.06); z-index:1000; padding-bottom:env(safe-area-inset-bottom);
-  border-top:1px solid var(--border); overflow-x:auto;
+  border-top:1px solid var(--border);
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
 }
 .nav-tab{
   position: relative; overflow: hidden; /* جلوگیری از پرش و باگ ریپل */
@@ -1425,7 +1428,7 @@ body.dark-mode .expand-indicator {
 <label for="new-is-collab" style="font-size:.85rem;font-weight:bold;color:#c2410c;cursor:pointer;">🤝 این مخاطب همکار / تعمیرکار واسط است</label>
 </div>
 <textarea id="new-notes" placeholder="آدرس یا مشخصات تکمیلی (اختیاری)" style="margin-top:8px;"></textarea>
-<button type="button" onclick="withButtonLoading(this, function() { addCustomer(); }, 'در حال افزودن...', '✅ افزوده شد!')" style="margin-top:10px;">➕ افزودن پرونده</button>
+<button type="button" onclick="addCustomer()" style="margin-top:10px;">➕ افزودن پرونده</button>
 </div>
 
 <div class="card">

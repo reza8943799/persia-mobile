@@ -1356,17 +1356,17 @@ body.dark-mode .expand-indicator {
 <!-- 📊 آمار کلیک‌پذیر مشتریان (فیلتر سریع) -->
 <div class="card" style="background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);padding:6px 6px !important;margin-bottom:10px !important;border:1px solid #bfdbfe;border-radius:16px !important;">
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;text-align:center;">
-    <div onclick="quickFilterCustomers('ALL')" style="padding:4px 2px;border-radius:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.6)'" onmouseout="this.style.background='transparent'">
-      <div style="font-size:1.05rem;font-weight:900;color:var(--primary);line-height:1.1;" id="stat-total-cust">۰</div>
-      <div style="font-size:0.62rem;color:#1e40af;font-weight:bold;margin-top:1px;">👥 کل</div>
+    <div onclick="quickFilterCustomers('ALL')" style="padding:6px 2px;border-radius:8px;cursor:pointer;">
+      <div style="font-size:22px !important;font-weight:900;color:var(--primary);line-height:1.2;display:block;" id="stat-total-cust">۰</div>
+      <div style="font-size:11px;color:#1e40af;font-weight:bold;margin-top:2px;">👥 کل</div>
     </div>
-    <div onclick="quickFilterCustomers('DEBT')" style="padding:4px 2px;border-radius:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.6)'" onmouseout="this.style.background='transparent'">
-      <div style="font-size:1.05rem;font-weight:900;color:#dc2626;line-height:1.1;" id="stat-debt-cust">۰</div>
-      <div style="font-size:0.62rem;color:#991b1b;font-weight:bold;margin-top:1px;">🔴 بدهکار</div>
+    <div onclick="quickFilterCustomers('DEBT')" style="padding:6px 2px;border-radius:8px;cursor:pointer;">
+      <div style="font-size:22px !important;font-weight:900;color:#dc2626;line-height:1.2;display:block;" id="stat-debt-cust">۰</div>
+      <div style="font-size:11px;color:#991b1b;font-weight:bold;margin-top:2px;">🔴 بدهکار</div>
     </div>
-    <div onclick="quickFilterCustomers('CREDIT')" style="padding:4px 2px;border-radius:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.6)'" onmouseout="this.style.background='transparent'">
-      <div style="font-size:1.05rem;font-weight:900;color:#10b981;line-height:1.1;" id="stat-clear-cust">۰</div>
-      <div style="font-size:0.62rem;color:#065f46;font-weight:bold;margin-top:1px;">✅ تسویه</div>
+    <div onclick="quickFilterCustomers('CREDIT')" style="padding:6px 2px;border-radius:8px;cursor:pointer;">
+      <div style="font-size:22px !important;font-weight:900;color:#10b981;line-height:1.2;display:block;" id="stat-clear-cust">۰</div>
+      <div style="font-size:11px;color:#065f46;font-weight:bold;margin-top:2px;">✅ تسویه</div>
     </div>
   </div>
 </div>
@@ -4179,21 +4179,24 @@ function buildEmptyState(icon, title, subtitle, ctaText, ctaAction) {
 function renderCustomers() {
   // 📊 آپدیت آمار بالای لیست مشتریان
   try {
- activeCustomers.forEach(function(c) {
-  var b = getBalance(c.id);
-  if (b > 0) {
-    debtCount++;
-    if (customerHasOverdueDue(c.id)) overdueCount++;
-    else if (customerHasDueSoon(c.id)) dueSoonCount++;
-  } else {
-    clearCount++;
-  }
-});
-var elTotal = document.getElementById('stat-total-cust');
-var elClear = document.getElementById('stat-clear-cust');
-if (elTotal) elTotal.innerText = activeCustomers.length.toLocaleString('fa-IR');
-if (elDebt) elDebt.innerText = debtCount.toLocaleString('fa-IR');
-if (elClear) elClear.innerText = clearCount.toLocaleString('fa-IR');
+    var activeCustomers = customers.filter(function(c) { return !c.deleted; });
+    var debtCount = 0, overdueCount = 0, clearCount = 0, dueSoonCount = 0;
+    activeCustomers.forEach(function(c) {
+      var b = getBalance(c.id);
+      if (b > 0) {
+        debtCount++;
+        if (customerHasOverdueDue(c.id)) overdueCount++;
+        else if (customerHasDueSoon(c.id)) dueSoonCount++;
+      } else {
+        clearCount++;
+      }
+    });
+    var elTotal = document.getElementById('stat-total-cust');
+    var elDebt = document.getElementById('stat-debt-cust');
+    var elClear = document.getElementById('stat-clear-cust');
+    if (elTotal) elTotal.innerText = activeCustomers.length.toLocaleString('fa-IR');
+    if (elDebt) elDebt.innerText = debtCount.toLocaleString('fa-IR');
+    if (elClear) elClear.innerText = clearCount.toLocaleString('fa-IR');
   } catch(e) {}
   
   var query = (document.getElementById('search-input').value || '').toLowerCase();

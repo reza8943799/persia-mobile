@@ -120,16 +120,17 @@ header{
 /* منوی ناوبری پایین با افکت شیشه‌ای عمیق و ارتفاع قفل‌شده */
 .nav-tabs{
   position:fixed; bottom:0; left:0; right:0; display:flex;
-  height: calc(64px + env(safe-area-inset-bottom)); /* قفل کردن ارتفاع */
+  height: calc(64px + env(safe-area-inset-bottom));
   background: rgba(255, 255, 255, 0.85) !important; 
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
   box-shadow:0 -4px 20px rgba(0,0,0,0.06); z-index:1000; padding-bottom:env(safe-area-inset-bottom);
-  border-top:1px solid var(--border);
+  border-top:1px solid var(--border); overflow-x:auto;
   overflow-x: hidden;
-  overflow-y: hidden;
+overflow-y: hidden;
 }
-}
+.nav-tabs::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+
 .nav-tab{
   position: relative; overflow: hidden; /* جلوگیری از پرش و باگ ریپل */
   flex:1; padding:0; height: 64px; display:flex; flex-direction:column;
@@ -1233,9 +1234,12 @@ body.dark-mode .workshop-card .workshop-details-box {
 <body>
 
 <div id="initial-loader">
-  <div style="text-align:center;">
-    <img src="splash.jpg" alt="Persia Mobile" style="max-width:88%;max-height:75vh;object-fit:contain;border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,0.5);display:block;">
-    <div class="loader-spinner" style="width:32px;height:32px;border-width:3px;margin-top:24px;border-color:rgba(255,255,255,0.15);border-top-color:#60a5fa;"></div>
+  <!-- 🖼️ تصویر Splash فول‌اسکرین و وسط‌چین -->
+  <img src="splash.jpg" alt="Persia Mobile" class="splash-img">
+  
+  <!-- ⏳ لودینگ روی تصویر (پایین) -->
+  <div class="splash-overlay">
+    <div class="loader-spinner" style="width:32px;height:32px;border-width:3px;border-color:rgba(255,255,255,0.15);border-top-color:#60a5fa;"></div>
     <div style="margin-top:12px;color:#93c5fd;font-size:0.8rem;font-weight:bold;">در حال بارگذاری داده‌ها...</div>
   </div>
 </div>
@@ -1348,6 +1352,57 @@ body.dark-mode .expand-indicator {
   background: #334155;
   color: #cbd5e1;
 }
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🖼️ Splash Screen فول‌اسکرین با تصویر وسط‌چین */
+/* ═══════════════════════════════════════════════════════════════ */
+
+#initial-loader {
+  position: fixed;
+  inset: 0;
+  background: #0b132b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99998;
+  transition: opacity 0.5s ease;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* تصویر فول‌اسکرین — وسط‌چین */
+.splash-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;      /* کل صفحه رو پر می‌کنه (ممکنه لبه‌ها بریده بشن) */
+  object-position: center;
+  display: block;
+  margin: 0 auto;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* اگه می‌خوای تصویر کامل دیده بشه (بدون برش) → این رو جایگزین کن: */
+/* .splash-img { object-fit: contain; background: #0b132b; } */
+
+/* لودینگ + متن روی تصویر، پایین وسط */
+.splash-overlay {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+  text-align: center;
+  /* سایه برای خوانایی روی هر تصویری */
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
 
 </style>
 <div class="nav-tabs">

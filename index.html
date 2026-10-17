@@ -13463,6 +13463,73 @@ title: combinedTitle, workType: workType, collabName: collabName, collabCost: co
 })();
 
 // ═══════════════════════════════════════════════════
+// 🔧 Fix: مودال خروج سریع بسته می‌شه (debounce)
+// ═══════════════════════════════════════════════════
+(function fixExitModalFlash() {
+  var _origConfirm = window.confirm;
+  var _exitModalOpen = false;
+  var _lastRequestAt = 0;
+  var DEBOUNCE_MS = 800;
+
+  window.confirm = function(msg) {
+    if (typeof msg !== 'string' || msg.indexOf('از برنامه خارج می‌شوید') === -1) {
+      return _origConfirm.apply(window, arguments);
+    }
+
+    if (typeof window.prettyConfirm !== 'function') {
+      return _origConfirm.apply(window, arguments);
+    }
+
+    var now = Date.now();
+    if (now - _lastRequestAt < DEBOUNCE_MS) {
+      return false;
+    }
+    _lastRequestAt = now;
+
+    if (_exitModalOpen) {
+      return false;
+    }
+
+    var existing = document.getElementById('pretty-confirm-overlay');
+    if (existing) {
+      var btns = existing.querySelectorAll('button');
+      if (btns.length > 0) {
+        try { btns[0].click(); } catch(e) {}
+      }
+      return false;
+    }
+
+    _exitModalOpen = true;
+
+    window.prettyConfirm({
+      title: 'خروج از برنامه',
+      message: 'آیا می‌خواهید از موبایل پرشیا خارج شوید؟\n\n✅ اطلاعات شما ذخیره شده‌اند و در بازگشت بعدی در دسترس خواهند بود.',
+      icon: '🚪',
+      confirmText: '👋 بله، خارج شو',
+      cancelText: '🏠 ماندن در برنامه',
+      danger: true
+    }).then(function(yes) {
+      _exitModalOpen = false;
+      if (yes) {
+        try {
+          if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+            window.Capacitor.Plugins.App.exitApp();
+            return;
+          }
+        } catch(e) {}
+        try { window.close(); } catch(e) {}
+        if (typeof showToast === 'function') {
+          showToast('👋 برای خروج، تب مرورگر رو ببندید', 'info');
+        }
+      }
+    });
+
+    return false;
+  };
+
+  console.log('[exit-flash-fix] Ready ✅');
+})();
+// ═══════════════════════════════════════════════════
 // 🔧 رفع باگ: فاصله ۱۴px بعد از فیلتر (نسخه JS)
 // ═══════════════════════════════════════════════════
 (function fixFilterGap() {

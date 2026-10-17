@@ -1,4 +1,4 @@
-var CACHE_NAME = 'persia-cache-v3';
+var CACHE_NAME = 'persia-cache-v4';
 var urlsToCache = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', function(event) {

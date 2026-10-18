@@ -1691,6 +1691,133 @@ body.dark-mode .workshop-card .workshop-details-box {
   console.log('[bottom-sheet] Drag ready ✅');
 })();
 
+/* ═══════════════════════════════════════════════════ */
+/* 🌙 رفع مشکلات دارک مود (حاشیه کارت‌ها و متن فیلدها) */
+/* ═══════════════════════════════════════════════════ */
+
+/* ۱. واضح کردن حاشیه دور کارت‌ها (مخصوصاً لیست مخاطبین) */
+body.dark-mode .card {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* حاشیه کمی پررنگ‌تر برای کارت‌های داخل لیست مشتری */
+body.dark-mode #customer-list .card {
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: #1e293b !important; /* یک پله روشن‌تر از پس‌زمینه */
+}
+
+/* ۲. فیکس کردن کادر رنگ دستگاه (که زرد کمرنگ بود) */
+body.dark-mode input[style*="background:#fef9c3"],
+body.dark-mode input[style*="background: #fef9c3"] {
+  background: #422006 !important; /* قهوه‌ای تیره */
+  color: #fef08a !important; /* متن زرد روشن */
+  border-color: #854d0e !important;
+}
+
+/* ۳. فیکس کردن کادر نشانه‌های دستگاه (که بنفش کمرنگ بود) */
+body.dark-mode textarea[style*="background:#f5f3ff"],
+body.dark-mode textarea[style*="background: #f5f3ff"] {
+  background: #2e1065 !important; /* بنفش تیره */
+  color: #e9d5ff !important; /* متن بنفش روشن */
+  border-color: #5b21b6 !important;
+}
+
+/* ۴. تضمین خوانایی متن تمام فیلدها در حالت شب */
+body.dark-mode input, 
+body.dark-mode textarea, 
+body.dark-mode select {
+  color: #f8fafc !important;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* 🌙 فیکس نهایی حالت تاریک: کادرهای رنگی و حاشیه کارت‌ها */
+/* ═══════════════════════════════════════════════════ */
+
+/* ۱. واضح‌تر کردن حاشیه دور کارت‌های مخاطبین در حالت شب */
+body.dark-mode #customer-list .card,
+body.dark-mode .swipe-cust-wrapper > .card {
+  border: 1px solid rgba(148, 163, 184, 0.4) !important; /* حاشیه خاکستری-آبی واضح */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ۲. فیکس کادر «نوع تعامل کاری» (پس‌زمینه نارنجی/کرم) */
+body.dark-mode select[style*="background:#fff7ed"],
+body.dark-mode [style*="background:#fff7ed"] {
+  background: #431407 !important;
+  color: #ffedd5 !important;
+  border-color: #9a3412 !important;
+}
+body.dark-mode select[style*="background:#fff7ed"] option {
+  background: #431407 !important;
+  color: #ffedd5 !important;
+}
+
+/* ۳. فیکس کادر «رنگ دستگاه» (پس‌زمینه زرد) */
+body.dark-mode input[style*="background:#fef9c3"] {
+  background: #422006 !important;
+  color: #fef08a !important;
+  border-color: #854d0e !important;
+}
+
+/* ۴. فیکس کادرهای داخلی کارگاه (پس‌زمینه صورتی) */
+body.dark-mode [style*="background:#fdf2f8"] {
+  background: #4c0519 !important;
+  border-color: #9d174d !important;
+}
+body.dark-mode [style*="background:#fdf2f8"] textarea,
+body.dark-mode [style*="background:#fff"] {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #be185d !important;
+}
+
+/* ۵. تضمین خوانایی متن در تمام فیلدهای متنی دارک مود */
+body.dark-mode input:not([type="checkbox"]):not([type="radio"]), 
+body.dark-mode textarea, 
+body.dark-mode select {
+  color: #f8fafc !important;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* 🌙 فیکس قطعی دراپ‌داون مرتب‌سازی مشتریان در حالت شب */
+/* ═══════════════════════════════════════════════════ */
+
+body.dark-mode #cust-sort-order {
+  background-color: #1e293b !important; /* پس‌زمینه تیره هماهنگ با برنامه */
+  color: #f8fafc !important; /* متن سفید/نقره‌ای */
+  border-color: #8b5cf6 !important; /* حاشیه بنفش */
+}
+
+/* فیکس کردن گزینه‌های داخل دراپ‌داون (وقتی باز می‌شه) */
+body.dark-mode #cust-sort-order option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* 🛠️ فیکس قطعی تداخل لیست و فاکتورها (با کلاس روی Body) */
+/* ═══════════════════════════════════════════════════ */
+
+/* ۱. قانون طلایی: به صورت پیش‌فرض صفحه فاکتورها کاملاً مخفی باشد */
+#view-details { display: none !important; }
+#view-customers { display: block; }
+
+/* ۲. وقتی کلاس پروفایل فعال شد، لیست مخفی و فاکتور باز شود */
+body.show-customer-profile #view-details { display: block !important; }
+body.show-customer-profile #view-customers { display: none !important; }
+
+/* ۳. فیکس رنگ کادر مرتب‌سازی برای حالت شب */
+body.dark-mode select#cust-sort-order {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #8b5cf6 !important;
+}
+body.dark-mode select#cust-sort-order option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
 </style>
 </head>
 
@@ -13634,6 +13761,797 @@ title: combinedTitle, workType: workType, collabName: collabName, collabCost: co
   console.log('[filter-gap-fix] Ready ✅');
 })();
 
+// ═══════════════════════════════════════════════════
+// 🆕 Fix: بازسازی نوار + آیکون جذاب بیشتر + رفع تداخل
+// ═══════════════════════════════════════════════════
+(function fixNavBarAndIcons() {
+
+ // ۱. تزریق CSS برای آیکون جادویی بیشتر (تبدیل به ضربدر)
+if (!document.getElementById('more-icon-styles')) {
+  var style = document.createElement('style');
+  style.id = 'more-icon-styles';
+  style.textContent = `
+    .custom-dots-icon {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 24px;
+      width: 24px;
+      position: relative;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .custom-dots-icon .dot {
+      width: 5px;
+      height: 5px;
+      background: currentColor;
+      border-radius: 50%;
+      position: absolute;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    /* پوزیشن اولیه نقطه‌ها */
+    .custom-dots-icon .dot:nth-child(1) { top: 3px; }
+    .custom-dots-icon .dot:nth-child(2) { top: 9.5px; }
+    .custom-dots-icon .dot:nth-child(3) { top: 16px; }
+
+    /* رنگ و درخشش نئونی (همیشه) */
+    #btn-tab-more .nav-icon {
+      color: #3b82f6 !important;
+      filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.6));
+    }
+    #btn-tab-more.active .nav-icon, #btn-tab-more.open .nav-icon {
+      color: #2563eb !important;
+      filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.9));
+    }
+
+    /* انیمیشن پالس (فقط وقتی منو بسته است) */
+    #btn-tab-more.active:not(.open) .custom-dots-icon .dot:nth-child(1) { animation: dotPulse 1.2s infinite 0s; }
+    #btn-tab-more.active:not(.open) .custom-dots-icon .dot:nth-child(2) { animation: dotPulse 1.2s infinite 0.15s; }
+    #btn-tab-more.active:not(.open) .custom-dots-icon .dot:nth-child(3) { animation: dotPulse 1.2s infinite 0.3s; }
+
+    @keyframes dotPulse {
+      0%, 100% { transform: translateY(0); opacity: 0.6; }
+      50% { transform: translateY(-3px); opacity: 1; box-shadow: 0 0 8px currentColor; }
+    }
+
+    /* تبدیل به ضربدر (وقتی منو بازه) */
+    #btn-tab-more.open .custom-dots-icon {
+      transform: rotate(90deg);
+    }
+    #btn-tab-more.open .custom-dots-icon .dot:nth-child(1) {
+      top: 9.5px;
+      transform: rotate(45deg);
+      width: 16px;
+      height: 2.5px;
+      border-radius: 2px;
+    }
+    #btn-tab-more.open .custom-dots-icon .dot:nth-child(2) {
+      top: 9.5px;
+      transform: scale(0);
+      opacity: 0;
+    }
+    #btn-tab-more.open .custom-dots-icon .dot:nth-child(3) {
+      top: 9.5px;
+      transform: rotate(-45deg);
+      width: 16px;
+      height: 2.5px;
+      border-radius: 2px;
+    }
+  `;
+  document.head.appendChild(style);
+}
+  // ۲. حذف دکمه تنظیمات از نوار پایین
+  var backupBtn = document.getElementById('btn-tab-backup');
+  if (backupBtn) backupBtn.remove();
+
+  // ۳. اضافه کردن دکمه سفارشات
+  var navTabs = document.querySelector('.nav-tabs');
+  var moreBtn = document.getElementById('btn-tab-more');
+  if (navTabs && moreBtn && !document.getElementById('btn-tab-orders')) {
+    var ordersBtn = document.createElement('button');
+    ordersBtn.type = 'button';
+    ordersBtn.className = 'nav-tab';
+    ordersBtn.id = 'btn-tab-orders';
+    ordersBtn.innerHTML = '<span class="nav-icon">📋</span><span>سفارشات</span>';
+    ordersBtn.onclick = function() { openTab('orders'); };
+    navTabs.insertBefore(ordersBtn, moreBtn);
+  }
+
+  // ۴. جذاب کردن آیکون «بیشتر» (۳ نقطه عمودی)
+  if (moreBtn) {
+    var moreIcon = moreBtn.querySelector('.nav-icon');
+    if (moreIcon) {
+      moreIcon.innerHTML = '<span class="custom-dots-icon"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
+      moreIcon.style.display = 'flex';
+      moreIcon.style.justifyContent = 'center';
+      moreIcon.style.alignItems = 'center';
+    }
+  }
+
+  // ۵. اضافه کردن تنظیمات به منوی بیشتر
+  var moreBox = document.getElementById('more-menu-box');
+  if (moreBox && !moreBox.querySelector('[data-tab="backup"]')) {
+    var settingsItem = document.createElement('div');
+    settingsItem.className = 'more-menu-item';
+    settingsItem.setAttribute('data-tab', 'backup');
+    settingsItem.onclick = function() { openMoreTab('backup'); };
+    settingsItem.innerHTML = '<div class="mm-icon">⚙️</div><span>تنظیمات</span>';
+    moreBox.appendChild(settingsItem);
+  }
+
+  // ۶. ساخت HTML بخش سفارشات
+  if (!document.getElementById('tab-content-orders')) {
+    var ordersSection = document.createElement('div');
+    ordersSection.id = 'tab-content-orders';
+    ordersSection.style.display = 'none';
+    ordersSection.innerHTML = '<div class="container"><div id="orders-container"></div></div>';
+    var depositsSection = document.getElementById('tab-content-deposits');
+    if (depositsSection && depositsSection.parentNode) {
+      depositsSection.parentNode.insertBefore(ordersSection, depositsSection.nextSibling);
+    }
+  }
+
+  // ۷. بازنویسی کامل openTab برای رفع تداخل
+  window.openTab = function(tabName) {
+    if (typeof closeMoreMenu === 'function') closeMoreMenu();
+
+    // الف) مخفی کردن همه تب‌ها
+    ['customers', 'deposits', 'orders', 'expenses', 'parts', 'reports', 'backup'].forEach(function(t) {
+      var sec = document.getElementById('tab-content-' + t);
+      if (sec) sec.style.display = (t === tabName) ? 'block' : 'none';
+    });
+
+    // ب) پاک کردن کلاس active از تمام دکمه‌های نوار پایین
+    document.querySelectorAll('.nav-tabs .nav-tab').forEach(function(btn) {
+      btn.classList.remove('active');
+    });
+
+    // ج) مشخص کردن تب فعال
+    var isMoreTab = ['expenses', 'parts', 'reports', 'backup'].includes(tabName);
+    if (isMoreTab) {
+      var mb = document.getElementById('btn-tab-more');
+      if (mb) mb.classList.add('active');
+    } else if (tabName === 'workshop') {
+      var wb = document.getElementById('btn-tab-workshop');
+      if (wb) wb.classList.add('active');
+    } else {
+      var activeBtn = document.getElementById('btn-tab-' + tabName);
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    // د) رندر کردن محتوای مربوطه
+    if (tabName === 'workshop') {
+      var tc = document.getElementById('tab-content-customers');
+      if (tc) tc.style.display = 'block';
+      var vc = document.getElementById('view-customers');
+      var vd = document.getElementById('view-details');
+      if (vc) vc.style.display = 'block';
+      if (vd) vd.style.display = 'none';
+      var secCust = document.getElementById('sub-section-customers');
+      var secWork = document.getElementById('sub-section-workshop');
+      if (secCust) secCust.style.display = 'none';
+      if (secWork) secWork.style.display = 'block';
+      if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    if (tabName === 'customers') {
+      if (typeof showCustomerList === 'function') showCustomerList();
+      if (typeof switchCustomerSubView === 'function') switchCustomerSubView('cust');
+    }
+    if (tabName === 'deposits' && typeof renderDepositsStream === 'function') renderDepositsStream();
+    if (tabName === 'orders' && typeof renderOrders === 'function') renderOrders();
+    
+    if (tabName === 'expenses') {
+      var ed1 = document.getElementById('exp-date');
+      if (ed1) ed1.value = getTodayJalali();
+      if (typeof renderExpenses === 'function') renderExpenses();
+    }
+    if (tabName === 'parts') {
+      var pd1 = document.getElementById('part-date');
+      if (pd1) pd1.value = getTodayJalali();
+      if (typeof renderParts === 'function') renderParts();
+    }
+    if (tabName === 'reports' && typeof renderReports === 'function') renderReports();
+    
+    if (tabName === 'backup') {
+      var cardTextEl = document.getElementById('cfg-card-text'); if (cardTextEl) cardTextEl.value = customPaymentText || '';
+      var remTextEl = document.getElementById('cfg-reminder-text');
+      if (remTextEl) { try { remTextEl.value = localStorage.getItem('db_daily_reminder') || ''; } catch(e) {} }
+      var driveUrlEl = document.getElementById('cfg-drive-url'); if (driveUrlEl) driveUrlEl.value = driveScriptUrl || defaultDriveUrl;
+      var qrUrlEl = document.getElementById('cfg-qr-base-url'); if (qrUrlEl) qrUrlEl.value = qrBaseUrl || '';
+      if (typeof countOrphanImages === 'function') {
+        countOrphanImages().then(n => {
+          var el = document.getElementById('orphan-count-info');
+          if (el) { el.innerText = n > 0 ? ('⚠️ ' + n + ' عکس یتیم پیدا شد') : '✅ همه عکس‌ها درست هستند'; el.style.color = n > 0 ? '#dc2626' : '#15803d'; }
+          if (typeof updateRecompressStats === 'function') updateRecompressStats();
+        });
+      }
+    }
+  };
+
+  console.log('[nav-fix] Ready ✅');
+})();
+
+// ─── Placeholder برای renderOrders (تا مرحله بعد)
+if (typeof window.renderOrders !== 'function') {
+  window.renderOrders = function() {
+    var container = document.getElementById('orders-container');
+    if (!container) return;
+    container.innerHTML = 
+      '<div class="card" style="text-align:center;padding:40px 20px;">' +
+        '<div style="font-size:3.5rem;margin-bottom:12px;animation:emptyFloat 3s ease-in-out infinite;display:inline-block;">📋</div>' +
+        '<div style="font-weight:900;font-size:1.1rem;color:#1e293b;margin-bottom:6px;">بخش سفارشات</div>' +
+        '<div style="font-size:0.85rem;color:#64748b;line-height:1.7;">در مرحله بعد تکمیل می‌شه<br>📦 ثبت سفارش قطعات</div>' +
+      '</div>';
+  };
+}
+
+
+// ═══════════════════════════════════════════════════
+// 🛒 سیستم کامل سفارشات — v2 (جستجو + کسری انبار)
+// ═══════════════════════════════════════════════════
+(function setupOrdersSystem() {
+  if (!window.orders) window.orders = [];
+  if (!window._ordersLoaded) {
+    window._ordersLoaded = true;
+    setTimeout(function() {
+      openAppDB().then(function(db) {
+        var req = db.transaction('store', 'readonly').objectStore('store').get('db_orders');
+        req.onsuccess = function(e) {
+          if (e.target.result && Array.isArray(e.target.result)) window.orders = e.target.result;
+          if (typeof renderOrders === 'function') renderOrders();
+        };
+      });
+    }, 500);
+  }
+
+  if (!window._ordersSavePatched) {
+    window._ordersSavePatched = true;
+    var _baseSaveAll = saveAll;
+    saveAll = function() {
+      var p = _baseSaveAll();
+      openAppDB().then(function(db) {
+        db.transaction('store', 'readwrite').objectStore('store').put(window.orders, 'db_orders');
+      });
+      return p;
+    };
+  }
+
+  ['modal-add-order', 'modal-transfer-order'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.remove();
+  });
+
+  document.body.insertAdjacentHTML('beforeend', `
+    <div class="modal-overlay" id="modal-add-order">
+      <div class="modal-content" style="max-width:480px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;">
+          <h3 style="font-size:1rem;color:#1e293b;">🛒 ثبت سفارش جدید</h3>
+          <button type="button" onclick="closeAddOrderModal()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">✕</button>
+        </div>
+
+        <div style="background:#fffbeb;border:1.5px dashed #f59e0b;border-radius:8px;padding:10px;margin-top:10px;display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="order-is-shortage" onchange="toggleOrderShortage()" style="width:20px;height:20px;margin:0;">
+          <label for="order-is-shortage" style="font-size:0.85rem;font-weight:800;color:#92400e;cursor:pointer;margin:0;flex:1;">📉 کسری انبار (خرید برای موجودی مغازه)</label>
+        </div>
+
+        <label class="field-label" id="order-cust-label">مشتری (اجباری):</label>
+        <div id="order-cust-wrap" style="position:relative;margin-top:6px;">
+          <input type="text" id="order-cust-search" placeholder="🔍 جستجوی نام یا شماره..." oninput="searchOrderCustomer(this.value)" onfocus="searchOrderCustomer(this.value)" autocomplete="off" style="margin-top:0;">
+          <input type="hidden" id="order-cust-id" value="">
+          <div id="order-cust-results" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.15);max-height:220px;overflow-y:auto;margin-top:4px;"></div>
+        </div>
+
+        <label class="field-label">نام قطعه / کالا:</label>
+        <input type="text" id="order-item-name" placeholder="مثال: LCD سامسونگ A54">
+
+        <div class="row">
+          <div style="flex:1;">
+            <label class="field-label">قیمت خرید (اختیاری):</label>
+            <input type="text" id="order-buy-price" placeholder="تومان" oninput="formatAmountInput(this)">
+          </div>
+          <div style="flex:1;">
+            <label class="field-label">قیمت فروش (اختیاری):</label>
+            <input type="text" id="order-sell-price" placeholder="تومان" oninput="formatAmountInput(this)">
+          </div>
+        </div>
+
+        <label class="field-label">یادداشت:</label>
+        <input type="text" id="order-note" placeholder="مثال: رنگ سفید، فابریک...">
+
+        <div class="row" style="margin-top:14px;">
+          <button type="button" onclick="saveNewOrder()" style="background:var(--success);flex:1.4;padding:11px;font-weight:800;">✓ ثبت سفارش</button>
+          <button type="button" onclick="closeAddOrderModal()" style="background:#cbd5e1;color:#1e293b;flex:1;padding:11px;">انصراف</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-transfer-order">
+      <div class="modal-content" style="max-width:460px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;">
+          <h3 style="font-size:1rem;color:#1e293b;">📦 انتقال به انبار قطعات</h3>
+          <button type="button" onclick="closeTransferModal()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">✕</button>
+        </div>
+        <input type="hidden" id="transfer-order-id">
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px;margin:10px 0;">
+          <div style="font-size:0.8rem;color:#166534;">در حال انتقال سفارش:</div>
+          <div id="transfer-item-title" style="font-weight:800;color:#065f46;font-size:1rem;margin-top:2px;"></div>
+        </div>
+        <div class="row">
+          <div style="flex:1;">
+            <label class="field-label">کیفیت / توضیح:</label>
+            <input type="text" id="transfer-quality" placeholder="مثال: اورجینال، کپی...">
+          </div>
+          <div style="flex:1;">
+            <label class="field-label">تعداد:</label>
+            <input type="text" id="transfer-qty" placeholder="1" oninput="formatAmountInput(this)">
+          </div>
+        </div>
+        <div class="row">
+          <div style="flex:1;">
+            <label class="field-label" style="color:var(--danger);">قیمت خرید:</label>
+            <input type="text" id="transfer-buy-price" placeholder="تومان" oninput="formatAmountInput(this)">
+          </div>
+          <div style="flex:1;">
+            <label class="field-label" style="color:var(--success);">قیمت فروش:</label>
+            <input type="text" id="transfer-sell-price" placeholder="تومان" oninput="formatAmountInput(this)">
+          </div>
+        </div>
+        <div class="row" style="margin-top:14px;">
+          <button type="button" onclick="confirmTransferToInventory()" style="background:var(--primary);flex:1.4;padding:11px;font-weight:800;">✓ تایید و وارد انبار</button>
+          <button type="button" onclick="closeTransferModal()" style="background:#cbd5e1;color:#1e293b;flex:1;padding:11px;">انصراف</button>
+        </div>
+      </div>
+    </div>
+  `);
+
+  // ─── رندر لیست سفارشات
+  window.renderOrders = function() {
+    var container = document.getElementById('orders-container');
+    if (!container) return;
+
+    var activeOrders = window.orders.filter(function(o) { return !o.deleted; });
+    activeOrders.sort(function(a, b) {
+      if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
+      if (b.status === 'PENDING' && a.status !== 'PENDING') return 1;
+      return b.id - a.id;
+    });
+
+    var html = `
+      <div class="card" style="background:#eff6ff;border:1.5px solid #93c5fd;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:800;font-size:1rem;color:#1e40af;">🛒 سفارشات قطعات</div>
+          <div style="font-size:0.78rem;color:#475569;margin-top:2px;">لیست خرید و تهیه قطعات</div>
+        </div>
+        <button type="button" onclick="openAddOrderModal()" style="background:#2563eb;width:auto;padding:8px 14px;font-size:0.82rem;margin:0;border-radius:8px;">➕ سفارش جدید</button>
+      </div>
+    `;
+
+    if (activeOrders.length === 0) {
+      html += `
+        <div class="card" style="text-align:center;padding:40px 20px;">
+          <div style="font-size:3.5rem;margin-bottom:12px;animation:emptyFloat 3s ease-in-out infinite;display:inline-block;">🛒</div>
+          <div style="font-weight:900;font-size:1.1rem;color:#1e293b;margin-bottom:6px;">سفارشی ثبت نشده</div>
+          <div style="font-size:0.85rem;color:#64748b;line-height:1.7;">برای خرید قطعه، از دکمه بالا استفاده کن.</div>
+        </div>
+      `;
+    } else {
+      activeOrders.forEach(function(o) {
+        var c = o.customerId ? customers.find(function(x) { return x.id === o.customerId && !x.deleted; }) : null;
+        var isArrived = (o.status === 'ARRIVED');
+        var isTransferred = o.transferredToInventory;
+        var isShortage = o.isShortage || !o.customerId;
+
+        var bg = isTransferred ? '#f8fafc' : (isArrived ? '#f0fdf4' : (isShortage ? '#fff7ed' : '#fffbeb'));
+        var border = isTransferred ? '#e2e8f0' : (isArrived ? '#86efac' : (isShortage ? '#fdba74' : '#fde68a'));
+
+        var customerLine = isShortage
+          ? '<span style="display:inline-block;background:#fed7aa;color:#9a3412;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:bold;">📉 کسری انبار</span>'
+          : '👤 ' + esc(c ? c.name : 'نامشخص');
+
+        html += `
+          <div class="card" style="padding:12px;margin-bottom:8px;background:${bg};border:1px solid ${border};">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <div onclick="toggleOrderStatus(${o.id})" style="cursor:pointer;margin-top:2px;">
+                <div style="width:24px;height:24px;border-radius:6px;border:2px solid ${isArrived ? '#10b981' : '#cbd5e1'};background:${isArrived ? '#10b981' : '#fff'};display:flex;justify-content:center;align-items:center;color:#fff;font-size:1rem;transition:all 0.2s;">
+                  ${isArrived ? '✓' : ''}
+                </div>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:800;font-size:0.95rem;color:#1e293b;text-decoration:${isTransferred ? 'line-through' : 'none'};">${esc(o.itemName)}</div>
+                <div style="font-size:0.78rem;color:#475569;margin-top:4px;">${customerLine}</div>
+                <div style="font-size:0.75rem;color:#64748b;margin-top:2px;">📅 ${esc(o.date)}</div>
+                ${o.buyPrice || o.sellPrice ? `
+                  <div style="font-size:0.75rem;margin-top:4px;display:flex;gap:8px;">
+                    ${o.buyPrice ? `<span style="color:#dc2626;">خرید: ${formatToman(o.buyPrice)}</span>` : ''}
+                    ${o.sellPrice ? `<span style="color:#10b981;">فروش: ${formatToman(o.sellPrice)}</span>` : ''}
+                  </div>
+                ` : ''}
+                ${o.note ? `<div style="font-size:0.75rem;color:#92400e;background:#fef3c7;padding:4px 8px;border-radius:6px;margin-top:6px;display:inline-block;">📝 ${esc(o.note)}</div>` : ''}
+              </div>
+              <div style="text-align:left;flex-shrink:0;">
+                ${isTransferred 
+                  ? `<span class="badge badge-green" style="font-size:0.7rem;">وارد انبار شد</span>`
+                  : (isArrived 
+                      ? `<button type="button" onclick="openTransferModal(${o.id})" style="background:#2563eb;padding:6px 10px;font-size:0.75rem;margin:0;border-radius:8px;width:auto;">📦 انتقال</button>`
+                      : `<span class="badge badge-orange" style="font-size:0.7rem;">⏳ منتظر</span>`
+                    )
+                }
+                <button type="button" onclick="deleteOrder(${o.id})" style="background:none;border:none;color:#ef4444;font-size:1rem;padding:4px;margin-top:8px;width:auto;box-shadow:none;cursor:pointer;display:block;">🗑️</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+    container.innerHTML = html;
+  };
+
+// ─── جستجوی مشتری
+window.searchOrderCustomer = function(q) {
+  var results = document.getElementById('order-cust-results');
+  if (!results) return;
+  q = (q || '').trim().toLowerCase();
+
+  var matches = customers.filter(function(c) {
+    if (c.deleted) return false;
+    if (!q) return true;
+    return (c.name || '').toLowerCase().indexOf(q) !== -1 || 
+           (c.phone || '').indexOf(q) !== -1 ||
+           (c.notes || '').toLowerCase().indexOf(q) !== -1;
+  }).slice(0, 25);
+
+  if (matches.length === 0) {
+    results.innerHTML = '<div style="padding:12px;color:#94a3b8;text-align:center;font-size:0.8rem;">مشتری یافت نشد</div>';
+    results.style.display = 'block';
+    return;
+  }
+
+  var html = '';
+  matches.forEach(function(c) {
+    var notesHtml = '';
+    if (c.notes && c.notes.trim()) {
+      notesHtml = '<span style="color:#b45309;font-size:0.72rem;background:#fef3c7;padding:2px 6px;border-radius:4px;display:inline-block;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom;margin-right:6px;">📝 ' + esc(c.notes) + '</span>';
+    }
+
+window.selectOrderCustomer = function(custId) {
+  // مقایسه امن آیدی (String) برای جلوگیری از باگ‌های عددی/متنی
+  var c = customers.find(function(x) { return String(x.id) === String(custId) && !x.deleted; });
+  if (!c) return;
+
+  document.getElementById('order-cust-id').value = c.id;
+  document.getElementById('order-cust-search').value = c.name + (c.phone ? ' — ' + c.phone : '');
+  document.getElementById('order-cust-results').style.display = 'none';
+  
+  // بستن کیبورد و برداشتن فوکوس
+  document.getElementById('order-cust-search').blur();
+};
+    // استفاده از onmousedown برای اینکه قبل از بسته شدن کیبورد اجرا بشه
+    html += '<div class="part-search-item" onmousedown="event.preventDefault(); window.selectOrderCustomer(\'' + c.id + '\')" style="cursor:pointer; align-items:flex-start;">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-weight:bold;color:#1e293b;font-size:0.88rem;margin-bottom:2px;">' + esc(c.name) + (c.isCollab ? ' 🤝' : '') + '</div>' +
+        '<div style="font-size:0.75rem;color:#64748b;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">' +
+          '<span style="font-family:monospace;">' + esc(c.phone || '---') + '</span>' +
+          notesHtml +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  results.innerHTML = html;
+  results.style.display = 'block';
+};
+
+  // ─── کسری انبار
+  window.toggleOrderShortage = function() {
+    var isShortage = document.getElementById('order-is-shortage').checked;
+    var wrap = document.getElementById('order-cust-wrap');
+    var label = document.getElementById('order-cust-label');
+
+    if (isShortage) {
+      wrap.style.opacity = '0.35';
+      wrap.style.pointerEvents = 'none';
+      document.getElementById('order-cust-id').value = '';
+      document.getElementById('order-cust-search').value = '';
+      document.getElementById('order-cust-search').placeholder = 'کسری انبار (بدون مشتری)';
+      if (label) label.innerText = 'مشتری (اختیاری — کسری انبار):';
+    } else {
+      wrap.style.opacity = '1';
+      wrap.style.pointerEvents = '';
+      document.getElementById('order-cust-search').placeholder = '🔍 جستجوی نام یا شماره...';
+      if (label) label.innerText = 'مشتری (اجباری):';
+    }
+  };
+
+  // ─── مدیریت
+  window.openAddOrderModal = function() {
+    document.getElementById('order-cust-id').value = '';
+    document.getElementById('order-cust-search').value = '';
+    document.getElementById('order-cust-results').style.display = 'none';
+    document.getElementById('order-is-shortage').checked = false;
+    document.getElementById('order-item-name').value = '';
+    document.getElementById('order-buy-price').value = '';
+    document.getElementById('order-sell-price').value = '';
+    document.getElementById('order-note').value = '';
+    toggleOrderShortage();
+    document.getElementById('modal-add-order').style.display = 'flex';
+  };
+
+  window.closeAddOrderModal = function() {
+    document.getElementById('modal-add-order').style.display = 'none';
+  };
+
+  window.saveNewOrder = function() {
+    var isShortage = document.getElementById('order-is-shortage').checked;
+    var custId = Number(document.getElementById('order-cust-id').value) || null;
+    var itemName = (document.getElementById('order-item-name').value || '').trim();
+    var buyPrice = Number(cleanNumber(document.getElementById('order-buy-price').value)) || 0;
+    var sellPrice = Number(cleanNumber(document.getElementById('order-sell-price').value)) || 0;
+    var note = (document.getElementById('order-note').value || '').trim();
+
+    if (!isShortage && !custId) return showToast('انتخاب مشتری اجباری است', 'warning');
+    if (!itemName) return showToast('نام قطعه را وارد کنید', 'warning');
+
+    window.orders.unshift({
+      id: Date.now(),
+      customerId: isShortage ? null : custId,
+      isShortage: isShortage,
+      itemName: itemName,
+      buyPrice: buyPrice,
+      sellPrice: sellPrice,
+      note: note,
+      status: 'PENDING',
+      transferredToInventory: false,
+      date: getTodayJalali(),
+      deleted: false,
+      updatedAt: Date.now()
+    });
+
+    saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
+    closeAddOrderModal();
+    renderOrders();
+    showToast('✅ سفارش ثبت شد', 'success');
+  };
+
+  window.toggleOrderStatus = function(id) {
+    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
+    if (!o || o.transferredToInventory) return;
+    o.status = (o.status === 'PENDING') ? 'ARRIVED' : 'PENDING';
+    o.updatedAt = Date.now();
+    saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
+    renderOrders();
+    if (navigator.vibrate) navigator.vibrate(20);
+  };
+
+  window.deleteOrder = function(id) {
+    if (!confirm('این سفارش حذف شود؟')) return;
+    var o = window.orders.find(function(x) { return x.id === id; });
+    if (o) {
+      o.deleted = true;
+      o.updatedAt = Date.now();
+      saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
+      renderOrders();
+      showToast('🗑️ سفارش حذف شد', 'info');
+    }
+  };
+
+  window.openTransferModal = function(id) {
+    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
+    if (!o) return;
+    document.getElementById('transfer-order-id').value = id;
+    document.getElementById('transfer-item-title').innerText = o.itemName;
+    document.getElementById('transfer-quality').value = '';
+    document.getElementById('transfer-qty').value = '1';
+    document.getElementById('transfer-buy-price').value = o.buyPrice ? Number(o.buyPrice).toLocaleString('en-US') : '';
+    document.getElementById('transfer-sell-price').value = o.sellPrice ? Number(o.sellPrice).toLocaleString('en-US') : '';
+    document.getElementById('modal-transfer-order').style.display = 'flex';
+  };
+
+  window.closeTransferModal = function() {
+    document.getElementById('modal-transfer-order').style.display = 'none';
+  };
+
+  window.confirmTransferToInventory = function() {
+    var id = Number(document.getElementById('transfer-order-id').value);
+    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
+    if (!o) return;
+
+    var quality = (document.getElementById('transfer-quality').value || '').trim();
+    var qty = Number(cleanNumber(document.getElementById('transfer-qty').value)) || 1;
+    var buyPrice = Number(cleanNumber(document.getElementById('transfer-buy-price').value)) || 0;
+    var sellPrice = Number(cleanNumber(document.getElementById('transfer-sell-price').value)) || 0;
+
+    if (!window.parts) window.parts = [];
+    window.parts.unshift({
+      id: Date.now(),
+      model: o.itemName,
+      quality: quality,
+      shop: 'سفارشات',
+      qty: qty,
+      buyPrice: buyPrice,
+      sellPrice: sellPrice,
+      date: getTodayJalali(),
+      deleted: false,
+      updatedAt: Date.now()
+    });
+
+    o.transferredToInventory = true;
+    o.updatedAt = Date.now();
+
+    saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
+    if (typeof renderParts === 'function') renderParts();
+    closeTransferModal();
+    renderOrders();
+    showToast('📦 قطعه با موفقیت به انبار منتقل شد', 'success');
+  };
+
+  console.log('[orders-system] Ready v2 ✅');
+})();
+
+
+// ═══════════════════════════════════════════════════
+// 📋 نمایش مشخصات دستگاه در سوابق و فاکتورهای مشتری
+// ═══════════════════════════════════════════════════
+(function showInvoiceDetailsInHistory() {
+  var _baseRenderTransactions = renderTransactions;
+
+  renderTransactions = function() {
+    _baseRenderTransactions();
+
+    setTimeout(function() {
+      var listEl = document.getElementById('tx-list');
+      if (!listEl || !activeCustomerId) return;
+
+      // ترتیب تراکنش‌ها همون ترتیب رندر شدنه
+      var custTx = transactions.filter(function(t) {
+        return t.customerId === activeCustomerId && !t.deleted;
+      });
+
+      var cards = listEl.children;
+
+      custTx.forEach(function(t, idx) {
+        if (t.type !== 'DEBT') return; // فقط فاکتورهای قطعی
+        var card = cards[idx];
+        if (!card) return;
+        if (card.dataset.invoiceDetailsApplied === '1') return;
+        card.dataset.invoiceDetailsApplied = '1';
+
+        var model = (t.model || '').trim();
+        var brand = (t.brand || '').trim();
+        var color = (t.color || '').trim();
+        var problem = (t.problem || '').trim();
+        var imei = (t.imei || '').trim();
+
+        if (!model && !brand && !problem && !color && !imei) return;
+
+        var deviceName = '';
+        if (brand && brand !== 'سایر') deviceName = brand + ' ';
+        if (model) deviceName += model;
+        deviceName = deviceName.trim();
+
+        var html = '<div class="invoice-device-details" style="margin-top:6px;font-size:0.72rem;display:flex;flex-wrap:wrap;gap:4px;">';
+
+        if (deviceName) {
+          html += '<span style="background:#eff6ff;color:#1e40af;padding:3px 8px;border-radius:6px;font-weight:bold;">📱 ' + esc(deviceName) + '</span>';
+        }
+        if (color) {
+          html += '<span style="background:#fef3c7;color:#92400e;padding:3px 8px;border-radius:6px;font-weight:bold;">🎨 ' + esc(color) + '</span>';
+        }
+        if (problem) {
+          var ps = problem.length > 32 ? problem.substring(0, 32) + '…' : problem;
+          html += '<span style="background:#fef2f2;color:#b91c1c;padding:3px 8px;border-radius:6px;">🔍 ' + esc(ps) + '</span>';
+        }
+        if (imei) {
+          html += '<span style="background:#f3e8ff;color:#7e22ce;padding:3px 8px;border-radius:6px;direction:ltr;font-family:monospace;">🔢 ' + esc(imei) + '</span>';
+        }
+        html += '</div>';
+
+        // درج بعد از عنوان فاکتور
+        var titleEl = card.querySelector('div[style*="font-weight:bold;font-size:.92rem"]');
+        if (titleEl) {
+          titleEl.insertAdjacentHTML('afterend', html);
+        }
+      });
+    }, 150);
+  };
+
+  console.log('[invoice-details-in-history] Ready ✅');
+})();
+
+// ═══════════════════════════════════════════════════
+// 🛠️ فیکس نهایی و تضمینی (بدون تداخل)
+// ═══════════════════════════════════════════════════
+(function absoluteFinalFix() {
+  
+  // ۱. وقتی روی یک مشتری کلیک می‌شه، کلاس پروفایل رو اضافه کن
+  var _baseOpen = window.openCustomer;
+  window.openCustomer = function() {
+    document.body.classList.add('show-customer-profile');
+    if (typeof _baseOpen === 'function') _baseOpen.apply(this, arguments);
+  };
+
+  // ۲. وقتی برمی‌گردیم به لیست، کلاس پروفایل رو بردار
+  var _baseShow = window.showCustomerList;
+  window.showCustomerList = function() {
+    document.body.classList.remove('show-customer-profile');
+    if (typeof _baseShow === 'function') _baseShow.apply(this, arguments);
+  };
+
+  // ۳. وقتی روی تب «مشتریان» توی نوار پایین کلیک می‌کنیم هم کلاس برداشته بشه
+  var _baseTab = window.openTab;
+  window.openTab = function(tabName) {
+    if (tabName === 'customers') {
+      document.body.classList.remove('show-customer-profile');
+    }
+    if (typeof _baseTab === 'function') _baseTab.apply(this, arguments);
+  };
+
+  // ۴. فیکس کادر مرتب‌سازی با جاوااسکریپت (اگه CSS کار نکرد)
+  setInterval(function() {
+    var el = document.getElementById('cust-sort-order');
+    if (el && document.body.classList.contains('dark-mode')) {
+      el.style.setProperty('background', '#1e293b', 'important');
+      el.style.setProperty('color', '#f8fafc', 'important');
+    }
+  }, 1000);
+
+  console.log('[absolute-final-fix] Ready ✅');
+})();
+
 </script>
+
+<style>
+  /* 🛡️ قفل سخت‌افزاری CSS: غیرممکن کردن نمایش همزمان لیست مشتریان و فاکتور */
+  body:not(.in-customer-details) #view-details,
+  body:not(.in-customer-details) #cust-sec-quotes,
+  body:not(.in-customer-details) #cust-sec-new,
+  body:not(.in-customer-details) #cust-sec-history,
+  body:not(.in-customer-details) #cust-sec-quick,
+  body:not(.in-customer-details) #cust-financial-summary {
+    display: none !important;
+  }
+</style>
+
+<script>
+// 🛡️ نگهبان هوشمند ضد تداخل با patch.js
+(function() {
+  // ۱. وقتی روی هر کارتی در لیست مشتریان کلیک شد، اجازه باز شدن فاکتور را بده
+  document.addEventListener('click', function(e) {
+    // اگر روی کارت مشتری در لیست کلیک شد
+    var custCard = e.target.closest('#customer-list .card, .swipe-cust-wrapper');
+    if (custCard && !e.target.closest('a, button')) {
+      document.body.classList.add('in-customer-details');
+    }
+    
+    // اگر روی دکمه «بازگشت به لیست» یا هر کدام از تب‌های منوی پایین کلیک شد، فوراً فاکتور را ببند
+    var backOrNav = e.target.closest('.btn-back, .nav-tab, #btn-sub-cust, #btn-sub-workshop');
+    if (backOrNav) {
+      document.body.classList.remove('in-customer-details');
+      var vd = document.getElementById('view-details');
+      var vc = document.getElementById('view-customers');
+      if (vd) vd.style.setProperty('display', 'none', 'important');
+      if (vc && backOrNav.id !== 'btn-sub-workshop') {
+        vc.style.setProperty('display', 'block', 'important');
+      }
+    }
+  }, true); // true یعنی قبل از اینکه patch.js متوجه بشه، این دستور رو اجرا کن!
+
+  // ۲. رادار دائمی: هر ۲۰۰ میلی‌ثانیه چک کن اگر لیست مشتریان باز است، فاکتور زیرش جا نمانده باشد
+  setInterval(function() {
+    var vc = document.getElementById('view-customers');
+    var vd = document.getElementById('view-details');
+    if (vc && vd) {
+      var isListVisible = window.getComputedStyle(vc).display !== 'none';
+      if (isListVisible && !document.body.classList.contains('in-customer-details')) {
+        if (window.getComputedStyle(vd).display !== 'none') {
+          vd.style.setProperty('display', 'none', 'important');
+        }
+      }
+    }
+  }, 200);
+})();
+</script>
+
 </body>
 </html>

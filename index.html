@@ -1602,95 +1602,6 @@ body.dark-mode .workshop-card .workshop-details-box {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// 🖐️ کشیدن مودال به پایین برای بستن (Bottom Sheet Drag)
-// ═══════════════════════════════════════════════════════════════
-(function setupBottomSheetDrag() {
-  var activeSheet = null;
-  var startY = 0;
-  var currentY = 0;
-  var isDragging = false;
-  var dragThreshold = 100; // پیکسل برای بستن
-  
-  function getSheetFromEvent(e) {
-    var target = e.target;
-    if (!target.closest) return null;
-    var sheet = target.closest('.modal-content');
-    if (!sheet) return null;
-    // فقط در موبایل
-    if (window.innerWidth > 600) return null;
-    return sheet;
-  }
-  
-  function getClientY(e) {
-    if (e.touches && e.touches[0]) return e.touches[0].clientY;
-    return e.clientY;
-  }
-  
-  function onStart(e) {
-    var sheet = getSheetFromEvent(e);
-    if (!sheet) return;
-    
-    // فقط از دسته بالا یا اول sheet می‌شه کشید
-    var target = e.target;
-    var rect = sheet.getBoundingClientRect();
-    var touchY = getClientY(e);
-    var relY = touchY - rect.top;
-    
-    // فقط اگه از بالا (منطقه دسته) شروع شد
-    if (relY > 60) return;
-    
-    activeSheet = sheet;
-    startY = touchY;
-    currentY = startY;
-    isDragging = true;
-    sheet.classList.add('dragging');
-    sheet.style.transition = 'none';
-  }
-  
-  function onMove(e) {
-    if (!isDragging || !activeSheet) return;
-    currentY = getClientY(e);
-    var diff = currentY - startY;
-    if (diff < 0) diff = 0; // فقط به پایین
-    activeSheet.style.transform = 'translateY(' + diff + 'px)';
-    if (e.cancelable) e.preventDefault();
-  }
-  
-  function onEnd(e) {
-    if (!isDragging || !activeSheet) return;
-    var diff = currentY - startY;
-    var sheet = activeSheet;
-    
-    sheet.classList.remove('dragging');
-    sheet.style.transition = '';
-    sheet.style.transform = '';
-    
-    isDragging = false;
-    activeSheet = null;
-    
-    if (diff > dragThreshold) {
-      // بستن مودال
-      var overlay = sheet.closest('.modal-overlay');
-      if (overlay) {
-        overlay.style.display = 'none';
-        // اگه مودال امضا بود، پاکسازی
-        if (overlay.id === 'modal-signature' && typeof closeSignatureModal === 'function') {
-          try { closeSignatureModal(); } catch(e) {}
-        }
-        if (navigator.vibrate) navigator.vibrate(20);
-      }
-    }
-  }
-  
-  document.addEventListener('touchstart', onStart, { passive: true });
-  document.addEventListener('touchmove', onMove, { passive: false });
-  document.addEventListener('touchend', onEnd);
-  document.addEventListener('touchcancel', onEnd);
-  
-  console.log('[bottom-sheet] Drag ready ✅');
-})();
-
 /* ═══════════════════════════════════════════════════ */
 /* 🌙 رفع مشکلات دارک مود (حاشیه کارت‌ها و متن فیلدها) */
 /* ═══════════════════════════════════════════════════ */
@@ -1800,12 +1711,6 @@ body.dark-mode #cust-sort-order option {
 /* ═══════════════════════════════════════════════════ */
 
 /* ۱. قانون طلایی: به صورت پیش‌فرض صفحه فاکتورها کاملاً مخفی باشد */
-#view-details { display: none !important; }
-#view-customers { display: block; }
-
-/* ۲. وقتی کلاس پروفایل فعال شد، لیست مخفی و فاکتور باز شود */
-body.show-customer-profile #view-details { display: block !important; }
-body.show-customer-profile #view-customers { display: none !important; }
 
 /* ۳. فیکس رنگ کادر مرتب‌سازی برای حالت شب */
 body.dark-mode select#cust-sort-order {
@@ -4130,7 +4035,7 @@ function _uploadToDriveNow() {
   if (st1) { st1.innerText = msg; st1.style.color = '#1e40af'; }
   if (st2) { st2.innerText = msg; st2.style.color = '#1e40af'; }
   
-  var payload = { customers: customers, transactions: transactions, quotes: quotes, parts: parts, expenses: expenses, paymentText: customPaymentText, nextIntakeSeq: nextIntakeSeq, syncTime: Date.now() };
+  var payload = { customers: customers, transactions: transactions, quotes: quotes, parts: parts, expenses: expenses, orders: window.orders || [], paymentText: customPaymentText, nextIntakeSeq: nextIntakeSeq, syncTime: Date.now() };
   var localCount = customers.length + '|' + transactions.length + '|' + quotes.length;
   var jsonStr = JSON.stringify(payload);
   
@@ -6144,7 +6049,7 @@ var compressed = smartCompressImage(canvas, { maxDim: 1000, targetKB: 90, startQ
 var base64Img = compressed.data;
       var targetUrl = driveScriptUrl || defaultDriveUrl;
 
-      fetch(targetUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ customers, transactions, quotes, parts, expenses, paymentText: customPaymentText, nextIntakeSeq, syncTime: Date.now() }) })
+      fetch(targetUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ customers, transactions, quotes, parts, expenses, orders: window.orders || [], paymentText: customPaymentText, nextIntakeSeq, syncTime: Date.now() }) })
       .then(() => new Promise(r => setTimeout(r, 900)))
       .then(() => fetch(targetUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'SAVE_EVIDENCE', trackCode: q.intakeCode || q.trackCode, image: base64Img, tag, note }) }))
       .then(r => r.json())
@@ -6686,6 +6591,7 @@ window.onSmartSyncDataReceived = function(rawContent) {
     quotes = mergeArraysById(quotes, d.quotes || []);
     parts = mergeArraysById(parts, d.parts || []);
     expenses = mergeArraysById(expenses, d.expenses || []);
+window.orders = mergeArraysById(window.orders || [], d.orders || []);
     if (d.nextIntakeSeq) nextIntakeSeq = Math.max(nextIntakeSeq, Number(d.nextIntakeSeq) || 1000);
 
     saveAll();
@@ -6714,7 +6620,8 @@ window.onSmartSyncDataReceived = function(rawContent) {
         quotes: quotes,
         parts: parts,
         expenses: expenses,
-        paymentText: customPaymentText,
+orders: window.orders || [],
+paymentText: customPaymentText,
         nextIntakeSeq: nextIntakeSeq,
         syncTime: Date.now()
       };
@@ -6909,11 +6816,30 @@ function dismissOverdueAlert() {
 }
 
 setInterval(updateSyncStatusBadge, 60000);
+  setInterval(updateSyncStatusBadge, 60000);
+
 function exportBackup() {
-  var data = { backupDate: getTodayJalali(), timestamp: Date.now(), customers, transactions, quotes, parts, expenses, paymentText: customPaymentText, customPaymentText, nextIntakeSeq, qrBaseUrl, driveScriptUrl };
+  var data = {
+    backupDate: getTodayJalali(),
+    timestamp: Date.now(),
+    customers: customers,
+    transactions: transactions,
+    quotes: quotes,
+    parts: parts,
+    expenses: expenses,
+    orders: window.orders || [],
+    paymentText: customPaymentText,
+    customPaymentText: customPaymentText,
+    nextIntakeSeq: nextIntakeSeq,
+    qrBaseUrl: qrBaseUrl,
+    driveScriptUrl: driveScriptUrl
+  };
   var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  var url = URL.createObjectURL(blob); var a = document.createElement('a'); a.href = url;
-  a.download = 'Backup_' + getTodayJalali().replace(/\//g, '-') + '.json'; a.click();
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'Backup_' + getTodayJalali().replace(/\//g, '-') + '.json';
+  a.click();
 }
 
 // 📦 پشتیبان کامل (شامل عکس‌های IndexedDB)
@@ -6940,7 +6866,8 @@ function exportFullBackup() {
         quotes: quotes,
         parts: parts,
         expenses: expenses,
-        paymentText: customPaymentText,
+orders: window.orders || [],
+paymentText: customPaymentText,
         customPaymentText: customPaymentText,
         nextIntakeSeq: nextIntakeSeq,
         qrBaseUrl: qrBaseUrl,
@@ -7011,11 +6938,12 @@ function importBackup(e) {
       
       // بازیابی دیتای متنی
       customers = d.customers || [];
-      transactions = d.transactions || [];
-      quotes = d.quotes || [];
-      parts = d.parts || [];
-      expenses = d.expenses || [];
-      if (d.paymentText) customPaymentText = d.paymentText;
+transactions = d.transactions || [];
+quotes = d.quotes || [];
+parts = d.parts || [];
+expenses = d.expenses || [];
+window.orders = d.orders || [];
+if (d.paymentText) customPaymentText = d.paymentText;;
       if (d.customPaymentText) customPaymentText = d.customPaymentText;
       if (d.nextIntakeSeq) nextIntakeSeq = Number(d.nextIntakeSeq) || 1000;
       if (d.qrBaseUrl) qrBaseUrl = d.qrBaseUrl;
@@ -12610,7 +12538,8 @@ title: combinedTitle, workType: workType, collabName: collabName, collabCost: co
         quotes: quotes,
         parts: parts,
         expenses: expenses,
-        paymentText: customPaymentText,
+orders: window.orders || [],
+paymentText: customPaymentText,
         customPaymentText: customPaymentText,
         nextIntakeSeq: nextIntakeSeq,
         qrBaseUrl: qrBaseUrl,
@@ -13019,7 +12948,8 @@ title: combinedTitle, workType: workType, collabName: collabName, collabCost: co
           quotes: JSON.parse(JSON.stringify(quotes || [])),
           parts: JSON.parse(JSON.stringify(parts || [])),
           expenses: JSON.parse(JSON.stringify(expenses || [])),
-          paymentText: customPaymentText,
+orders: JSON.parse(JSON.stringify(window.orders || [])),
+paymentText: customPaymentText,
           nextIntakeSeq: nextIntakeSeq
         };
         var tx = db.transaction(AUTO_BACKUP_STORE, 'readwrite');
@@ -13104,6 +13034,7 @@ title: combinedTitle, workType: workType, collabName: collabName, collabCost: co
       quotes = b.quotes || [];
       parts = b.parts || [];
       expenses = b.expenses || [];
+window.orders = b.orders || [];
       if (b.paymentText) customPaymentText = b.paymentText;
       if (b.nextIntakeSeq) nextIntakeSeq = b.nextIntakeSeq;
       saveAll();
@@ -14107,87 +14038,110 @@ if (typeof window.renderOrders !== 'function') {
     </div>
   `);
 
-  // ─── رندر لیست سفارشات
-  window.renderOrders = function() {
-    var container = document.getElementById('orders-container');
-    if (!container) return;
+// ─── رندر لیست سفارشات
+window.renderOrders = function() {
+  var container = document.getElementById('orders-container');
+  if (!container) return;
 
-    var activeOrders = window.orders.filter(function(o) { return !o.deleted; });
-    activeOrders.sort(function(a, b) {
-      if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
-      if (b.status === 'PENDING' && a.status !== 'PENDING') return 1;
-      return b.id - a.id;
-    });
+  var activeOrders = window.orders.filter(function(o) { return !o.deleted; });
+  activeOrders.sort(function(a, b) {
+    if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
+    if (b.status === 'PENDING' && a.status !== 'PENDING') return 1;
+    return b.id - a.id;
+  });
 
-    var html = `
-      <div class="card" style="background:#eff6ff;border:1.5px solid #93c5fd;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-weight:800;font-size:1rem;color:#1e40af;">🛒 سفارشات قطعات</div>
-          <div style="font-size:0.78rem;color:#475569;margin-top:2px;">لیست خرید و تهیه قطعات</div>
-        </div>
-        <button type="button" onclick="openAddOrderModal()" style="background:#2563eb;width:auto;padding:8px 14px;font-size:0.82rem;margin:0;border-radius:8px;">➕ سفارش جدید</button>
+  var html = `
+    <div class="card" style="background:#eff6ff;border:1.5px solid #93c5fd;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-weight:800;font-size:1rem;color:#1e40af;">🛒 سفارشات قطعات</div>
+        <div style="font-size:0.78rem;color:#475569;margin-top:2px;">لیست خرید و تهیه قطعات</div>
+      </div>
+      <button type="button" onclick="openAddOrderModal()" style="background:#2563eb;width:auto;padding:8px 14px;font-size:0.82rem;margin:0;border-radius:8px;">➕ سفارش جدید</button>
+    </div>
+  `;
+
+  if (activeOrders.length === 0) {
+    html += `
+      <div class="card" style="text-align:center;padding:40px 20px;">
+        <div style="font-size:3.5rem;margin-bottom:12px;animation:emptyFloat 3s ease-in-out infinite;display:inline-block;">🛒</div>
+        <div style="font-weight:900;font-size:1.1rem;color:#1e293b;margin-bottom:6px;">سفارشی ثبت نشده</div>
+        <div style="font-size:0.85rem;color:#64748b;line-height:1.7;">برای خرید قطعه، از دکمه بالا استفاده کن.</div>
       </div>
     `;
+  } else {
+    activeOrders.forEach(function(o) {
+      var c = o.customerId ? customers.find(function(x) { return x.id === o.customerId && !x.deleted; }) : null;
+      var isArrived = (o.status === 'ARRIVED');
+      var isTransferred = o.transferredToInventory;
+      var isShortage = o.isShortage || !o.customerId;
 
-    if (activeOrders.length === 0) {
-      html += `
-        <div class="card" style="text-align:center;padding:40px 20px;">
-          <div style="font-size:3.5rem;margin-bottom:12px;animation:emptyFloat 3s ease-in-out infinite;display:inline-block;">🛒</div>
-          <div style="font-weight:900;font-size:1.1rem;color:#1e293b;margin-bottom:6px;">سفارشی ثبت نشده</div>
-          <div style="font-size:0.85rem;color:#64748b;line-height:1.7;">برای خرید قطعه، از دکمه بالا استفاده کن.</div>
-        </div>
-      `;
-    } else {
-      activeOrders.forEach(function(o) {
-        var c = o.customerId ? customers.find(function(x) { return x.id === o.customerId && !x.deleted; }) : null;
-        var isArrived = (o.status === 'ARRIVED');
-        var isTransferred = o.transferredToInventory;
-        var isShortage = o.isShortage || !o.customerId;
+      var bg = isTransferred ? '#f8fafc' : (isArrived ? '#f0fdf4' : (isShortage ? '#fff7ed' : '#fffbeb'));
+      var border = isTransferred ? '#e2e8f0' : (isArrived ? '#86efac' : (isShortage ? '#fdba74' : '#fde68a'));
 
-        var bg = isTransferred ? '#f8fafc' : (isArrived ? '#f0fdf4' : (isShortage ? '#fff7ed' : '#fffbeb'));
-        var border = isTransferred ? '#e2e8f0' : (isArrived ? '#86efac' : (isShortage ? '#fdba74' : '#fde68a'));
+      var customerLine = isShortage
+        ? '<span style="display:inline-block;background:#fed7aa;color:#9a3412;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:bold;">📉 کسری انبار</span>'
+        : '👤 ' + esc(c ? c.name : 'نامشخص');
 
-        var customerLine = isShortage
-          ? '<span style="display:inline-block;background:#fed7aa;color:#9a3412;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:bold;">📉 کسری انبار</span>'
-          : '👤 ' + esc(c ? c.name : 'نامشخص');
-
-        html += `
-          <div class="card" style="padding:12px;margin-bottom:8px;background:${bg};border:1px solid ${border};">
-            <div style="display:flex;align-items:flex-start;gap:10px;">
-              <div onclick="toggleOrderStatus(${o.id})" style="cursor:pointer;margin-top:2px;">
-                <div style="width:24px;height:24px;border-radius:6px;border:2px solid ${isArrived ? '#10b981' : '#cbd5e1'};background:${isArrived ? '#10b981' : '#fff'};display:flex;justify-content:center;align-items:center;color:#fff;font-size:1rem;transition:all 0.2s;">
-                  ${isArrived ? '✓' : ''}
-                </div>
-              </div>
-              <div style="flex:1;min-width:0;">
-                <div style="font-weight:800;font-size:0.95rem;color:#1e293b;text-decoration:${isTransferred ? 'line-through' : 'none'};">${esc(o.itemName)}</div>
-                <div style="font-size:0.78rem;color:#475569;margin-top:4px;">${customerLine}</div>
-                <div style="font-size:0.75rem;color:#64748b;margin-top:2px;">📅 ${esc(o.date)}</div>
-                ${o.buyPrice || o.sellPrice ? `
-                  <div style="font-size:0.75rem;margin-top:4px;display:flex;gap:8px;">
-                    ${o.buyPrice ? `<span style="color:#dc2626;">خرید: ${formatToman(o.buyPrice)}</span>` : ''}
-                    ${o.sellPrice ? `<span style="color:#10b981;">فروش: ${formatToman(o.sellPrice)}</span>` : ''}
-                  </div>
-                ` : ''}
-                ${o.note ? `<div style="font-size:0.75rem;color:#92400e;background:#fef3c7;padding:4px 8px;border-radius:6px;margin-top:6px;display:inline-block;">📝 ${esc(o.note)}</div>` : ''}
-              </div>
-              <div style="text-align:left;flex-shrink:0;">
-                ${isTransferred 
-                  ? `<span class="badge badge-green" style="font-size:0.7rem;">وارد انبار شد</span>`
-                  : (isArrived 
-                      ? `<button type="button" onclick="openTransferModal(${o.id})" style="background:#2563eb;padding:6px 10px;font-size:0.75rem;margin:0;border-radius:8px;width:auto;">📦 انتقال</button>`
-                      : `<span class="badge badge-orange" style="font-size:0.7rem;">⏳ منتظر</span>`
-                    )
-                }
-                <button type="button" onclick="deleteOrder(${o.id})" style="background:none;border:none;color:#ef4444;font-size:1rem;padding:4px;margin-top:8px;width:auto;box-shadow:none;cursor:pointer;display:block;">🗑️</button>
-              </div>
-            </div>
+      // 👇 اینجا دکمه‌های انتقال و پیامک رو کنار هم چیدیم
+      var actionButtons = '';
+      if (isTransferred) {
+        actionButtons = `<span class="badge badge-green" style="font-size:0.7rem;">وارد انبار شد</span>`;
+      } else if (isArrived) {
+        actionButtons = `
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+            <button type="button" onclick="openTransferModal(${o.id})" style="background:#2563eb;padding:6px 10px;font-size:0.75rem;margin:0;border-radius:8px;width:auto;white-space:nowrap;">📦 انتقال</button>
+            ${c ? `<button type="button" onclick="sendOrderReadySMS(${o.id})" style="background:#10b981;padding:6px 10px;font-size:0.75rem;margin:0;border-radius:8px;width:auto;white-space:nowrap;color:#fff;border:none;cursor:pointer;">✉️ پیامک</button>` : ''}
           </div>
         `;
-      });
-    }
-    container.innerHTML = html;
-  };
+      } else {
+        actionButtons = `<span class="badge badge-orange" style="font-size:0.7rem;">⏳ منتظر</span>`;
+      }
+
+      html += `
+        <div class="card" style="padding:12px;margin-bottom:8px;background:${bg};border:1px solid ${border};">
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <div onclick="toggleOrderStatus(${o.id})" style="cursor:pointer;margin-top:2px;">
+              <div style="width:24px;height:24px;border-radius:6px;border:2px solid ${isArrived ? '#10b981' : '#cbd5e1'};background:${isArrived ? '#10b981' : '#fff'};display:flex;justify-content:center;align-items:center;color:#fff;font-size:1rem;transition:all 0.2s;">
+                ${isArrived ? '✓' : ''}
+              </div>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:800;font-size:0.95rem;color:#1e293b;text-decoration:${isTransferred ? 'line-through' : 'none'};">${esc(o.itemName)}</div>
+              <div style="font-size:0.78rem;color:#475569;margin-top:4px;">${customerLine}</div>
+              <div style="font-size:0.75rem;color:#64748b;margin-top:2px;">📅 ${esc(o.date)}</div>
+              ${o.buyPrice || o.sellPrice ? `
+                <div style="font-size:0.75rem;margin-top:4px;display:flex;gap:8px;">
+                  ${o.buyPrice ? `<span style="color:#dc2626;">خرید: ${formatToman(o.buyPrice)}</span>` : ''}
+                  ${o.sellPrice ? `<span style="color:#10b981;">فروش: ${formatToman(o.sellPrice)}</span>` : ''}
+                </div>
+              ` : ''}
+              ${o.note ? `<div style="font-size:0.75rem;color:#92400e;background:#fef3c7;padding:4px 8px;border-radius:6px;margin-top:6px;display:inline-block;">📝 ${esc(o.note)}</div>` : ''}
+            </div>
+            <div style="text-align:left;flex-shrink:0;">
+              ${actionButtons}
+              <button type="button" onclick="deleteOrder(${o.id})" style="background:none;border:none;color:#ef4444;font-size:1rem;padding:4px;margin-top:8px;width:auto;box-shadow:none;cursor:pointer;display:block;">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+  container.innerHTML = html;
+};
+
+
+// ─── تابع ارسال پیامک آماده‌سازی قطعه
+window.sendOrderReadySMS = function(id) {
+  var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
+  if (!o) return;
+  var c = customers.find(function(x) { return x.id === o.customerId && !x.deleted; });
+  if (!c || !c.phone) return showToast('شماره تماس مشتری ثبت نشده است.', 'warning');
+  var msg = '✦ موبایل پرشیا ✦\n' +
+            'قطعه مورد نظر شما (' + o.itemName + ') تهیه شد.\n' +
+            'لطفاً جهت تحویل به موبایل پرشیا مراجعه فرمایید.';
+  window.location.href = buildSmsLink(c.phone, msg);
+};
+  
 
 // ─── جستجوی مشتری
 window.searchOrderCustomer = function(q) {
@@ -14499,59 +14453,692 @@ window.selectOrderCustomer = function(custId) {
   console.log('[absolute-final-fix] Ready ✅');
 })();
 
+
 </script>
 
 <style>
-  /* 🛡️ قفل سخت‌افزاری CSS: غیرممکن کردن نمایش همزمان لیست مشتریان و فاکتور */
-  body:not(.in-customer-details) #view-details,
-  body:not(.in-customer-details) #cust-sec-quotes,
-  body:not(.in-customer-details) #cust-sec-new,
-  body:not(.in-customer-details) #cust-sec-history,
-  body:not(.in-customer-details) #cust-sec-quick,
-  body:not(.in-customer-details) #cust-financial-summary {
+  /* 🛡️ فقط وقتی در حالت پروفایل مشتری نیستیم، فاکتورها مخفی باشند */
+  body:not(.in-customer-details) #view-details {
     display: none !important;
   }
 </style>
 
 <script>
-// 🛡️ نگهبان هوشمند ضد تداخل با patch.js
+// 🛡️ نگهبان هوشمند نسخه ۲ (سازگار با جستجوی جادویی، تب کارگاه و patch.js)
 (function() {
-  // ۱. وقتی روی هر کارتی در لیست مشتریان کلیک شد، اجازه باز شدن فاکتور را بده
-  document.addEventListener('click', function(e) {
-    // اگر روی کارت مشتری در لیست کلیک شد
-    var custCard = e.target.closest('#customer-list .card, .swipe-cust-wrapper');
-    if (custCard && !e.target.closest('a, button')) {
-      document.body.classList.add('in-customer-details');
+  // ۱. هوک کردن تابع باز کردن مشتری (چه از لیست کلیک شود، چه از جستجوی جادویی، چه بعد از ثبت مشتری جدید)
+  function hookOpenCustomer() {
+    if (typeof window.openCustomer === 'function' && !window.openCustomer._isHooked) {
+      var origOpen = window.openCustomer;
+      window.openCustomer = function(id) {
+        document.body.classList.add('in-customer-details');
+        var vd = document.getElementById('view-details');
+        if (vd) vd.style.removeProperty('display'); // برداشتن قفل برای نمایش
+        return origOpen.apply(this, arguments);
+      };
+      window.openCustomer._isHooked = true;
     }
-    
-    // اگر روی دکمه «بازگشت به لیست» یا هر کدام از تب‌های منوی پایین کلیک شد، فوراً فاکتور را ببند
-    var backOrNav = e.target.closest('.btn-back, .nav-tab, #btn-sub-cust, #btn-sub-workshop');
-    if (backOrNav) {
+  }
+  hookOpenCustomer();
+  setTimeout(hookOpenCustomer, 500);
+  setTimeout(hookOpenCustomer, 1500);
+
+  // ۲. تشخیص کلیک‌ها (پشتیبانی کامل از جستجوی جادویی و تب‌ها)
+  document.addEventListener('click', function(e) {
+    // اگر روی کارت مشتری در لیست **یا** آیتم‌های جستجوی جادویی (Spotlight) کلیک شد:
+    var custTrigger = e.target.closest('#customer-list .card, .swipe-cust-wrapper, .spotlight-item, [onclick*="openCustomer"]');
+    if (custTrigger && !e.target.closest('a, .action-btn')) {
+      document.body.classList.add('in-customer-details');
+      var vd = document.getElementById('view-details');
+      if (vd) vd.style.removeProperty('display');
+      return;
+    }
+
+    // اگر روی دکمه «بازگشت»، تب‌های پایین، یا سوییچ «لیست مشتریان / کارگاه» کلیک شد:
+    var navTrigger = e.target.closest('.btn-back, .nav-tab, #btn-sub-cust, #btn-sub-workshop');
+    if (navTrigger) {
       document.body.classList.remove('in-customer-details');
+      
+      // بستن فاکتور بدون استفاده از !important روی لیست مشتریان (تا تب کارگاه خراب نشود)
       var vd = document.getElementById('view-details');
       var vc = document.getElementById('view-customers');
-      if (vd) vd.style.setProperty('display', 'none', 'important');
-      if (vc && backOrNav.id !== 'btn-sub-workshop') {
-        vc.style.setProperty('display', 'block', 'important');
+      if (vd) vd.style.display = 'none';
+      if (vc) {
+        vc.style.removeProperty('display');
+        vc.style.display = 'block';
       }
     }
-  }, true); // true یعنی قبل از اینکه patch.js متوجه بشه، این دستور رو اجرا کن!
+  }, true);
 
-  // ۲. رادار دائمی: هر ۲۰۰ میلی‌ثانیه چک کن اگر لیست مشتریان باز است، فاکتور زیرش جا نمانده باشد
+  // ۳. رادار سبک: جلوگیری از جا ماندن فاکتور زیر لیست بدون دخالت در کار تب‌های دیگر
   setInterval(function() {
+    hookOpenCustomer(); // اطمینان از فعال بودن هوک بعد از لود patch.js
     var vc = document.getElementById('view-customers');
     var vd = document.getElementById('view-details');
     if (vc && vd) {
-      var isListVisible = window.getComputedStyle(vc).display !== 'none';
-      if (isListVisible && !document.body.classList.contains('in-customer-details')) {
-        if (window.getComputedStyle(vd).display !== 'none') {
-          vd.style.setProperty('display', 'none', 'important');
-        }
+      if (document.body.classList.contains('in-customer-details')) {
+        // وقتی داخل پرونده مشتری هستیم، لیست اصلی مخفی و پرونده باز باشد
+        if (vc.style.display !== 'none') vc.style.display = 'none';
+        if (vd.style.display === 'none') vd.style.display = 'block';
+      } else {
+        // وقتی بیرون از پرونده هستیم، پرونده حتماً بسته باشد
+        if (vd.style.display !== 'none') vd.style.display = 'none';
       }
     }
-  }, 200);
+  }, 250);
 })();
 </script>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════ */
+/* 🌙 پکیج جامع و قطعی اصلاح فونت‌ها و پس‌زمینه‌ها در حالت تاریک (Dark Mode) */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* ۱. اصلاح پس‌زمینه مودال‌ها در حالت شب (رفع مشکل سفید روی سفید) */
+body.dark-mode .modal-content {
+  background: rgba(15, 23, 42, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+}
+
+/* ۲. اصلاح تمام متن‌های تیره (با فاصله و بدون فاصله در استایل خطی) */
+body.dark-mode [style*="color:#1e293b"], body.dark-mode [style*="color: #1e293b"],
+body.dark-mode [style*="color:#0f172a"], body.dark-mode [style*="color: #0f172a"] { color: #f8fafc !important; }
+
+body.dark-mode [style*="color:#334155"], body.dark-mode [style*="color: #334155"],
+body.dark-mode [style*="color:#475569"], body.dark-mode [style*="color: #475569"] { color: #cbd5e1 !important; }
+
+body.dark-mode [style*="color:#64748b"], body.dark-mode [style*="color: #64748b"] { color: #94a3b8 !important; }
+
+/* آبی‌های تیره ⬅ آبی روشن و خوانا */
+body.dark-mode [style*="color:#1e40af"], body.dark-mode [style*="color: #1e40af"],
+body.dark-mode [style*="color:#1d4ed8"], body.dark-mode [style*="color: #1d4ed8"],
+body.dark-mode [style*="color:#0369a1"], body.dark-mode [style*="color: #0369a1"],
+body.dark-mode [style*="color:#0284c7"], body.dark-mode [style*="color: #0284c7"] { color: #7dd3fc !important; }
+
+/* سبزهای تیره ⬅ سبز نعنایی روشن */
+body.dark-mode [style*="color:#166534"], body.dark-mode [style*="color: #166534"],
+body.dark-mode [style*="color:#15803d"], body.dark-mode [style*="color: #15803d"],
+body.dark-mode [style*="color:#047857"], body.dark-mode [style*="color: #047857"],
+body.dark-mode [style*="color:#065f46"], body.dark-mode [style*="color: #065f46"],
+body.dark-mode [style*="color:#059669"], body.dark-mode [style*="color: #059669"] { color: #6ee7b7 !important; }
+
+/* قهوه‌ای و نارنجی‌های تیره ⬅ کهربایی و طلایی روشن */
+body.dark-mode [style*="color:#92400e"], body.dark-mode [style*="color: #92400e"],
+body.dark-mode [style*="color:#78350f"], body.dark-mode [style*="color: #78350f"],
+body.dark-mode [style*="color:#b45309"], body.dark-mode [style*="color: #b45309"],
+body.dark-mode [style*="color:#c2410c"], body.dark-mode [style*="color: #c2410c"],
+body.dark-mode [style*="color:#9a3412"], body.dark-mode [style*="color: #9a3412"] { color: #fcd34d !important; }
+
+/* قرمز و زرشکی‌های تیره ⬅ صورتی/قرمز روشن */
+body.dark-mode [style*="color:#991b1b"], body.dark-mode [style*="color: #991b1b"],
+body.dark-mode [style*="color:#7f1d1d"], body.dark-mode [style*="color: #7f1d1d"],
+body.dark-mode [style*="color:#dc2626"], body.dark-mode [style*="color: #dc2626"],
+body.dark-mode [style*="color:#be185d"], body.dark-mode [style*="color: #be185d"] { color: #fda4af !important; }
+
+/* بنفش و نیلی تیره ⬅ یاسی روشن */
+body.dark-mode [style*="color:#3730a3"], body.dark-mode [style*="color: #3730a3"],
+body.dark-mode [style*="color:#6b21a8"], body.dark-mode [style*="color: #6b21a8"],
+body.dark-mode [style*="color:#7c3aed"], body.dark-mode [style*="color: #7c3aed"],
+body.dark-mode [style*="color:#4338ca"], body.dark-mode [style*="color: #4338ca"] { color: #c4b5fd !important; }
+
+/* ۳. اصلاح پس‌زمینه‌های گرادیانی و کادرهای خاص در حالت شب */
+body.dark-mode [style*="background:#eef2ff"], body.dark-mode [style*="background: #eef2ff"],
+body.dark-mode [style*="linear-gradient(135deg,#eff6ff"], body.dark-mode [style*="linear-gradient(135deg, #eff6ff"] {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+  border-color: #334155 !important;
+}
+body.dark-mode #overdue-alert-banner {
+  background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%) !important;
+  border-color: #ef4444 !important;
+}
+
+/* ۴. اصلاح جدول نرخ‌نامه، چک‌لیست‌ها، پترن و جستجوی قطعه در حالت شب */
+body.dark-mode .field-label,
+body.dark-mode .check-item { color: #cbd5e1 !important; }
+body.dark-mode .tariff-table th { background: #0f172a !important; color: #93c5fd !important; border-color: #334155 !important; }
+body.dark-mode .tariff-table td { color: #e2e8f0 !important; border-color: #334155 !important; }
+body.dark-mode .pattern-dot { background: #1e293b !important; color: #cbd5e1 !important; border-color: #475569 !important; }
+body.dark-mode .pattern-dot.active { background: var(--primary) !important; color: #fff !important; }
+body.dark-mode .part-search-item { border-bottom-color: #1e293b !important; color: #f8fafc !important; }
+body.dark-mode .spotlight-box { background: rgba(15, 23, 42, 0.95) !important; border-color: #334155 !important; }
+body.dark-mode .spotlight-close { background: #1e293b !important; }
+body.dark-mode .loyalty-banner.tier-regular { background: #1e293b !important; color: #cbd5e1 !important; border-color: #334155 !important; }
+body.dark-mode .loyalty-banner.tier-silver { background: #1e1b4b !important; color: #a5b4fc !important; border-color: #3730a3 !important; }
+body.dark-mode .loyalty-banner.tier-gold { background: #422006 !important; color: #fde68a !important; border-color: #92400e !important; }
+
+/* ۵. تضمین خوانایی کلیه فیلدهای ورودی و Placeholder در شب */
+body.dark-mode input:not([type="checkbox"]):not([type="radio"]),
+body.dark-mode textarea,
+body.dark-mode select {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #64748b !important;
+}
+body.dark-mode select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+</style>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// 🛠️ پچ یکپارچه: تعمیر ساختار DOM + حذف پیام‌های تستی + Drag مودال
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+  // ۱. خروج تب‌های دیگر از داخل #view-details (جبران تگ </div> جاافتاده)
+  function fixBrokenDOM() {
+    var vd = document.getElementById('view-details');
+    var tc = document.getElementById('tab-content-customers');
+    if (!vd || !tc) return;
+    
+    // اطمینان از اینکه view-details مستقیم داخل tab-content-customers است
+    if (vd.parentNode !== tc) tc.appendChild(vd);
+
+    var rootSections = [
+      'tab-content-deposits', 'tab-content-expenses', 'tab-content-parts',
+      'tab-content-reports', 'tab-content-backup', 'modal-receive-payment',
+      'modal-edit-customer', 'modal-evidence', 'modal-view-evidence',
+      'modal-qc', 'modal-signature', 'tariff-modal', 'modal-quote-edit',
+      'modal-part-edit', 'modal-expense-edit', 'modal-payment-edit',
+      'modal-imei-history', 'modal-pin-prompt', 'modal-quick-note',
+      'modal-timeline-view', 'print-section'
+    ];
+    rootSections.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && (vd.contains(el) || tc.contains(el))) {
+        document.body.insertBefore(el, document.body.lastElementChild);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixBrokenDOM);
+  } else {
+    fixBrokenDOM();
+  }
+
+  // ۲. فیلتر کردن Toastهای تستیِ دیباگ (🔵 قبل از confirm و...)
+  if (typeof window.showToast === 'function' && !window.showToast._cleaned) {
+    var _origToast = window.showToast;
+    window.showToast = function(msg, type) {
+      if (typeof msg === 'string' && (msg.indexOf('🔵') !== -1 || msg.indexOf('🟡') !== -1 || msg.indexOf('🟢 OK زدی') !== -1 || msg.indexOf('🔴 Cancel') !== -1)) {
+        return; // نادیده گرفتن پیام‌های تستی
+      }
+      return _origToast.apply(this, arguments);
+    };
+    window.showToast._cleaned = true;
+  }
+
+  // ۳. راه‌اندازی صحیح کشیدن مودال به پایین (Bottom Sheet Drag) در محیط اسکریپت
+  var activeSheet = null, startY = 0, currentY = 0, isDragging = false;
+  document.addEventListener('touchstart', function(e) {
+    if (window.innerWidth > 600 || !e.target.closest) return;
+    var sheet = e.target.closest('.modal-content');
+    if (!sheet) return;
+    var rect = sheet.getBoundingClientRect();
+    var touchY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+    if (touchY - rect.top > 60) return;
+    activeSheet = sheet; startY = touchY; currentY = startY; isDragging = true;
+    sheet.classList.add('dragging');
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!isDragging || !activeSheet) return;
+    currentY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+    var diff = Math.max(0, currentY - startY);
+    activeSheet.style.transform = 'translateY(' + diff + 'px)';
+    if (e.cancelable && diff > 5) e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', function() {
+    if (!isDragging || !activeSheet) return;
+    var diff = currentY - startY;
+    var sheet = activeSheet;
+    sheet.classList.remove('dragging');
+    sheet.style.transform = '';
+    isDragging = false; activeSheet = null;
+    if (diff > 100) {
+      var overlay = sheet.closest('.modal-overlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+  });
+})();
+</script>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════ */
+/* ✨ استایل قابلیت‌های ۱، ۲ و ۳ (نوار چسبان، چیپ‌های سریع، واتساپ) */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* ۱. نوار چسبان بالای پرونده مشتری (Sticky Header) */
+#cust-sticky-bar {
+  position: fixed;
+  top: 64px; /* دقیقاً زیر هدر اصلی */
+  left: 0; right: 0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 14px;
+  z-index: 98;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-120%);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#cust-sticky-bar.visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+body.dark-mode #cust-sticky-bar {
+  background: rgba(15, 23, 42, 0.92);
+  border-bottom-color: #334155;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* ۲. چیپ‌های انتخاب سریع ایراد و متعلقات */
+.quick-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+.quick-chip-btn {
+  width: auto !important;
+  padding: 5px 10px !important;
+  margin: 0 !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  border-radius: 16px !important;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+.quick-chip-btn:active {
+  transform: scale(0.93) !important;
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+body.dark-mode .quick-chip-btn {
+  background: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-color: #475569 !important;
+}
+
+/* ۳. دکمه‌های واتساپ و تلگرام */
+.btn-whatsapp {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+  color: #fff !important;
+  font-size: 0.82rem !important;
+  padding: 9px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 3px 10px rgba(34, 197, 94, 0.25) !important;
+}
+.btn-telegram {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%) !important;
+  color: #fff !important;
+  font-size: 0.82rem !important;
+  padding: 9px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 3px 10px rgba(2, 132, 199, 0.25) !important;
+}
+
+
+
+body.dark-mode header {
+  background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #0f172a 80%) !important;
+  border-bottom: 1px solid rgba(147, 197, 253, 0.2) !important;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  overflow: hidden;
+}
+
+/* افکت نور پس‌زمینه (رنگین‌کمان کهکشانی محو) */
+body.dark-mode header::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -20%; width: 140%; height: 200%;
+  background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%);
+  animation: galaxyRotate 15s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes galaxyRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+  /* ☀️ حالت روز — گزینه ۱: یاقوت کبود و موج شفق */
+  body:not(.dark-mode) header {
+    background: linear-gradient(125deg, #0b132b 0%, #1e3a8a 45%, #1e1b4b 75%, #0b132b 100%) !important;
+    background-size: 250% 250% !important;
+    animation: royalDayFlow 10s ease-in-out infinite !important;
+    border-bottom: 1px solid rgba(96, 165, 250, 0.3) !important;
+    box-shadow: 0 8px 25px rgba(30, 58, 138, 0.22) !important;
+    overflow: hidden;
+  }
+  body:not(.dark-mode) header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 85% 50%, rgba(34, 211, 238, 0.18), transparent 55%),
+                radial-gradient(circle at 15% 50%, rgba(232, 121, 249, 0.12), transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes royalDayFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+</style>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// 🚀 اجرای قابلیت‌های ۱، ۲ و ۳
+// ═══════════════════════════════════════════════════════════════════
+(function initTopUpgrades() {
+
+  // ─── ۱. ساخت و مدیریت نوار چسبان مشتری (Sticky Header) ───
+  var stickyBar = document.createElement('div');
+  stickyBar.id = 'cust-sticky-bar';
+  stickyBar.innerHTML =
+    '<div style="display:flex;align-items:center;gap:8px;min-width:0;">' +
+      '<button type="button" onclick="showCustomerList()" style="width:auto;padding:6px 12px;margin:0;font-size:0.78rem;background:#64748b;border-radius:8px;box-shadow:none;">⬅ بازگشت</button>' +
+      '<span id="sticky-cust-name" style="font-weight:900;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>' +
+    '</div>' +
+    '<div id="sticky-cust-bal" style="font-weight:900;font-size:0.82rem;padding:4px 10px;border-radius:8px;background:rgba(0,0,0,0.05);flex-shrink:0;"></div>';
+  document.body.appendChild(stickyBar);
+
+  window.addEventListener('scroll', function() {
+    var vd = document.getElementById('view-details');
+    var isDetailsOpen = vd && window.getComputedStyle(vd).display !== 'none';
+    if (isDetailsOpen && window.scrollY > 180) {
+      var nameEl = document.getElementById('cust-name-title');
+      var balEl = document.getElementById('cust-balance');
+      if (nameEl) document.getElementById('sticky-cust-name').innerText = nameEl.innerText;
+      if (balEl) {
+        var sb = document.getElementById('sticky-cust-bal');
+        sb.innerText = balEl.innerText;
+        sb.style.color = balEl.style.color;
+      }
+      stickyBar.classList.add('visible');
+    } else {
+      stickyBar.classList.remove('visible');
+    }
+  }, { passive: true });
+
+
+  // ─── ۲. افزودن چیپ‌های لمسی برای «ایراد دستگاه» و «متعلقات» ───
+  function injectQuickChips() {
+    var problemInput = document.getElementById('dev-problem');
+    if (problemInput && !document.getElementById('chips-problem')) {
+      var probChips = ['📱 تعویض ال‌سی‌دی', '🔌 سوکت شارژ', '🔋 تعویض باتری', '💧 آب‌خوردگی', '💀 خاموش کامل', '📶 مشکل آنتن', '🔊 اسپیکر/میکروفون', '🔄 فلش و نرم‌افزار', '🔓 قفل FRP / اکانت'];
+      var wrap1 = document.createElement('div');
+      wrap1.id = 'chips-problem';
+      wrap1.className = 'quick-chips-wrap';
+      probChips.forEach(function(txt) {
+        var cleanTxt = txt.replace(/^[^\s]+\s/, ''); // حذف ایموجی هنگام درج در کادر
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quick-chip-btn';
+        btn.innerText = txt;
+        btn.onclick = function() { appendChipText('dev-problem', cleanTxt); };
+        wrap1.appendChild(btn);
+      });
+      problemInput.parentNode.insertBefore(wrap1, problemInput.nextSibling);
+    }
+
+    var accInput = document.getElementById('dev-acc');
+    if (accInput && !document.getElementById('chips-acc')) {
+      var accChips = ['❌ بدون متعلقات', '🛡️ گارد دارد', '📲 سیم‌کارت همراه است', '💾 رم همراه است', '📥 خشاب سیم‌کارت دارد', '📦 کارتن دارد', '🔌 شارژر دارد'];
+      var wrap2 = document.createElement('div');
+      wrap2.id = 'chips-acc';
+      wrap2.className = 'quick-chips-wrap';
+      accChips.forEach(function(txt) {
+        var cleanTxt = txt.replace(/^[^\s]+\s/, '');
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quick-chip-btn';
+        btn.innerText = txt;
+        btn.onclick = function() { appendChipText('dev-acc', cleanTxt); };
+        wrap2.appendChild(btn);
+      });
+      accInput.parentNode.insertBefore(wrap2, accInput.nextSibling);
+    }
+  }
+
+  window.appendChipText = function(inputId, text) {
+    var inp = document.getElementById(inputId);
+    if (!inp) return;
+    var cur = inp.value.trim();
+    if (!cur) {
+      inp.value = text;
+    } else if (cur.indexOf(text) === -1) {
+      inp.value = cur + ' ، ' + text;
+    }
+    if (navigator.vibrate) navigator.vibrate(15);
+  };
+
+
+  // ─── ۳. اتصال مستقیم به واتساپ و تلگرام بدون نیاز به ذخیره شماره ───
+  function formatIranPhone(phone) {
+    var p = cleanNumber(phone || '');
+    if (p.indexOf('09') === 0 && p.length === 11) return '98' + p.slice(1);
+    if (p.indexOf('9') === 0 && p.length === 10) return '98' + p;
+    if (p.indexOf('98') === 0) return p;
+    return p;
+  }
+
+  // الف) ارسال وضعیت حساب کل به واتساپ یا تلگرام (در بالای پرونده مشتری)
+  window.sendSocialAccount = function(platform) {
+    if (!activeCustomerId) return;
+    var c = customers.find(function(x) { return x.id === activeCustomerId && !x.deleted; });
+    if (!c || !c.phone) return showToast('شماره تماس مشتری ثبت نشده است!', 'warning');
+    
+    var intlPhone = formatIranPhone(c.phone);
+    var bal = getBalance(activeCustomerId);
+    var loyalty = getCustomerLoyalty(c.id);
+    var msg = '✦ *موبایل پرشیا* ✦\n' +
+              'سلام ' + c.name + ' عزیز 🌹\n' +
+              'کد اشتراک: ' + loyalty.custCode + ' (سطح ' + loyalty.tier + ')\n\n' +
+              '💰 *وضعیت حساب شما:* ' + (bal > 0 ? (formatToman(bal) + ' بدهکار') : 'تسویه کامل ✅') + '\n\n' +
+              (bal > 0 && customPaymentText ? ('💳 *اطلاعات واریز:*\n' + customPaymentText) : '');
+
+    if (platform === 'wa') {
+      window.open('https://wa.me/' + intlPhone + '?text=' + encodeURIComponent(msg), '_blank');
+    } else {
+      window.open('https://t.me/+' + intlPhone + '?text=' + encodeURIComponent(msg), '_blank');
+    }
+  };
+
+  // ب) ارسال رسید یک دستگاه خاص به واتساپ (روی کارت‌های در دست تعمیر)
+  window.sendWhatsAppQuote = function(qId) {
+    var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+    if (!q) return;
+    var c = customers.find(function(x) { return x.id === q.customerId && !x.deleted; });
+    if (!c || !c.phone) return showToast('شماره تماس مشتری ثبت نشده است!', 'warning');
+
+    var intlPhone = formatIranPhone(c.phone);
+    var cashDep = Number(q.cashDeposit != null ? q.cashDeposit : (q.deposit || 0));
+    var onlineDep = Number(q.onlineDeposit || 0);
+    var remain = Math.max(0, Number(q.amount) - (cashDep + onlineDep));
+    var stLabel = (typeof statusLabels !== 'undefined' && statusLabels[q.deviceStatus]) ? statusLabels[q.deviceStatus] : q.deviceStatus;
+
+    var msg = '✦ *رسید پذیرش موبایل پرشیا* ✦\n' +
+              '👤 مشتری: ' + c.name + '\n' +
+              '📱 دستگاه: ' + (q.model || 'نامشخص') + (q.color ? ' (' + q.color + ')' : '') + '\n' +
+              '🔢 شماره قبض: ' + (q.intakeCode || '---') + '\n' +
+              '🔍 ایراد: ' + (q.problem || 'بررسی تخصصی') + '\n' +
+              '📊 وضعیت فعلی: *' + stLabel + '*\n' +
+              '💰 مبلغ کل: ' + formatToman(q.amount) + '\n' +
+              '📌 مانده حساب این قبض: *' + formatToman(remain) + '*\n\n' +
+              '🌐 لینک استعلام آنلاین:\n' + getQrFullUrl(q.intakeCode || q.trackCode);
+
+    window.open('https://wa.me/' + intlPhone + '?text=' + encodeURIComponent(msg), '_blank');
+  };
+
+  // ج) تزریق دکمه‌های واتساپ و تلگرام به بالای پرونده مشتری
+  function injectCustomerSocialBtns() {
+    var shareBtn = document.querySelector('#view-details .btn-share');
+    if (shareBtn && shareBtn.parentNode && !document.getElementById('social-row-injected')) {
+      var socialRow = document.createElement('div');
+      socialRow.id = 'social-row-injected';
+      socialRow.className = 'row';
+      socialRow.style.marginTop = '6px';
+      socialRow.innerHTML =
+        '<button type="button" class="btn-whatsapp" style="flex:1;" onclick="sendSocialAccount(\'wa\')">🟢 ارسال در واتساپ</button>' +
+        '<button type="button" class="btn-telegram" style="flex:1;" onclick="sendSocialAccount(\'tg\')">🔵 ارسال در تلگرام</button>';
+      shareBtn.parentNode.parentNode.insertBefore(socialRow, shareBtn.parentNode.nextSibling);
+    }
+  }
+
+  // د) اضافه کردن خودکار دکمه واتساپ روی کارت‌های فاکتور در دست تعمیر
+  var _origRenderQuotes = window.renderQuotes;
+  if (typeof _origRenderQuotes === 'function' && !window.renderQuotes._waPatched) {
+    window.renderQuotes = function() {
+      _origRenderQuotes.apply(this, arguments);
+      var shareBtns = document.querySelectorAll('#quotes-list button[onclick*="shareQuoteReceipt"]');
+      shareBtns.forEach(function(btn) {
+        var onclickStr = btn.getAttribute('onclick') || '';
+        var match = onclickStr.match(/shareQuoteReceipt\((\d+)\)/);
+        if (match && match[1] && !btn.parentNode.querySelector('.btn-wa-quote')) {
+          var qId = match[1];
+          var waBtn = document.createElement('button');
+          waBtn.type = 'button';
+          waBtn.className = 'btn-whatsapp btn-wa-quote';
+          waBtn.innerHTML = '🟢 واتساپ';
+          waBtn.onclick = function(e) { e.stopPropagation(); sendWhatsAppQuote(Number(qId)); };
+          btn.parentNode.insertBefore(waBtn, btn.nextSibling);
+        }
+      });
+    };
+    window.renderQuotes._waPatched = true;
+  }
+
+  // اجرای اولیه
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      injectQuickChips();
+      injectCustomerSocialBtns();
+    });
+  } else {
+    injectQuickChips();
+    injectCustomerSocialBtns();
+  }
+})();
+
+
+// 🛠️ اصلاح جامع و قطعی تابع بازگشت به لیست مشتریان
+window.showCustomerList = function() {
+  // ۱. پاک کردن حالت پروفایل فعال از روی بدنه صفحه
+  document.body.classList.remove('in-customer-details');
+  
+  // ۲. مخفی کردن نوار چسبان (Sticky Bar)
+  var stickyBar = document.getElementById('cust-sticky-bar');
+  if (stickyBar) stickyBar.classList.remove('visible');
+
+  // ۳. صفر کردن شناسه مشتری فعال
+  activeCustomerId = null;
+
+  // ۴. مخفی کردن صفحه جزئیات و فاکتور با اولویت بالا
+  var vd = document.getElementById('view-details');
+  if (vd) {
+    vd.style.display = 'none';
+    vd.style.removeProperty('display');
+  }
+
+  // ۵. نمایش لیست اصلی مشتریان
+  var vc = document.getElementById('view-customers');
+  if (vc) {
+    vc.style.display = 'block';
+    vc.style.removeProperty('display');
+  }
+
+  // ۶. رندر مجدد لیست و اسکرول به بالا
+  if (typeof renderCustomers === 'function') {
+    renderCustomers();
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// ═══════════════════════════════════════════════════
+// 🔓 قفل هوشمند ۱۰ دقیقه‌ای (Smart Lock)
+// ═══════════════════════════════════════════════════
+(function setupSmartLock() {
+  var lockTimer = null;
+
+  // تابعی که تایمر ۱۰ دقیقه‌ای رو استارت می‌زنه
+  function applySmartLock() {
+    if (lockTimer) clearTimeout(lockTimer); // اگه تایمر قبلی هست، ریست کن
+    
+    lockTimer = setTimeout(function() {
+      // بعد از ۱۰ دقیقه همه چیز رو قفل کن
+      isReportsUnlocked = false;
+      isStockUnlocked = false;
+      isExpensesUnlocked = false;
+      
+      // آپدیت کردن ظاهر دکمه‌ها و صفحات
+      if (typeof updateReportsLockUI === 'function') updateReportsLockUI();
+      if (typeof updateStockLockUI === 'function') updateStockLockUI();
+      if (typeof updateExpensesLockUI === 'function') updateExpensesLockUI();
+      if (typeof renderReports === 'function') renderReports();
+      if (typeof renderParts === 'function') renderParts();
+      if (typeof renderExpenses === 'function') renderExpenses();
+      if (typeof updateGlobalLockIcon === 'function') updateGlobalLockIcon();
+      
+      if (typeof showToast === 'function') {
+        showToast('🔒 قفل‌ها به دلیل عدم فعالیت ۱۰ دقیقه‌ای بسته شدند', 'info');
+      }
+    }, 10 * 60 * 1000); // ۱۰ دقیقه (۶۰۰,۰۰۰ میلی‌ثانیه)
+  }
+
+  // ۱. هر بار که رمز رو با موفقیت وارد کردی، تایمر ۱۰ دقیقه‌ای رو شروع کن
+  var _basePrompt = window.promptForPinAsync;
+  if (typeof _basePrompt === 'function') {
+    window.promptForPinAsync = function() {
+      var p = _basePrompt.apply(this, arguments);
+      if (p && typeof p.then === 'function') {
+        return p.then(function(res) {
+          if (res) applySmartLock(); // اگه رمز درست بود، تایمر رو استارت بزن
+          return res;
+        });
+      }
+      return p;
+    };
+  }
+
+  // ۲. اگه از دکمه قفل کل (بالای هدر) استفاده کردی، اون هم تایمر رو فعال کنه
+  var _baseGlobalLock = window.toggleGlobalLock;
+  if (typeof _baseGlobalLock === 'function') {
+    window.toggleGlobalLock = function() {
+      var res = _baseGlobalLock.apply(this, arguments);
+      if (isReportsUnlocked && isStockUnlocked && isExpensesUnlocked) {
+         applySmartLock();
+      }
+      return res;
+    };
+  }
+
+  console.log('[smart-lock] Ready ✅');
+})();
+
+
+</script>
+
+
 
 </body>
 </html>

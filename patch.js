@@ -40,10 +40,13 @@ function learnBrandModel(brand, model) {
   var learned = loadLearnedModels();
   if (!learned[brand]) learned[brand] = [];
 
+  // 🔧 مقایسه case-insensitive + trim
+  var mNorm = m.toLowerCase();
   var defaultList = (window.PHONE_BRANDS_DB && window.PHONE_BRANDS_DB[brand]) || [];
-  if (defaultList.indexOf(m) !== -1) return false;
+  if (defaultList.some(function(d) { return d.toLowerCase().trim() === mNorm; })) return false;
 
-  var existing = learned[brand].find(function(x) { return x.model === m; });
+  // 🔧 چک تکراری با learned ها هم case-insensitive
+  var existing = learned[brand].find(function(x) { return x.model.toLowerCase().trim() === mNorm; });
   if (existing) {
     existing.lastUsed = Date.now();
     saveLearnedModels();

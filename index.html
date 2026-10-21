@@ -1904,6 +1904,13 @@ body.dark-mode .expand-indicator {
   <button type="button" class="nav-tab active" id="btn-tab-customers" onclick="openTab('customers')">
     <span class="nav-icon">👥</span><span>مشتریان</span>
   </button>
+  
+  <!-- ✅ دکمه سفارشات دقیقاً اینجا و مستقل -->
+  <button type="button" class="nav-tab" id="btn-tab-orders" onclick="openTab('orders')">
+    <span class="nav-icon">📋</span><span>سفارشات</span>
+  </button>
+
+  <!-- دکمه واریزی‌ها با ساختار اصلی خودش -->
   <button type="button" class="nav-tab" id="btn-tab-deposits" onclick="openTab('deposits')">
     <div style="position:relative; display:inline-block;">
       <span class="nav-icon">💳</span>
@@ -1911,9 +1918,11 @@ body.dark-mode .expand-indicator {
     </div>
     <span>واریزی‌ها</span>
   </button>
+
   <button type="button" class="nav-tab" id="btn-tab-more" onclick="toggleMoreMenu()">
     <span class="nav-icon">📋</span><span>بیشتر</span>
   </button>
+  
   <button type="button" class="nav-tab" id="btn-tab-backup" onclick="openTab('backup')">
     <span class="nav-icon">⚙️</span><span>تنظیمات</span>
   </button>
@@ -1934,11 +1943,27 @@ body.dark-mode .expand-indicator {
     <div class="mm-icon">📊</div>
     <span>گزارشات و سود</span>
   </div>
+    <div class="more-menu-item" data-tab="glass-ref" onclick="openMoreTab('glass-ref')">
+    <div class="mm-icon">🛡️</div>
+    <span>مرجع گلس و قطعات</span>
+  </div>
 </div>
 
 
 
 <div id="toast-box"></div>
+
+<!-- کادر تب سفارشات -->
+<div id="tab-content-orders" style="display:none;">
+  <div class="container"><div id="orders-container"></div></div>
+</div>
+
+<!-- کادر تب مرجع گلس (iframe) -->
+<div id="tab-content-glass-ref" style="display:none;">
+  <div style="position:fixed;top:64px;left:0;right:0;bottom:64px;background:var(--bg);overflow:hidden;z-index:90;">
+    <iframe id="glass-reference-iframe" src="glass-reference.html?embed=1" style="width:100%;height:100%;border:none;display:block;" title="مرجع گلس و قطعات"></iframe>
+  </div>
+</div>
 
 <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 <form id="drive_form" method="POST" target="hidden_iframe" style="display:none;">
@@ -2403,10 +2428,11 @@ body.dark-mode .expand-indicator {
 </select>
 </div>
 </div>
+</div>
 
 <button type="button" onclick="saveQuickSale()" style="background:var(--success);margin-top:16px;padding:12px;font-size:0.95rem;font-weight:800;">✓ ثبت فروش و دریافت وجه</button>
 </div>
-
+</div>
 </div>
 </div>
 <!-- ===== تب واریزی‌ها ===== -->
@@ -4226,7 +4252,7 @@ function getQrFullUrl(trackCode) {
 }
 
 function getQrCodeUrl(trackCode) {
-  return 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=2&data=' + encodeURIComponent(getQrFullUrl(trackCode));
+  return 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&margin=10&data=' + encodeURIComponent(getQrFullUrl(trackCode));
 }
 
 function getCustomerLoyalty(customerId) {
@@ -6815,7 +6841,6 @@ function dismissOverdueAlert() {
   setTimeout(function() { banner.style.display = 'none'; banner.style.animation = ''; }, 300);
 }
 
-setInterval(updateSyncStatusBadge, 60000);
   setInterval(updateSyncStatusBadge, 60000);
 
 function exportBackup() {
@@ -15138,7 +15163,154 @@ window.showCustomerList = function() {
 
 </script>
 
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🛡️ فقط مدیریت تب گلس (بدون دست زدن به سیستم سفارشات)
+// ═══════════════════════════════════════════════════════════════
+(function setupGlassRefTab() {
 
+  var _baseOpenTab = window.openTab;
+
+  window.openTab = function(tabName) {
+    if (typeof closeMoreMenu === 'function') closeMoreMenu();
+
+    // ─── تب گلس ───
+    if (tabName === 'glass-ref') {
+      // مخفی کردن همه تب‌های دیگر
+      ['customers', 'deposits', 'orders', 'expenses', 'parts', 'reports', 'backup'].forEach(function(t) {
+        var sec = document.getElementById('tab-content-' + t);
+        if (sec) sec.style.display = 'none';
+      });
+
+      // نمایش تب گلس
+      var glassSec = document.getElementById('tab-content-glass-ref');
+      if (glassSec) glassSec.style.display = 'block';
+
+      // پاک کردن active از همه دکمه‌ها
+      document.querySelectorAll('.nav-tabs .nav-tab').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+      // active کردن دکمه «بیشتر» (چون گلس زیرمجموعه‌ی اونه)
+      var mb = document.getElementById('btn-tab-more');
+      if (mb) mb.classList.add('active');
+
+      return;
+    }
+
+    // ─── بقیه تب‌ها: توسط openTab اصلی (fixNavBarAndIcons) مدیریت می‌شوند ───
+    if (typeof _baseOpenTab === 'function') _baseOpenTab(tabName);
+  };
+
+  console.log('[glass-ref-tab] Ready ✅');
+})();
+</script>
+<script>
+  // ─── ۲. کدهای سیستم سفارشات (چون در نسخه اصلی ناقص بود) ───
+  if (!window.orders) window.orders = [];
+
+  window.renderOrders = function() {
+    var container = document.getElementById('orders-container');
+    if (!container) return;
+
+    var activeOrders = window.orders.filter(function(o) { return !o.deleted; });
+    
+    var html = `
+      <div class="card" style="background:#eff6ff;border:1.5px solid #93c5fd;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:800;font-size:1rem;color:#1e40af;">🛒 سفارشات قطعات</div>
+          <div style="font-size:0.78rem;color:#475569;margin-top:2px;">لیست خرید و تهیه قطعات</div>
+        </div>
+        <button type="button" onclick="openAddOrderModal()" style="background:#2563eb;width:auto;padding:8px 14px;font-size:0.82rem;margin:0;border-radius:8px;">➕ سفارش جدید</button>
+      </div>
+    `;
+
+    if (activeOrders.length === 0) {
+      html += `<div class="card" style="text-align:center;padding:40px 20px;">
+          <div style="font-size:3.5rem;margin-bottom:12px;animation:emptyFloat 3s infinite;display:inline-block;">🛒</div>
+          <div style="font-weight:900;font-size:1.1rem;color:#1e293b;margin-bottom:6px;">سفارشی ثبت نشده</div>
+          <div style="font-size:0.85rem;color:#64748b;">برای خرید قطعه، از دکمه بالا استفاده کن.</div>
+        </div>`;
+    } else {
+      activeOrders.forEach(function(o) {
+        var isArrived = (o.status === 'ARRIVED');
+        var c = o.customerId ? customers.find(function(x) { return x.id === o.customerId; }) : null;
+        var customerLine = o.isShortage ? '<span class="badge badge-orange">کسری انبار</span>' : '👤 ' + (c ? c.name : 'نامشخص');
+        
+        html += `
+          <div class="card" style="padding:12px;margin-bottom:8px;background:${isArrived ? '#f0fdf4' : '#fffbeb'};">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <div onclick="toggleOrderStatus(${o.id})" style="cursor:pointer;margin-top:2px;">
+                <div style="width:24px;height:24px;border-radius:6px;border:2px solid ${isArrived ? '#10b981' : '#cbd5e1'};background:${isArrived ? '#10b981' : '#fff'};display:flex;justify-content:center;align-items:center;color:#fff;font-size:1rem;">${isArrived ? '✓' : ''}</div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-weight:800;font-size:0.95rem;color:#1e293b;">${o.itemName}</div>
+                <div style="font-size:0.78rem;color:#475569;margin-top:4px;">${customerLine}</div>
+                <div style="font-size:0.75rem;color:#64748b;margin-top:2px;">📅 ${o.date}</div>
+              </div>
+              <button type="button" onclick="deleteOrder(${o.id})" style="background:none;border:none;color:#ef4444;font-size:1rem;cursor:pointer;">🗑️</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+    container.innerHTML = html;
+  };
+
+  window.openAddOrderModal = function() {
+    var item = prompt('نام قطعه / کالا را وارد کنید:');
+    if (!item) return;
+    window.orders.unshift({
+      id: Date.now(), itemName: item, customerId: null, isShortage: true, status: 'PENDING', date: getTodayJalali(), deleted: false
+    });
+    saveAll();
+    window.renderOrders();
+    showToast('✅ سفارش ثبت شد', 'success');
+  };
+
+  window.toggleOrderStatus = function(id) {
+    var o = window.orders.find(function(x) { return x.id === id; });
+    if (o) { o.status = (o.status === 'PENDING') ? 'ARRIVED' : 'PENDING'; saveAll(); window.renderOrders(); }
+  };
+
+  window.deleteOrder = function(id) {
+    if (!confirm('حذف شود؟')) return;
+    var o = window.orders.find(function(x) { return x.id === id; });
+    if (o) { o.deleted = true; saveAll(); window.renderOrders(); }
+  };
+
+  // دانلود سفارشات از دیتابیس هنگام لود (اگر از قبل داشتید)
+  setTimeout(function() {
+    if (typeof openAppDB === 'function') {
+      openAppDB().then(function(db) {
+        var req = db.transaction('store', 'readonly').objectStore('store').get('db_orders');
+        req.onsuccess = function(e) {
+          if (e.target.result && Array.isArray(e.target.result)) {
+            window.orders = e.target.result;
+            window.renderOrders();
+          }
+        };
+      });
+    }
+  }, 1000);
+
+  console.log('[Orders & Glass] Ready ✅');
+})();
+</script>
+
+<script>
+(function fixGlassRefStuck() {
+  // هر بار که openTab صدا زده می‌شود، اگر به glass-ref نمی‌رویم، اول glass را مخفی کن
+  var _base = window.openTab;
+  window.openTab = function(tabName) {
+    if (tabName !== 'glass-ref') {
+      var glassSec = document.getElementById('tab-content-glass-ref');
+      if (glassSec) glassSec.style.display = 'none';
+    }
+    return _base.apply(this, arguments);
+  };
+  console.log('[fix-glass-ref-stuck] Ready ✅');
+})();
+</script>
 
 </body>
 </html>

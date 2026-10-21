@@ -1,0 +1,2649 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>مرجع مهندسی گلس، ال‌سی‌دی و قطعات | موبایل پرشیا</title>
+<meta name="theme-color" content="#0b132b">
+<style>
+/* حالت ادغام‌شده (بدون هدر، بدون نوار وضعیت و بدون دکمه شناور) */
+body.embedded header,
+body.embedded .nav-tabs,
+body.embedded .magic-fab { display: none !important; }
+body.embedded { padding-bottom: 12px !important; }
+
+@font-face{font-family:'Vazirmatn';font-weight:400;font-display:swap;src:url('font/Vazirmatn-Regular.woff2') format('woff2'),url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');}
+@font-face{font-family:'Vazirmatn';font-weight:700;font-display:swap;src:url('font/Vazirmatn-Bold.woff2') format('woff2'),url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Bold.woff2') format('woff2');}
+
+:root {
+  --primary:#2563eb; --primary-dark:#1d4ed8; --primary-light:#eff6ff;
+  --parts-color:#7c3aed; --parts-dark:#5b21b6; --parts-light:#f5f3ff;
+  --bat-color:#059669; --bat-light:#ecfdf5;
+  --gold:#f59e0b; --danger:#ef4444; --success:#10b981;
+  --bg:#f1f5f9; --card:#ffffff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0;
+  --radius:22px;
+}
+body.dark-mode {
+  --primary:#3b82f6; --primary-dark:#2563eb; --primary-light:#1e293b;
+  --parts-color:#a78bfa; --parts-dark:#7c3aed; --parts-light:#2e1065;
+  --bat-color:#34d399; --bat-light:#064e3b;
+  --bg:#0f172a; --card:#1e293b; --text:#f8fafc; --muted:#94a3b8; --border:#334155;
+}
+
+*{box-sizing:border-box;font-family:'Vazirmatn',system-ui,-apple-system,sans-serif;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);padding-bottom:70px;-webkit-tap-highlight-color:transparent;line-height:1.6;transition:background .3s,color .3s;}
+
+header{position:sticky;top:0;z-index:100;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;color:#fff;overflow:hidden;background:linear-gradient(125deg,#0b132b 0%,#1e3a8a 45%,#1e1b4b 75%,#0b132b 100%);background-size:250% 250%;animation:royalDayFlow 10s ease-in-out infinite;border-bottom:1px solid rgba(96,165,250,.3);box-shadow:0 8px 25px rgba(15,23,42,.25);}
+body.dark-mode header{background:radial-gradient(circle at 50% -20%,#1e1b4b 0%,#0f172a 85%)!important;border-bottom:1px solid rgba(147,197,253,.2)!important;box-shadow:0 8px 32px rgba(15,23,42,.6)!important;}
+header::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#60a5fa,#a78bfa,transparent);opacity:.9;z-index:3;}
+@keyframes royalDayFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shine{0%{background-position:200% center}100%{background-position:-200% center}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}50%{box-shadow:0 0 0 8px rgba(16,185,129,0)}}
+@keyframes magicFadeIn{from{opacity:0;transform:translateY(-12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fabPulse{0%,100%{box-shadow:0 8px 25px rgba(139,92,246,.4),0 0 0 0 rgba(139,92,246,.5)}50%{box-shadow:0 12px 35px rgba(139,92,246,.6),0 0 0 12px rgba(139,92,246,0)}}
+
+.text-wave{background:linear-gradient(90deg,#93c5fd 0%,#93c5fd 40%,#fff 45%,#e879f9 50%,#fff 55%,#93c5fd 60%,#93c5fd 100%);background-size:200% auto;color:transparent;-webkit-background-clip:text;background-clip:text;animation:shine 3s linear infinite;}
+.header-actions{display:flex;gap:6px;flex-wrap:wrap;z-index:2;}
+.icon-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;min-width:40px;height:40px;border-radius:12px;display:flex;justify-content:center;align-items:center;font-size:1rem;cursor:pointer;backdrop-filter:blur(8px);transition:transform .2s;padding:0 9px;font-weight:bold;}
+.icon-btn:active{transform:scale(.9)}
+
+.container{max-width:640px;margin:0 auto;padding:14px;}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:14px;border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.04);}
+body.dark-mode .card{border-color:rgba(255,255,255,.08);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+
+.main-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--card);padding:7px;border-radius:20px;border:1px solid var(--border);margin-bottom:14px;box-shadow:0 6px 20px rgba(0,0,0,.04);}
+.main-tab-btn{padding:12px 10px;border-radius:15px;border:none;background:transparent;color:var(--muted);font-weight:900;font-size:.86rem;cursor:pointer;transition:all .25s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;}
+.main-tab-btn .tab-sub{font-size:.66rem;font-weight:700;opacity:.8;}
+.main-tab-btn.active[data-tab="GLASS"]{background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);color:#fff;box-shadow:0 6px 16px rgba(37,99,235,.35);}
+.main-tab-btn.active[data-tab="PARTS"]{background:linear-gradient(135deg,#7c3aed 0%,#5b21b6 100%);color:#fff;box-shadow:0 6px 16px rgba(124,58,237,.35);}
+
+.parts-subfilter{display:none;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
+.parts-subfilter.visible{display:flex;}
+.subfilter-btn{flex:1;min-width:max-content;padding:8px 12px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:.77rem;font-weight:800;cursor:pointer;transition:all .2s;text-align:center;}
+.subfilter-btn.active{background:var(--parts-light);color:var(--parts-color);border-color:var(--parts-color);}
+body.dark-mode .subfilter-btn.active{background:#2e1065;color:#ddd6fe;border-color:#8b5cf6;}
+
+.search-wrap{position:relative;display:flex;align-items:center;}
+.search-input{width:100%;padding:15px 46px 15px 88px;border-radius:16px;border:2px solid var(--primary);background:var(--bg);color:var(--text);font-size:1rem;font-weight:800;outline:none;transition:all .2s;box-shadow:0 4px 15px rgba(37,99,235,.1);}
+body.parts-mode-active .search-input{border-color:var(--parts-color);box-shadow:0 4px 15px rgba(124,58,237,.12);}
+.search-input:focus{box-shadow:0 0 0 4px rgba(37,99,235,.2);background:var(--card);}
+.search-icon{position:absolute;right:15px;font-size:1.25rem;pointer-events:none;}
+.search-hint{position:absolute;left:12px;display:flex;gap:4px;align-items:center;pointer-events:none;opacity:.65;}
+.search-hint kbd{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:2px 6px;font-size:.68rem;font-weight:900;font-family:monospace;color:var(--muted);box-shadow:0 1px 0 var(--border);}
+.clear-btn{position:absolute;left:10px;width:30px;height:30px;border-radius:50%;background:rgba(239,68,68,.15);color:var(--danger);border:none;font-weight:bold;cursor:pointer;display:none;justify-content:center;align-items:center;}
+
+.chips-scroll{display:flex;gap:7px;overflow-x:auto;padding:8px 2px 2px 2px;scrollbar-width:none;}
+.chips-scroll::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:7px 13px;border-radius:20px;font-size:.76rem;font-weight:800;background:var(--bg);color:var(--muted);border:1.5px solid var(--border);cursor:pointer;transition:all .2s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+.chip:active{transform:scale(.94)}
+.chip.active{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;border-color:var(--primary-dark);box-shadow:0 4px 10px rgba(37,99,235,.25);}
+.section-label{font-size:.73rem;color:var(--muted);font-weight:800;margin-top:11px;display:flex;justify-content:space-between;align-items:center;}
+
+.section-banner{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 15px;border-radius:15px;margin:16px 0 10px 0;font-weight:900;font-size:.88rem;}
+.banner-exact{background:linear-gradient(135deg,#dcfce7 0%,#bbf7d0 100%);color:#166534;border:1px solid #86efac;}
+.banner-size{background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);color:#92400e;border:1px solid #fcd34d;}
+.banner-lcd{background:linear-gradient(135deg,#ede9fe 0%,#ddd6fe 100%);color:#5b21b6;border:1px solid #c4b5fd;}
+body.dark-mode .banner-exact{background:linear-gradient(135deg,#052e16 0%,#064e3b 100%);color:#86efac;border-color:#166534;}
+body.dark-mode .banner-size{background:linear-gradient(135deg,#451a03 0%,#78350f 100%);color:#fcd34d;border-color:#92400e;}
+body.dark-mode .banner-lcd{background:linear-gradient(135deg,#2e1065 0%,#4c1d95 100%);color:#ddd6fe;border-color:#6d28d9;}
+
+.group-card{position:relative;border-right:6px solid var(--success)!important;overflow:hidden;}
+.group-card.size-card{border-right-color:var(--gold)!important;}
+.group-card.lcd-card{border-right-color:var(--parts-color)!important;}
+.group-card.lcd-warn-card{border-right-color:var(--danger)!important;}
+.group-card.bat-card{border-right-color:var(--bat-color)!important;}
+.group-card.board-card{border-right-color:#0284c7!important;}
+
+.group-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:11px;padding-bottom:10px;border-bottom:1px dashed var(--border);flex-wrap:wrap;}
+.group-title{font-size:.98rem;font-weight:900;flex:1 1 100%;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;}
+
+.spec-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;width:100%;}
+.spec-badge{padding:4px 9px;border-radius:8px;font-size:.71rem;font-weight:800;background:var(--primary-light);color:var(--primary);border:1px solid rgba(37,99,235,.2);display:inline-flex;align-items:center;gap:4px;}
+body.dark-mode .spec-badge{background:#0f172a;color:#93c5fd;border-color:#334155;}
+
+.edge-badge-FLAT{background:#dcfce7!important;color:#15803d!important;border-color:#86efac!important;}
+.edge-badge-25D{background:#e0f2fe!important;color:#0369a1!important;border-color:#7dd3fc!important;}
+.edge-badge-CURVED{background:#fae8ff!important;color:#a21caf!important;border-color:#f0abfc!important;}
+body.dark-mode .edge-badge-FLAT{background:#052e16!important;color:#6ee7b7!important;border-color:#166534!important;}
+body.dark-mode .edge-badge-25D{background:#082f49!important;color:#7dd3fc!important;border-color:#0369a1!important;}
+body.dark-mode .edge-badge-CURVED{background:#4a044e!important;color:#f0abfc!important;border-color:#86198f!important;}
+
+.gg-tag{padding:3px 8px;border-radius:6px;font-size:.69rem;font-weight:900;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;direction:ltr;}
+body.dark-mode .gg-tag{background:#450a0a;color:#fca5a5;border-color:#991b1b;}
+
+.frame-badge-FULL{background:#dcfce7;color:#166534;border:1px solid #86efac;padding:4px 10px;border-radius:8px;font-size:.73rem;font-weight:900;}
+.frame-badge-PANEL{background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:4px 10px;border-radius:8px;font-size:.73rem;font-weight:900;}
+.frame-badge-TRAP{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;padding:4px 10px;border-radius:8px;font-size:.73rem;font-weight:900;}
+body.dark-mode .frame-badge-FULL{background:#052e16;color:#6ee7b7;border-color:#166534;}
+body.dark-mode .frame-badge-PANEL{background:#451a03;color:#fcd34d;border-color:#92400e;}
+body.dark-mode .frame-badge-TRAP{background:#450a0a;color:#fca5a5;border-color:#991b1b;}
+
+.code-box{background:var(--bg);border:1px dashed var(--border);border-radius:11px;padding:8px 11px;margin-bottom:10px;font-size:.77rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.code-pill{font-family:monospace;font-weight:900;font-size:.82rem;background:var(--card);color:var(--parts-color);padding:3px 9px;border-radius:7px;border:1.5px solid var(--border);direction:ltr;cursor:pointer;}
+.code-pill:active{transform:scale(.93);}
+.code-pill.bat-code{background:#ecfdf5;color:#047857;border-color:#6ee7b7;font-size:.88rem;}
+body.dark-mode .code-pill.bat-code{background:#064e3b;color:#6ee7b7;border-color:#059669;}
+
+.models-grid{display:flex;flex-wrap:wrap;gap:7px;}
+.model-pill{padding:7px 11px;border-radius:10px;font-size:.81rem;font-weight:800;display:inline-flex;align-items:center;gap:5px;direction:ltr;border:1.5px solid transparent;transition:all .2s;cursor:pointer;user-select:none;}
+.model-pill:active{transform:scale(.95)}
+.brand-samsung{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.brand-xiaomi{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.brand-apple{background:#f8fafc;color:#334155;border-color:#cbd5e1}
+.brand-huawei{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.brand-honor{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}
+.brand-nokia{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.brand-realme{background:#fef9c3;color:#a16207;border-color:#fde68a}
+.brand-tecno{background:#fce7f3;color:#be185d;border-color:#fbcfe8}
+.brand-infinix{background:#e0f2fe;color:#0369a1;border-color:#bae6fd}
+
+body.dark-mode .brand-samsung{background:#172554;color:#93c5fd;border-color:#1e40af}
+body.dark-mode .brand-xiaomi{background:#431407;color:#fdba74;border-color:#9a3412}
+body.dark-mode .brand-apple{background:#0f172a;color:#e2e8f0;border-color:#475569}
+body.dark-mode .brand-huawei{background:#450a0a;color:#fca5a5;border-color:#991b1b}
+body.dark-mode .brand-honor{background:#2e1065;color:#c4b5fd;border-color:#5b21b6}
+body.dark-mode .brand-nokia{background:#052e16;color:#6ee7b7;border-color:#065f46}
+body.dark-mode .brand-realme{background:#422006;color:#fde68a;border-color:#713f12}
+body.dark-mode .brand-tecno{background:#500724;color:#fbcfe8;border-color:#9d174d}
+body.dark-mode .brand-infinix{background:#082f49;color:#bae6fd;border-color:#075985}
+
+.model-pill.searched{background:linear-gradient(135deg,#10b981 0%,#059669 100%)!important;color:#fff!important;border-color:#047857!important;animation:pulse 2s ease-in-out infinite;transform:scale(1.05);}
+
+.fit-note{margin-top:11px;padding:9px 12px;border-radius:10px;font-size:.78rem;background:#fffbeb;color:#92400e;border-right:3px solid #f59e0b;font-weight:700;line-height:1.65;}
+.tech-warn{margin-top:8px;padding:9px 12px;border-radius:10px;font-size:.78rem;background:#fef2f2;color:#991b1b;border-right:3px solid #ef4444;font-weight:800;line-height:1.65;}
+body.dark-mode .fit-note{background:#422006;color:#fde68a;}
+body.dark-mode .tech-warn{background:#450a0a;color:#fca5a5;}
+
+.empty-state{text-align:center;padding:30px 16px;}
+.delete-btn{background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:3px 8px;font-size:.7rem;font-weight:bold;cursor:pointer;}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(8px);display:none;justify-content:center;align-items:center;z-index:1000;padding:14px;}
+.modal-overlay.open{display:flex;}
+.modal-content{background:var(--card);border-radius:22px;padding:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 25px 50px -12px rgba(0,0,0,.4);}
+.field-label{font-size:.8rem;font-weight:bold;color:var(--muted);margin-top:10px;display:block;}
+input,select,textarea{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);margin-top:5px;font-size:.88rem;outline:none;font-family:inherit;}
+.btn-primary{width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;font-weight:800;font-size:.92rem;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,.3);}
+.btn-purple{background:linear-gradient(135deg,#8b5cf6 0%,#6d28d9 100%)!important;box-shadow:0 4px 12px rgba(139,92,246,.3)!important;}
+
+.magic-overlay{position:fixed;inset:0;background:rgba(11,19,43,.68);backdrop-filter:blur(16px);display:none;justify-content:center;align-items:flex-start;z-index:2000;padding:65px 14px 20px 14px;}
+.magic-overlay.open{display:flex;}
+.magic-box{background:var(--card);width:100%;max-width:580px;border-radius:22px;overflow:hidden;box-shadow:0 30px 80px -20px rgba(0,0,0,.6);animation:magicFadeIn .22s ease-out;max-height:calc(100vh - 90px);display:flex;flex-direction:column;border:1px solid var(--border);}
+.magic-input-wrap{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);gap:10px;}
+.magic-input{flex:1;border:none!important;background:transparent!important;font-size:1.1rem!important;font-weight:800!important;color:var(--text);outline:none!important;margin:0!important;padding:0!important;}
+.magic-close{background:var(--bg);color:var(--muted);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-weight:bold;}
+.magic-results{flex:1;overflow-y:auto;padding:8px;}
+.magic-result{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:background .15s;}
+.magic-result:hover{background:var(--primary-light);}
+.magic-fab{position:fixed;bottom:20px;left:20px;z-index:900;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6 0%,#6366f1 100%);color:#fff;font-size:1.4rem;border:none;cursor:pointer;display:flex;justify-content:center;align-items:center;animation:fabPulse 2.5s infinite;}
+
+#toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,23,42,.95);color:#fff;padding:10px 20px;border-radius:12px;font-size:.85rem;font-weight:bold;opacity:0;pointer-events:none;transition:all .3s;z-index:9999;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:12px;z-index:2;">
+    <div style="position:relative;width:45px;height:45px;border-radius:14px;background:#0f172a;border:1px solid rgba(255,255,255,.15);display:flex;justify-content:center;align-items:center;overflow:hidden;flex-shrink:0;">
+      <div style="position:absolute;width:150%;height:150%;background:conic-gradient(from 0deg,transparent,#22d3ee,#818cf8,#e879f9,transparent 60%);animation:spin 4s linear infinite;opacity:.75;"></div>
+      <div style="position:absolute;inset:2px;background:#0f172a;border-radius:12px;z-index:1;"></div>
+      <span style="position:relative;z-index:2;font-size:1.3rem;" id="header-icon">🛡️</span>
+    </div>
+    <div>
+      <div style="font-size:1.05rem;font-weight:900;line-height:1.1;" id="header-title">مرجع گلس و قطعات مشابه</div>
+      <div class="text-wave" style="font-size:.64rem;letter-spacing:2px;font-weight:bold;margin-top:3px;">PERSIA MOBILE PRO</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" onclick="openDataImportModal()" title="به‌روزرسانی و بکاپ" style="background:rgba(139,92,246,.28);border-color:rgba(139,92,246,.5);">📥</button>
+    <button class="icon-btn" onclick="openMagicSearch()" title="جستجوی جادویی (Ctrl+K)">✨</button>
+    <button class="icon-btn" onclick="openCustomModal()" title="ثبت تجربه جدید">➕</button>
+    <button class="icon-btn" onclick="toggleDarkMode()" id="theme-btn">🌙</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="main-tabs">
+    <button type="button" class="main-tab-btn active" data-tab="GLASS" onclick="switchMainSection('GLASS', this)">
+      <span>🛡️ بخش تخصصی گلس</span>
+      <span class="tab-sub">تطابق ۱۰۰٪ یا حداکثر ±۱ میلی‌متر</span>
+    </button>
+    <button type="button" class="main-tab-btn" data-tab="PARTS" onclick="switchMainSection('PARTS', this)">
+      <span>📱 ال‌سی‌دی، باتری و قطعات</span>
+      <span class="tab-sub">کد فنی فلت، باتری (BN/EB) و برد شارژ</span>
+    </button>
+  </div>
+
+  <div class="parts-subfilter" id="parts-subfilter-bar">
+    <button type="button" class="subfilter-btn active" data-sub="ALL" onclick="setPartsSubFilter('ALL', this)">⚡ همه</button>
+    <button type="button" class="subfilter-btn" data-sub="LCD" onclick="setPartsSubFilter('LCD', this)">📱 تاچ و ال‌سی‌دی</button>
+    <button type="button" class="subfilter-btn" data-sub="BATTERY" onclick="setPartsSubFilter('BATTERY', this)">🔋 باتری</button>
+    <button type="button" class="subfilter-btn" data-sub="BOARD" onclick="setPartsSubFilter('BOARD', this)">🔌 برد و فلت</button>
+  </div>
+
+  <div class="card" style="padding:15px;">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" class="search-input" placeholder="مدل گوشی (مثلاً: Poco X3 Pro، A14 5G، iPhone SE)..." autocomplete="off" autofocus>
+      <div class="search-hint" id="search-hint"><kbd>Ctrl</kbd><kbd>K</kbd></div>
+      <button type="button" id="clear-btn" class="clear-btn" onclick="clearSearch()">✕</button>
+    </div>
+
+    <div class="section-label">
+      <span id="quick-chips-label">⚡ میانبرهای سریع:</span>
+      <span id="stats-bar" style="font-size:.7rem;color:var(--primary);"></span>
+    </div>
+    <div class="chips-scroll" id="quick-chips-box">
+      <span class="chip" onclick="quickSearch('Poco X3 Pro')">📱 Poco X3 Pro</span>
+      <span class="chip" onclick="quickSearch('Poco X3 GT')">📱 Poco X3 GT</span>
+      <span class="chip" onclick="quickSearch('Redmi 10C')">📱 Redmi 10C</span>
+      <span class="chip" onclick="quickSearch('A20')">📱 A20 / A30 / A50</span>
+      <span class="chip" onclick="quickSearch('A12')">📱 A12</span>
+      <span class="chip" onclick="quickSearch('A54')">📱 A54</span>
+      <span class="chip" onclick="quickSearch('iPhone 13')">🍎 iPhone 13</span>
+    </div>
+
+    <div class="section-label">🏷️ فیلتر برند:</div>
+    <div class="chips-scroll" id="brand-filter">
+      <span class="chip active" data-brand="ALL" onclick="setBrandFilter('ALL',this)">🌐 همه</span>
+      <span class="chip" data-brand="samsung" onclick="setBrandFilter('samsung',this)">🔵 سامسونگ</span>
+      <span class="chip" data-brand="xiaomi" onclick="setBrandFilter('xiaomi',this)">🟠 شیائومی</span>
+      <span class="chip" data-brand="apple" onclick="setBrandFilter('apple',this)">🍎 آیفون</span>
+      <span class="chip" data-brand="huawei" onclick="setBrandFilter('huawei',this)">🔴 هواوی</span>
+      <span class="chip" data-brand="honor" onclick="setBrandFilter('honor',this)">🟣 آنر</span>
+      <span class="chip" data-brand="nokia" onclick="setBrandFilter('nokia',this)">🟢 نوکیا</span>
+      <span class="chip" data-brand="realme" onclick="setBrandFilter('realme',this)">🟡 ریلمی/تکنو</span>
+    </div>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<div class="magic-overlay" id="magic-overlay" onclick="if(event.target===this) closeMagicSearch()">
+  <div class="magic-box" onclick="event.stopPropagation()">
+    <div class="magic-input-wrap">
+      <span style="font-size:1.35rem;">✨</span>
+      <input type="text" id="magic-input" class="magic-input" placeholder="مدل، کد باتری (BN61) یا کد فلت..." oninput="handleMagicSearch(this.value)" autocomplete="off">
+      <button type="button" class="magic-close" onclick="closeMagicSearch()">✕</button>
+    </div>
+    <div class="magic-results" id="magic-results"></div>
+  </div>
+</div>
+<button class="magic-fab" onclick="openMagicSearch()" title="جستجوی جادویی">✨</button>
+
+<div class="modal-overlay" id="modal-custom" onclick="if(event.target===this) closeCustomModal()">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:10px;">
+      <h3 style="font-size:1rem;">➕ ثبت تجربه فنی جدید</h3>
+      <button onclick="closeCustomModal()" style="background:none;border:none;font-size:1.2rem;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+    <label class="field-label">بخش مورد نظر:</label>
+    <select id="cg-type" onchange="toggleCustomFormFields()">
+      <option value="GLASS">🛡️ گروه گلس</option>
+      <option value="LCD">📱 گروه تاچ و ال‌سی‌دی</option>
+      <option value="BATTERY">🔋 گروه باتری</option>
+      <option value="BOARD">🔌 گروه برد / فلت</option>
+    </select>
+    <label class="field-label">عنوان گروه:</label>
+    <input type="text" id="cg-title" placeholder="مثال: خانواده Redmi 10C">
+    <div id="cg-glass-fields">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><label class="field-label">سایز (اینچ):</label><input type="number" step="0.01" id="cg-size" value="6.5"></div>
+        <div><label class="field-label">ابعاد (طول×عرض mm):</label><input type="text" id="cg-dim" placeholder="160.5 × 74.8"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><label class="field-label">لبه:</label><select id="cg-edge"><option value="FLAT">📐 تخت</option><option value="25D">💧 2.5D</option><option value="CURVED">🌊 خمیده</option></select></div>
+        <div><label class="field-label">برش:</label><select id="cg-notch"><option value="⚫ پانچ وسط">⚫ پانچ وسط</option><option value="💧 ناچ قطره‌ای">💧 ناچ قطره‌ای</option><option value="↖️ پانچ چپ">↖️ پانچ چپ</option><option value="🍎 ناچ اپل">🍎 ناچ اپل</option></select></div>
+      </div>
+    </div>
+    <div id="cg-parts-fields" style="display:none;">
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:8px;">
+        <div><label class="field-label">وضعیت:</label><select id="cg-frame"><option value="FULL">🟢 مشترک کامل</option><option value="PANEL">🟡 بدون فریم</option><option value="TRAP">🔴 هشدار</option></select></div>
+        <div><label class="field-label">مشخصه فنی:</label><input type="text" id="cg-panel" placeholder="5000mAh"></div>
+      </div>
+      <label class="field-label">کد فنی:</label>
+      <input type="text" id="cg-codes" placeholder="BN61, BN57">
+    </div>
+    <label class="field-label">مدل‌ها (با ویرگول):</label>
+    <textarea id="cg-models" rows="3"></textarea>
+    <label class="field-label">نکته فنی:</label>
+    <input type="text" id="cg-note">
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn-primary" onclick="saveCustomEntry()" style="flex:1.5;">✓ ذخیره</button>
+      <button class="btn-primary" onclick="closeCustomModal()" style="background:#64748b;flex:1;box-shadow:none;">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-data-import" onclick="if(event.target===this) closeDataImportModal()">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:10px;">
+      <h3 style="font-size:1rem;">📥 پشتیبان و بازیابی</h3>
+      <button onclick="closeDataImportModal()" style="background:none;border:none;font-size:1.2rem;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button class="btn-primary" onclick="exportBackupJSON()" style="background:#10b981;font-size:.82rem;padding:10px;">⬇️ دانلود بکاپ</button>
+      <label class="btn-primary btn-purple" style="font-size:.82rem;padding:10px;text-align:center;display:block;cursor:pointer;">
+        ⬆️ بازیابی
+        <input type="file" accept=".json" onchange="importBackupJSON(event)" style="display:none;">
+      </label>
+    </div>
+    <label class="field-label">افزودن گروه گلس جدید (هر خط یا با ویرگول):</label>
+    <textarea id="import-text-area" rows="4"></textarea>
+    <button class="btn-primary" onclick="processBatchImport()" style="margin-top:10px;">🔄 ثبت گروه</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// فعال‌سازی استایل‌های بدون هدر در حالت نمایش درون برنامه اصلی
+if (location.search.includes('embed=1') || window.parent !== window) {
+  document.documentElement.classList.add('embedded');
+  document.body.classList.add('embedded');
+
+  // هدایت دکمه Back / Escape به برنامه اصلی
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      window.parent.postMessage('glass-back-requested', '*');
+    }
+  });
+  window.addEventListener('popstate', function() {
+    window.parent.postMessage('glass-back-requested', '*');
+  });
+}
+
+
+// =========================================================================
+// 🛡️ دیتابیس مهندسی گلس — قانون سخت‌گیرانه: تطابق ۱۰۰٪ یا حداکثر تلورانس ±۱.۰ میلی‌متر
+// تمامی مدل‌ها به‌صورت رشته‌های مستقل و استاندارد ثبت شده‌اند
+// =========================================================================
+const DEFAULT_GLASS_GROUPS = [
+  // ═══ ۱. شیائومی ۶.۷۱ اینچ ناچ قطره‌ای ═══
+  {
+    id:'gl_redmi10c_pococ40', title:'خانواده ۶.۷۱ اینچ شیائومی (Redmi 10C / Poco C40 / 10 Power)',
+    size:6.71, w:76.6, l:169.6, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'هر سه مدل دقیقاً ۱۶۹.۶×۷۶.۶ میلی‌متر هستند (تطابق ۱۰۰٪).',
+    models:['Xiaomi Redmi 10C','Xiaomi Poco C40','Xiaomi Redmi 10 Power']
+  },
+  {
+    id:'gl_redmi12c_a3_c61', title:'خانواده ۶.۷۱ اینچ شیائومی (Redmi 12C / Poco C55 / Redmi A3 / Poco C61)',
+    size:6.71, w:76.4, l:168.6, edge:'FLAT', edgeLabel:'📐 تخت / 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'Redmi 12C و Poco C55 (۱۶۸.۸×۷۶.۴) و Redmi A3 / A3x / Poco C61 (۱۶۸.۴×۷۶.۳). حداکثر اختلاف ۰.۴mm.',
+    models:['Xiaomi Redmi 12C','Xiaomi Poco C55','Xiaomi Redmi A3','Xiaomi Redmi A3x','Xiaomi Poco C61']
+  },
+
+  // ═══ ۲. سامسونگ ۶.۴ اینچ ناچ قطره‌ای ═══
+  {
+    id:'gl_a20_a30_a50', title:'خانواده ۶.۴ اینچ سامسونگ (A20 / A30 / A50 / A30s / A50s / M21 / M30 / M31)',
+    size:6.4, w:74.8, l:158.7, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:['No Holes'],
+    note:'A20/A30/A50/A30s/A50s (۱۵۸.۵×۷۴.۷) و M21/M30/M30s/M31 (۱۵۹.۰×۷۵.۱). اختلاف کمتر از ۰.۵ میلی‌متر.',
+    models:['Samsung Galaxy A20','Samsung Galaxy A30','Samsung Galaxy A50','Samsung Galaxy A30s','Samsung Galaxy A50s','Samsung Galaxy M30','Samsung Galaxy M30s','Samsung Galaxy M21','Samsung Galaxy M31']
+  },
+  {
+    id:'gl_a20s_standalone', title:'گلس اختصاصی Samsung Galaxy A20s (۱۶۳.۳mm)',
+    size:6.5, w:77.5, l:163.3, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'A20s ابعاد ۱۶۳.۳×۷۷.۵ دارد.',
+    models:['Samsung Galaxy A20s']
+  },
+
+  // ═══ ۳. هواوی و آنر ۶.۵۹ اینچ پاپ‌آپ ═══
+  {
+    id:'gl_y9prime_honor9x', title:'خانواده ۶.۵۹ اینچ پاپ‌آپ (Y9 Prime 2019 / Y9s / P Smart Z / Honor 9X)',
+    size:6.59, w:77.3, l:163.5, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'📱 تمام‌صفحه پاپ‌آپ', tags:['No Holes'],
+    note:'Y9 Prime 2019، Y9s، P Smart Z، Honor 9X و 9X Pro همگی ۱۶۳.۱ تا ۱۶۳.۵ در ۷۷.۲ تا ۷۷.۳ میلی‌متر هستند.',
+    models:['Huawei Y9 Prime 2019','Huawei Y9s','Huawei P Smart Z','Honor 9X','Honor 9X Pro']
+  },
+
+  // ═══ ۴. هواوی سری Nova Y ═══
+  {
+    id:'gl_hw_nova_y60_y61', title:'خانواده ۶.۵۲ و ۶.۶ اینچ هواوی (Nova Y60 / Nova Y61)',
+    size:6.56, w:75.7, l:164.7, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'Nova Y60 (۱۶۴.۹×۷۵.۸) و Nova Y61 (۱۶۴.۵×۷۵.۶). اختلاف فقط ۰.۴ میلی‌متر.',
+    models:['Huawei Nova Y60','Huawei Nova Y61']
+  },
+  {
+    id:'gl_hw_nova_y70_x7a', title:'خانواده ۶.۷۵ اینچ هواوی و آنر (Nova Y70 / Y70 Plus / Honor X7a)',
+    size:6.75, w:77.4, l:167.9, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'Nova Y70 / Y70 Plus (۱۶۸.۳×۷۷.۷) و Honor X7a (۱۶۷.۵×۷۶.۹). هر سه ۶.۷۵ اینچ ناچ قطره‌ای.',
+    models:['Huawei Nova Y70','Huawei Nova Y70 Plus','Honor X7a']
+  },
+
+  // ═══ ۵. Redmi Note 8 Pro ═══
+  {
+    id:'gl_note8pro_standalone', title:'گلس اختصاصی Xiaomi Redmi Note 8 Pro (۱۶۱.۳mm)',
+    size:6.53, w:76.4, l:161.3, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'ابعاد ۱۶۱.۳×۷۶.۴ میلی‌متر.',
+    models:['Xiaomi Redmi Note 8 Pro']
+  },
+
+  // ═══ ۶. خانواده بزرگ ۶.۵ اینچ اقتصادی ═══
+  {
+    id:'gl_a12_a02_a03_family', title:'خانواده ۶.۵ اینچ اقتصادی الف (A12 / A02 / A02s / A03 / A03s / A04 / A04e / M12)',
+    size:6.5, w:75.9, l:164.2, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'تمام این مدل‌ها طول ۱۶۴.۰ تا ۱۶۴.۷ و عرض ۷۵.۶ تا ۷۶.۳ دارند.',
+    models:['Samsung Galaxy A12','Samsung Galaxy A02','Samsung Galaxy A02s','Samsung Galaxy A03','Samsung Galaxy A03s','Samsung Galaxy A03 Core','Samsung Galaxy A04','Samsung Galaxy A04e','Samsung Galaxy M12','Samsung Galaxy F12','Realme C30','Realme C33','Honor X5','Nokia G10','Nokia G20']
+  },
+  {
+    id:'gl_redmi9a_9c_a13_a04s', title:'خانواده ۶.۵ اینچ اقتصادی ب (Redmi 9A / 9C / 10A / Poco C3 / A04s / A13)',
+    size:6.53, w:76.8, l:164.8, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'Redmi 9A/9C/10A/Poco C3/C31 (۱۶۴.۹×۷۷.۰)، A04s (۱۶۴.۷×۷۶.۷)، A13 4G/5G (۱۶۴.۵×۷۶.۵)، Realme C21/C25 (۱۶۵.۲×۷۶.۴).',
+    models:['Xiaomi Redmi 9A','Xiaomi Redmi 9C','Xiaomi Redmi 9AT','Xiaomi Redmi 9i','Xiaomi Redmi 10A','Xiaomi Poco C3','Xiaomi Poco C31','Samsung Galaxy A04s','Samsung Galaxy A13 4G','Samsung Galaxy A13 5G','Realme C21','Realme C25']
+  },
+  {
+    id:'gl_redmi9_note9_merlin', title:'خانواده ۶.۵۳ اینچ شیائومی (Redmi 9 4G / Poco M2 / Redmi 9T / Poco M3)',
+    size:6.53, w:77.2, l:162.8, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'Redmi 9 4G / Poco M2 (۱۶۳.۳×۷۷.۰) و Redmi 9T / Poco M3 / Redmi 9 Power (۱۶۲.۳×۷۷.۳).',
+    models:['Xiaomi Redmi 9 4G','Xiaomi Redmi 9 Prime','Xiaomi Poco M2','Xiaomi Redmi 9T','Xiaomi Poco M3','Xiaomi Redmi 9 Power']
+  },
+
+  // ═══ ۷. خانواده ۶.۶ و ۶.۷ اینچ جدید اقتصادی ═══
+  {
+    id:'gl_a05_a06_a14_redmi13c', title:'خانواده ۶.۷ اینچ جدید (A05 / A05s / A06 / A14 / Redmi 13C / Poco C65)',
+    size:6.7, w:77.8, l:167.9, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'A05s/M05/F05 (۱۶۸.۰×۷۷.۸)، A05 (۱۶۸.۸×۷۸.۲)، A06 (۱۶۷.۳×۷۷.۳)، A14 4G/5G (۱۶۷.۷×۷۸.۰)، Redmi 13C / Poco C65 (۱۶۸.۰×۷۸.۰).',
+    models:['Samsung Galaxy A05','Samsung Galaxy A05s','Samsung Galaxy A06 4G','Samsung Galaxy A06 5G','Samsung Galaxy A07 5G','Samsung Galaxy M05','Samsung Galaxy F05','Samsung Galaxy A14 4G','Samsung Galaxy A14 5G','Xiaomi Redmi 13C','Xiaomi Poco C65','Xiaomi Redmi 13R 5G']
+  },
+  {
+    id:'gl_a23_standalone', title:'خانواده ۶.۶ اینچ سامسونگ (A23 4G / A23 5G / M23 / M33)',
+    size:6.6, w:76.9, l:165.4, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'A23 4G، A23 5G، M23 5G و M33 5G همگی دقیقاً ۱۶۵.۴×۷۶.۹ میلی‌متر هستند.',
+    models:['Samsung Galaxy A23 4G','Samsung Galaxy A23 5G','Samsung Galaxy M23 5G','Samsung Galaxy M33 5G']
+  },
+  {
+    id:'gl_honor_x6_spark20', title:'خانواده ۶.۵۶ اینچ تخت (Honor X6 / X6a / Tecno Spark 20 / Infinix Smart 8)',
+    size:6.56, w:75.6, l:163.6, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ / پانچ', tags:['No Holes'],
+    note:'Honor X6 / X6a (۱۶۳.۶×۷۵.۶)، Tecno Spark 20 / Pop 8 (۱۶۳.۷×۷۵.۶) و Infinix Smart 8 / Hot 40i (۱۶۳.۶×۷۵.۶).',
+    models:['Honor X6','Honor X6a','Tecno Spark 20','Tecno Pop 8','Infinix Smart 8','Infinix Hot 40i']
+  },
+  {
+    id:'gl_a33_standalone', title:'گلس اختصاصی Samsung Galaxy A33 5G (۱۵۹.۷mm)',
+    size:6.4, w:74.0, l:159.7, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'A33 5G ابعاد ۱۵۹.۷×۷۴.۰ دارد.',
+    models:['Samsung Galaxy A33 5G']
+  },
+
+  // ═══ ۸. خانواده ۶.۵ اینچ فلت سامسونگ ═══
+  {
+    id:'gl_a15_a25_m15', title:'خانواده ۶.۵ اینچ فلت سامسونگ (A15 4G / A15 5G / A25 5G / M15 / F15)',
+    size:6.5, w:76.6, l:160.5, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای فلت', tags:[],
+    note:'A15 4G/5G و M15/F15 (۱۶۰.۱×۷۶.۸) و A25 5G (۱۶۱.۰×۷۶.۵).',
+    models:['Samsung Galaxy A15 4G','Samsung Galaxy A15 5G','Samsung Galaxy A25 5G','Samsung Galaxy M15 5G','Samsung Galaxy F15 5G']
+  },
+  {
+    id:'gl_a24_standalone', title:'گلس اختصاصی Samsung Galaxy A24 4G (۱۶۲.۱mm)',
+    size:6.5, w:77.6, l:162.1, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای فلت', tags:[],
+    note:'A24 4G ابعاد ۱۶۲.۱×۷۷.۶ دارد.',
+    models:['Samsung Galaxy A24 4G']
+  },
+
+  // ═══ ۹. خانواده ۶.۷ اینچ فلت جدید سامسونگ ═══
+  {
+    id:'gl_sam_a16_a17_a26', title:'خانواده ۶.۷ اینچ سامسونگ (A16 / A17 / A18 / A26 / M16 / M17)',
+    size:6.7, w:77.9, l:164.2, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای فلت', tags:['Open Pore'],
+    note:'A16 4G/5G، A17، A26 5G و M16 همگی ۱۶۴.۰ تا ۱۶۴.۴ در ۷۷.۹ میلی‌متر هستند.',
+    models:['Samsung Galaxy A16 4G','Samsung Galaxy A16 5G','Samsung Galaxy A17 5G','Samsung Galaxy A18 5G','Samsung Galaxy A26 5G','Samsung Galaxy M16 5G','Samsung Galaxy M17 5G']
+  },
+  {
+    id:'gl_a36_a56_s24fe', title:'خانواده ۶.۷ اینچ فلت سامسونگ (A36 5G / A56 5G / S24 FE 5G)',
+    size:6.7, w:77.5, l:162.3, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['Open Pore'],
+    note:'A36 5G (۱۶۲.۹×۷۸.۰)، A56 5G (۱۶۲.۲×۷۷.۵) و S24 FE 5G (۱۶۲.۰×۷۷.۳).',
+    models:['Samsung Galaxy A36 5G','Samsung Galaxy A56 5G','Samsung Galaxy S24 FE 5G']
+  },
+  {
+    id:'gl_s24plus_s25plus', title:'خانواده ۶.۷ اینچ پرچمدار سامسونگ (S24 Plus / S25 Plus)',
+    size:6.7, w:75.9, l:158.5, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['Open Pore'],
+    note:'S24 Plus و S25 Plus هر دو دقیقاً ۱۵۸.۵×۷۵.۹ میلی‌متر هستند.',
+    models:['Samsung Galaxy S24 Plus','Samsung Galaxy S25 Plus']
+  },
+
+  // ═══ ۱۰. خانواده ۶.۴ اینچ فلت سامسونگ (A54 / S23 FE) ═══
+  {
+    id:'gl_a54_s23fe', title:'خانواده ۶.۴ اینچ سامسونگ (A54 5G / S23 FE)',
+    size:6.4, w:76.6, l:158.1, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['Open Pore'],
+    note:'A54 5G (۱۵۸.۲×۷۶.۷) و S23 FE (۱۵۸.۰×۷۶.۵).',
+    models:['Samsung Galaxy A54 5G','Samsung Galaxy S23 FE']
+  },
+
+  // ═══ ۱۱. خانواده ۶.۴۳ اینچ OLED شیائومی ═══
+  {
+    id:'gl_note10_11_series', title:'خانواده ۶.۴۳ اینچ شیائومی (Note 10 / 10S / 11 / 11S / 12S / Poco M4 Pro 4G / M5s)',
+    size:6.43, w:74.2, l:160.2, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'Note 10/10S/Poco M5s (۱۶۰.۵×۷۴.۵) و Note 11/11S/12S/Poco M4 Pro 4G (۱۵۹.۹×۷۳.۹) و Realme 8/9 (۱۶۰.۲×۷۳.۹).',
+    models:['Xiaomi Redmi Note 10 4G','Xiaomi Redmi Note 10S','Xiaomi Redmi Note 11 4G','Xiaomi Redmi Note 11S 4G','Xiaomi Redmi Note 12S','Xiaomi Poco M4 Pro 4G','Xiaomi Poco M5s','Realme 8 4G','Realme 9 4G']
+  },
+
+  // ═══ ۱۲. خانواده ۶.۵ اینچ پانچ وسط سامسونگ ═══
+  {
+    id:'gl_a52_a53_s20fe', title:'خانواده ۶.۵ اینچ سامسونگ (A52 / A52s / A53 / S20 FE / M31s)',
+    size:6.5, w:74.9, l:159.8, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'A52 4G/5G و A52s (۱۵۹.۹×۷۵.۱)، A53 5G (۱۵۹.۶×۷۴.۸)، S20 FE (۱۵۹.۸×۷۴.۵) و M31s (۱۵۹.۳×۷۴.۴).',
+    models:['Samsung Galaxy A52 4G','Samsung Galaxy A52 5G','Samsung Galaxy A52s 5G','Samsung Galaxy A53 5G','Samsung Galaxy S20 FE','Samsung Galaxy M31s']
+  },
+  {
+    id:'gl_a51_standalone', title:'گلس اختصاصی Samsung Galaxy A51 (۱۵۸.۵×۷۳.۶mm)',
+    size:6.5, w:73.6, l:158.5, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'A51 حاشیه بسیار باریک ۱۵۸.۵×۷۳.۶ دارد.',
+    models:['Samsung Galaxy A51']
+  },
+  {
+    id:'gl_note10_5g_standalone', title:'خانواده ۶.۵ اینچ شیائومی (Redmi Note 10 5G / Poco M3 Pro 5G / Redmi 10 5G)',
+    size:6.5, w:75.3, l:161.8, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'Note 10 5G، Note 10T 5G و Poco M3 Pro 5G همگی ۱۶۱.۸×۷۵.۳ میلی‌متر هستند.',
+    models:['Xiaomi Redmi Note 10 5G','Xiaomi Redmi Note 10T 5G','Xiaomi Poco M3 Pro 5G']
+  },
+  {
+    id:'gl_a31_a32_glass', title:'خانواده ۶.۴ اینچ سامسونگ (A31 / A32 4G / A32 5G)',
+    size:6.4, w:73.4, l:158.7, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ / ناچ قطره‌ای', tags:[],
+    note:'Samsung A31 (۱۵۹.۳×۷۳.۱)، A32 4G (۱۵۸.۹×۷۳.۶) و A32 5G (۱۶۴.۲×۷۶.۱ - توجه: A32 5G بزرگ‌تر است و در گروه A12 قرار دارد).',
+    models:['Samsung Galaxy A31','Samsung Galaxy A32 4G']
+  },
+
+  // ═══ ۱۳. خانواده ۶.۷ اینچ سامسونگ (A71 / M51 / M52 / M53 / Note 10 Lite) ═══
+  {
+    id:'gl_a71_family', title:'خانواده ۶.۷ اینچ سامسونگ (A71 / M51 / M52 / M62 / Note 10 Lite)',
+    size:6.7, w:76.3, l:163.9, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'⚫ پانچ وسط', tags:[],
+    note:'A71 (۱۶۳.۶×۷۶.۰)، M51/M62/F62 (۱۶۳.۹×۷۶.۳)، M52 5G (۱۶۴.۲×۷۶.۴)، Note 10 Lite (۱۶۳.۷×۷۶.۱).',
+    models:['Samsung Galaxy A71 4G','Samsung Galaxy A71 5G','Samsung Galaxy M51','Samsung Galaxy M52 5G','Samsung Galaxy M62','Samsung Galaxy F62','Samsung Galaxy Note 10 Lite','Samsung Galaxy A70','Samsung Galaxy A70s','Samsung Galaxy A81','Samsung Galaxy A91']
+  },
+  {
+    id:'gl_m53_standalone', title:'گلس اختصاصی Samsung Galaxy M53 5G / A72 / M54',
+    size:6.7, w:77.1, l:164.7, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'⚫ پانچ وسط', tags:[],
+    note:'Samsung M53 5G (۱۶۴.۷×۷۷.۰)، A72 (۱۶۵.۰×۷۷.۴) و M54 / F54 (۱۶۴.۹×۷۷.۳).',
+    models:['Samsung Galaxy M53 5G','Samsung Galaxy A72','Samsung Galaxy M54 5G','Samsung Galaxy F54 5G']
+  },
+  {
+    id:'gl_s10lite_standalone', title:'گلس اختصاصی Samsung Galaxy S10 Lite (۱۶۲.۵×۷۵.۶mm)',
+    size:6.7, w:75.6, l:162.5, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'⚫ پانچ وسط', tags:[],
+    note:'S10 Lite ابعاد ۱۶۲.۵×۷۵.۶ دارد.',
+    models:['Samsung Galaxy S10 Lite']
+  },
+  {
+    id:'gl_a73_standalone', title:'گلس اختصاصی Samsung Galaxy A73 5G (۱۵۹.۶×۷۶.۱mm)',
+    size:6.7, w:76.1, l:159.6, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'A73 5G ابعاد کاملاً تخت و کم‌حاشیه ۱۵۹.۶×۷۶.۱ دارد.',
+    models:['Samsung Galaxy A73 5G']
+  },
+
+  // ═══ ۱۴. خانواده ۶.۶۷ اینچ شیائومی ═══
+  {
+  id:'gl_pocox3_note9_note12', title:'خانواده ۶.۶۷ اینچ شیائومی (Poco X3 / Note 9S / Note 12 / X5)',
+  size:6.67, w:76.5, l:165.6, edge:'FLAT', edgeLabel:'📐 تخت / 2.5D', notch:'⚫ پانچ وسط', tags:['Open Pore'],
+  note:'Poco X3/Pro/NFC (۱۶۵.۳×۷۶.۸)، Note 9S/9Pro (۱۶۵.۷×۷۶.۷)، Note 12 4G/5G و Poco X5 (۱۶۵.۷×۷۶.۰). حداکثر اختلاف ۰.۸mm.',
+  models:['Xiaomi Poco X3','Xiaomi Poco X3 Pro','Xiaomi Poco X3 NFC','Xiaomi Redmi Note 9S','Xiaomi Redmi Note 9 Pro','Xiaomi Redmi Note 9 Pro Max','Xiaomi Poco M2 Pro','Xiaomi Redmi Note 10 Lite','Xiaomi Mi 10T','Xiaomi Mi 10T Pro','Xiaomi Mi 10T Lite 5G','Xiaomi Redmi Note 12 4G','Xiaomi Redmi Note 12 5G','Xiaomi Poco X5 5G']
+},
+{
+  id:'gl_mi11t_standalone', title:'گلس اختصاصی Xiaomi Mi 11T / 11T Pro (۱۶۴.۱×۷۶.۹mm)',
+  size:6.67, w:76.9, l:164.1, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+  note:'Mi 11T و 11T Pro هر دو ۱۶۴.۱×۷۶.۹ میلی‌متر هستند. با Poco X3 / Note 12 حدود ۱.۲ تا ۱.۸mm فرق دارند — مستقل شد.',
+  models:['Xiaomi Mi 11T','Xiaomi Mi 11T Pro']
+},
+  {
+    id:'gl_note10pro_11pro_f3_x4pro', title:'خانواده ۶.۶۷ اینچ شیائومی (Note 10 Pro / Note 11 Pro / Poco F3 / X4 Pro / X4 GT)',
+    size:6.67, w:76.3, l:164.0, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'Note 10 Pro (۱۶۴.۰×۷۶.۵)، Note 11 Pro (۱۶۴.۲×۷۶.۱)، Poco X4 Pro (۱۶۴.۲×۷۶.۱)، Poco F3/F4 (۱۶۳.۷×۷۶.۴) و Poco X4 GT (۱۶۳.۶×۷۴.۳).',
+    models:['Xiaomi Redmi Note 10 Pro','Xiaomi Redmi Note 10 Pro Max','Xiaomi Redmi Note 11 Pro 4G','Xiaomi Redmi Note 11 Pro 5G','Xiaomi Redmi Note 11 Pro+ 5G','Xiaomi Redmi Note 12 Pro 4G','Xiaomi Poco X4 Pro 5G','Xiaomi Poco F3','Xiaomi Poco F4','Xiaomi Poco X4 GT']
+  },
+  {
+    id:'gl_pocox3gt_f5pro_12t', title:'خانواده ۶.۶ و ۶.۶۷ اینچ شیائومی (Poco X3 GT / Poco F5 Pro / Xiaomi 12T / Note 12 Pro 5G)',
+    size:6.67, w:75.9, l:163.1, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'Poco X3 GT (۱۶۳.۳×۷۵.۹)، Xiaomi 12T / 12T Pro (۱۶۳.۱×۷۵.۹)، Poco F5 Pro (۱۶۲.۸×۷۵.۴) و Note 12 Pro 5G / Poco X5 Pro (۱۶۲.۹×۷۶.۰).',
+    models:['Xiaomi Poco X3 GT','Xiaomi 12T','Xiaomi 12T Pro','Xiaomi Poco F5 Pro','Xiaomi Redmi Note 12 Pro 5G','Xiaomi Poco X5 Pro 5G']
+  },
+  {
+    id:'gl_note13_4g_13t_note14', title:'خانواده ۶.۶۷ اینچ شیائومی (Note 13 4G / Note 14 4G / 13T / Poco M7 Pro)',
+    size:6.67, w:75.6, l:162.3, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['Open Pore'],
+    note:'Note 13 4G (۱۶۲.۲×۷۵.۵)، Xiaomi 13T / 13T Pro (۱۶۲.۲×۷۵.۷)، Note 14 5G / Poco M7 Pro 5G (۱۶۲.۴×۷۵.۷) و Note 14 4G (۱۶۳.۲×۷۶.۵).',
+    models:['Xiaomi Redmi Note 13 4G','Xiaomi 13T','Xiaomi 13T Pro','Xiaomi Redmi Note 14 5G','Xiaomi Redmi Note 14 4G','Xiaomi Poco M7 Pro 5G']
+  },
+  {
+    id:'gl_note13_5g_pro_f5_x6', title:'خانواده ۶.۶۷ اینچ کم‌حاشیه شیائومی (Note 13 5G / Note 13 Pro / Poco F5 / Poco X6 / Honor 90 Lite)',
+    size:6.67, w:74.6, l:161.2, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['Open Pore'],
+    note:'Note 13 5G (۱۶۱.۱×۷۵.۰)، Note 13 Pro 4G/5G (۱۶۱.۱×۷۵.۰ تا ۱۶۱.۲×۷۴.۲)، Poco F5 / X6 (۱۶۱.۱×۷۵.۰) و Honor 90 Lite (۱۶۲.۹×۷۴.۵).',
+    models:['Xiaomi Redmi Note 13 5G','Xiaomi Redmi Note 13 Pro 4G','Xiaomi Redmi Note 13 Pro 5G','Xiaomi Poco M6 Pro 4G','Xiaomi Poco X6 5G','Xiaomi Poco X6 Neo 5G','Xiaomi Poco F5','Honor X8b','Honor 90 Lite']
+  },
+  {
+    id:'gl_14t_pocof6_x6pro_x7pro', title:'خانواده ۶.۶۷ اینچ فلت جدید (Xiaomi 14T / 14T Pro / Poco F6 / F6 Pro / X6 Pro / X7 Pro)',
+    size:6.67, w:74.8, l:160.5, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['THICK GLUE'],
+    note:'Xiaomi 14T / 14T Pro (۱۶۰.۵×۷۵.۱)، Poco F6 (۱۶۰.۵×۷۴.۴)، Poco F6 Pro (۱۶۰.۹×۷۵.۰)، Poco X6 Pro 5G (۱۶۰.۵×۷۴.۳)، Poco X7 Pro (۱۶۰.۸×۷۵.۲).',
+    models:['Xiaomi 14T','Xiaomi 14T Pro','Xiaomi Poco F6','Xiaomi Poco F6 Pro','Xiaomi Poco X6 Pro 5G','Xiaomi Poco X7 Pro 5G']
+  },
+  {
+    id:'gl_redmi12_m6pro5g_m6_4g', title:'خانواده ۶.۷۹ اینچ شیائومی (Redmi 12 / Poco M6 Pro 5G / Poco M6 4G / Redmi 13 4G)',
+    size:6.79, w:76.3, l:168.6, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'Redmi 12 4G/5G، Poco M6 Pro 5G، Poco M6 4G و Redmi 13 4G همگی دقیقاً ۱۶۸.۶×۷۶.۳ میلی‌متر هستند.',
+    models:['Xiaomi Redmi 12 4G','Xiaomi Redmi 12 5G','Xiaomi Poco M6 Pro 5G','Xiaomi Poco M6 4G','Xiaomi Redmi 13 4G']
+  },
+
+  // ═══ ۱۵. ریلمی و آنر ═══
+  {
+    id:'gl_realme_c53_c67_x7b', title:'خانواده ۶.۷۴ اینچ ریلمی و آنر (Realme C53 / C63 / Narzo N53 / Honor X7b)',
+    size:6.74, w:76.6, l:167.0, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ / قطره‌ای', tags:['No Holes'],
+    note:'Realme C53 / C63 / Narzo N53 (۱۶۷.۳×۷۶.۷) و Honor X7b (۱۶۶.۷×۷۶.۵).',
+    models:['Realme C53','Realme C63','Realme Narzo N53','Honor X7b']
+  },
+  {
+    id:'gl_realme_c55_c67', title:'خانواده ۶.۷۲ اینچ فلت ریلمی (Realme C55 / Realme C67 4G / Narzo 60x)',
+    size:6.72, w:75.7, l:165.2, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'Realme C55 (۱۶۵.۶×۷۵.۹) و Realme C67 4G / Narzo 60x (۱۶۴.۶×۷۵.۴).',
+    models:['Realme C55','Realme C67 4G','Realme Narzo 60x']
+  },
+
+  // ═══ ۱۶. سامسونگ ۶.۶ اینچ فلت (A34 / A35 / A55) و آنر X8/X9 ═══
+  {
+    id:'gl_a34_a35_a55', title:'خانواده ۶.۶ اینچ سامسونگ (A34 5G / A35 5G / A55 5G)',
+    size:6.6, w:77.8, l:161.4, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['Open Pore'],
+    note:'A34 5G (۱۶۱.۳×۷۸.۱)، A35 5G (۱۶۱.۷×۷۸.۰) و A55 5G (۱۶۱.۱×۷۷.۴).',
+    models:['Samsung Galaxy A34 5G','Samsung Galaxy A35 5G','Samsung Galaxy A55 5G']
+  },
+  {
+    id:'gl_honor_x8_x9', title:'خانواده ۶.۷ اینچ آنر (Honor X8 4G / X8a / X9 4G / X9 5G)',
+    size:6.7, w:74.9, l:163.4, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'Honor X8 4G (۱۶۳.۴×۷۴.۷)، Honor X8a (۱۶۲.۹×۷۴.۵) و Honor X9 4G/5G (۱۶۶.۰×۷۵.۸ - نزدیک به X7b).',
+    models:['Honor X8 4G','Honor X8a','Honor X9 4G','Honor X9 5G']
+  },
+
+  // ═══ ۱۷. سری ۶.۲ و ۶.۳ اینچ کلاسیک ═══
+  {
+    id:'gl_a10_redmi8', title:'خانواده ۶.۲ اینچ (A10 / A10s / M10 / M20 / Redmi 8 / Redmi 8A)',
+    size:6.2, w:75.5, l:156.2, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'A10/M10 (۱۵۵.۶×۷۵.۶)، A10s (۱۵۶.۹×۷۵.۸)، M20 (۱۵۶.۴×۷۴.۵) و Redmi 8 / 8A (۱۵۶.۵×۷۵.۴).',
+    models:['Samsung Galaxy A10','Samsung Galaxy A10s','Samsung Galaxy M10','Samsung Galaxy M20','Xiaomi Redmi 8','Xiaomi Redmi 8A']
+  },
+  
+{
+  id:'gl_nokia_6_2_7_2_family', title:'خانواده ۶.۳ اینچ نوکیا (Nokia 6.2 / 7.2)',
+  size:6.3, w:75.2, l:159.9, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+  note:'Nokia 6.2 و 7.2 هر دو دقیقاً ۱۵۹.۹×۷۵.۲ میلی‌متر هستند — از گروه Redmi Note 8 (۱۵۸.۳) ۱.۶mm بلندتر، مستقل شدند.',
+  models:['Nokia 6.2','Nokia 7.2']
+},
+  {
+    id:'gl_y8p_standalone', title:'خانواده ۶.۳ اینچ باریک هواوی (Huawei Y8p / P Smart S)',
+    size:6.3, w:73.4, l:157.4, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'Huawei Y8p و P Smart S هر دو دقیقاً ۱۵۷.۴×۷۳.۴ میلی‌متر هستند.',
+    models:['Huawei Y8p','Huawei P Smart S']
+  },
+  {
+    id:'gl_nova3i_standalone', title:'گلس اختصاصی Huawei Nova 3i / P Smart+ (۱۵۷.۶×۷۵.۲mm)',
+    size:6.3, w:75.2, l:157.6, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'📱 ناچ پهن', tags:[],
+    note:'Nova 3i دارای ناچ پهن دو دوربینه با ابعاد ۱۵۷.۶×۷۵.۲ است.',
+    models:['Huawei Nova 3i','Huawei P Smart Plus']
+  },
+  {
+    id:'gl_honor8a_y6s', title:'خانواده ۶.۰۹ اینچ هواوی و آنر (Honor 8A / Huawei Y6s / Y6 Prime 2019)',
+    size:6.09, w:73.5, l:156.3, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'Honor 8A، Huawei Y6s 2019 و Y6 Prime 2019 همگی دقیقاً ۱۵۶.۳×۷۳.۵ میلی‌متر هستند.',
+    models:['Honor 8A','Huawei Y6s 2019','Huawei Y6 Prime 2019']
+  },
+  {
+    id:'gl_honor10lite_psmart2019', title:'خانواده ۶.۲۱ اینچ هواوی و آنر (Honor 10 Lite / Huawei P Smart 2019)',
+    size:6.21, w:73.6, l:154.8, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'Honor 10 Lite و Huawei P Smart 2019 هر دو دقیقاً ۱۵۴.۸×۷۳.۶ میلی‌متر هستند.',
+    models:['Honor 10 Lite','Huawei P Smart 2019']
+  },
+  {
+    id:'gl_y7prime_2019_standalone', title:'خانواده ۶.۲۶ اینچ هواوی (Y7 Prime 2019 / Y7 2019 / Y7 Pro 2019)',
+    size:6.26, w:76.9, l:158.9, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'Y7 Prime 2019، Y7 2019 و Y7 Pro 2019 همگی دقیقاً ۱۵۸.۹×۷۶.۹ میلی‌متر هستند.',
+    models:['Huawei Y7 Prime 2019','Huawei Y7 2019','Huawei Y7 Pro 2019']
+  },
+  {
+    id:'gl_honor8x_standalone', title:'گلس اختصاصی Honor 8X (۱۶۰.۴×۷۶.۶mm)',
+    size:6.5, w:76.6, l:160.4, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'📱 ناچ کلاسیک', tags:[],
+    note:'Honor 8X ابعاد ۱۶۰.۴×۷۶.۶ میلی‌متر دارد.',
+    models:['Honor 8X']
+  },
+  {
+    id:'gl_y9_2019_standalone', title:'گلس اختصاصی Huawei Y9 2019 (۱۶۲.۴×۷۷.۱mm)',
+    size:6.5, w:77.1, l:162.4, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'📱 ناچ کلاسیک', tags:[],
+    note:'Huawei Y9 2019 ابعاد ۱۶۲.۴×۷۷.۱ میلی‌متر دارد.',
+    models:['Huawei Y9 2019']
+  },
+
+  // ═══ ۱۸. سری پانچ چپ ═══
+  {
+    id:'gl_a11_m11_nokia54', title:'خانواده ۶.۴ اینچ پانچ چپ (A11 / M11 / Nokia 5.4 / Nokia 3.4)',
+    size:6.4, w:76.1, l:161.2, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'↖️ پانچ چپ', tags:['No Holes'],
+    note:'A11 / M11 (۱۶۱.۴×۷۶.۳) و Nokia 5.4 / 3.4 (۱۶۱.۰×۷۶.۰).',
+    models:['Samsung Galaxy A11','Samsung Galaxy M11','Nokia 5.4','Nokia 3.4']
+  },
+  {
+    id:'gl_a21s_standalone', title:'گلس اختصاصی Samsung Galaxy A21s (۱۶۳.۷×۷۵.۳mm)',
+    size:6.5, w:75.3, l:163.7, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'↖️ پانچ چپ', tags:[],
+    note:'A21s ابعاد ۱۶۳.۷×۷۵.۳ دارد.',
+    models:['Samsung Galaxy A21s']
+  },
+  {
+  id:'gl_note9_4g_standalone', title:'گلس اختصاصی Redmi Note 9 4G (۱۶۲.۳×۷۷.۲mm)',
+  size:6.53, w:77.2, l:162.3, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'↖️ پانچ چپ', tags:['No Holes'],
+  note:'Redmi Note 9 4G (هند) ابعاد ۱۶۲.۳×۷۷.۲ میلی‌متر دارد — با Y9a/X10 حدود ۱.۴mm فرق طول دارد، مستقل شد.',
+  models:['Xiaomi Redmi Note 9 4G']
+},
+{
+  id:'gl_y9a_x10_family', title:'خانواده ۶.۵۳ اینچ هواوی و آنر (Huawei Y9a / Honor X10 / Y7a)',
+  size:6.53, w:76.5, l:163.6, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'↖️ پانچ چپ / تمام‌صفحه', tags:['No Holes'],
+  note:'Huawei Y9a (۱۶۳.۵×۷۶.۵) و Honor X10 / Y7a (۱۶۳.۷×۷۶.۵). اختلاف فقط ۰.۲ میلی‌متر — تطابق ۱۰۰٪.',
+  models:['Huawei Y9a','Honor X10','Huawei Y7a']
+},
+  {
+    id:'gl_nova7i_family', title:'خانواده ۶.۴ اینچ هواوی (Nova 7i / P40 Lite / Nova 6 SE)',
+    size:6.4, w:76.3, l:159.2, edge:'FLAT', edgeLabel:'📐 تخت', notch:'↖️ پانچ چپ', tags:[],
+    note:'Nova 7i، P40 Lite و Nova 6 SE هر سه دقیقاً ۱۵۹.۲×۷۶.۳ میلی‌متر هستند.',
+    models:['Huawei Nova 7i','Huawei P40 Lite','Huawei Nova 6 SE']
+  },
+  {
+    id:'gl_honor20_standalone', title:'خانواده ۶.۲۶ اینچ آنر و هواوی (Honor 20 / Honor 20 Pro / Huawei Nova 5T)',
+    size:6.26, w:73.9, l:154.3, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'↖️ پانچ چپ', tags:[],
+    note:'Honor 20، Honor 20 Pro و Huawei Nova 5T همگی دقیقاً ۱۵۴.۳×۷۳.۹ میلی‌متر هستند.',
+    models:['Honor 20','Honor 20 Pro','Huawei Nova 5T']
+  },
+
+  // ═══ ۱۹. گوشی‌های لبه خمیده ═══
+  {
+    id:'gl_curved_honor_90_200', title:'خانواده ۶.۷ اینچ خمیده (Honor X9a / Honor 90 / Honor 200 / Note 13 Pro+)',
+    size:6.7, w:74.3, l:161.5, edge:'CURVED', edgeLabel:'🌊 خمیده (Edge 3D)', notch:'⚫ پانچ وسط', tags:['UV / 3D Curved'],
+    note:'Honor X9a (۱۶۱.۶×۷۴.۱)، Honor 90 / 200 (۱۶۱.۵×۷۴.۳) و Note 13 Pro+ 5G (۱۶۱.۴×۷۴.۲).',
+    models:['Honor X9a','Honor 90','Honor 200','Xiaomi Redmi Note 13 Pro+ 5G']
+  },
+{
+  id:'gl_curved_honor_x9c_note14proplus', title:'خانواده ۶.۷۸ اینچ خمیده جدید (Honor X9c / Note 14 Pro+ / Note 14 Pro)',
+  size:6.78, w:75.5, l:162.5, edge:'CURVED', edgeLabel:'🌊 خمیده (Edge 3D)', notch:'⚫ پانچ وسط', tags:['UV / 3D Curved'],
+  note:'Honor X9c (۱۶۲.۸×۷۵.۵)، Note 14 Pro+ 5G و Note 14 Pro 5G (۱۶۲.۵×۷۵.۵). اختلاف فقط ۰.۳mm.',
+  models:['Honor X9c','Xiaomi Redmi Note 14 Pro+ 5G','Xiaomi Redmi Note 14 Pro 5G']
+},
+{
+  id:'gl_honor50_standalone', title:'گلس اختصاصی Honor 50 (۶.۵۷ اینچ خمیده / ۱۶۰.۰×۷۳.۸mm)',
+  size:6.57, w:73.8, l:160.0, edge:'CURVED', edgeLabel:'🌊 خمیده (Edge 3D)', notch:'⚫ پانچ وسط', tags:['UV / 3D Curved'],
+  note:'Honor 50 ابعاد ۱۶۰.۰×۷۳.۸ دارد — ۲.۸mm کوتاه‌تر از X9c، مستقل شد.',
+  models:['Honor 50']
+},
+{
+  id:'gl_honor70_standalone', title:'گلس اختصاصی Honor 70 (۶.۶۷ اینچ خمیده / ۱۶۱.۴×۷۳.۳mm)',
+  size:6.67, w:73.3, l:161.4, edge:'CURVED', edgeLabel:'🌊 خمیده (Edge 3D)', notch:'⚫ پانچ وسط', tags:['UV / 3D Curved'],
+  note:'Honor 70 ابعاد ۱۶۱.۴×۷۳.۳ دارد — ۲.۲mm باریک‌تر از X9c، مستقل شد.',
+  models:['Honor 70']
+},
+  {
+    id:'gl_curved_x9b_standalone', title:'گلس اختصاصی Honor X9b 5G (۶.۷۸ اینچ خمیده)',
+    size:6.78, w:75.5, l:163.6, edge:'CURVED', edgeLabel:'🌊 خمیده (Edge 3D)', notch:'⚫ پانچ وسط', tags:['UV / 3D Curved'],
+    note:'Honor X9b ابعاد ۱۶۳.۶×۷۵.۵ دارد.',
+    models:['Honor X9b']
+  },
+  {
+    id:'gl_s22u_s23u_curved', title:'خانواده ۶.۸ اینچ خمیده سامسونگ (S22 Ultra / S23 Ultra)',
+    size:6.8, w:78.0, l:163.4, edge:'CURVED', edgeLabel:'🌊 خمیده (Edge 3D)', notch:'⚫ پانچ وسط', tags:['UV / 3D Curved'],
+    note:'S22 Ultra (۱۶۳.۳×۷۷.۹) و S23 Ultra (۱۶۳.۴×۷۸.۱).',
+    models:['Samsung Galaxy S22 Ultra','Samsung Galaxy S23 Ultra']
+  },
+  {
+    id:'gl_s20u_standalone', title:'گلس اختصاصی Samsung Galaxy S20 Ultra (۶.۹ اینچ خمیده)',
+    size:6.9, w:76.0, l:166.9, edge:'CURVED', edgeLabel:'🌊 خمیده (Edge 3D)', notch:'⚫ پانچ وسط', tags:['UV / 3D Curved'],
+    note:'S20 Ultra ابعاد ۱۶۶.۹×۷۶.۰ دارد.',
+    models:['Samsung Galaxy S20 Ultra']
+  },
+  {
+    id:'gl_note20u_standalone', title:'گلس اختصاصی Samsung Galaxy Note 20 Ultra (۶.۹ اینچ خمیده)',
+    size:6.9, w:77.2, l:164.8, edge:'CURVED', edgeLabel:'🌊 خمیده (Edge 3D)', notch:'⚫ پانچ وسط', tags:['UV / 3D Curved'],
+    note:'Note 20 Ultra ابعاد ۱۶۴.۸×۷۷.۲ دارد.',
+    models:['Samsung Galaxy Note 20 Ultra']
+  },
+
+  // ═══ ۲۰. پرچمداران اولترا فلت سامسونگ ═══
+  {
+    id:'gl_s24u_standalone', title:'گلس اختصاصی Samsung Galaxy S24 Ultra (گوشه تیز ۹۰°)',
+    size:6.8, w:79.0, l:162.3, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'S24 Ultra دارای گوشه‌های تیز ۹۰ درجه با ابعاد ۱۶۲.۳×۷۹.۰ میلی‌متر است.',
+    models:['Samsung Galaxy S24 Ultra']
+  },
+  {
+    id:'gl_s25u_standalone', title:'گلس اختصاصی Samsung Galaxy S25 Ultra (گوشه گرد)',
+    size:6.9, w:77.6, l:162.8, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+    note:'S25 Ultra دارای گوشه‌های گرد با ابعاد ۱۶۲.۸×۷۷.۶ میلی‌متر است.',
+    models:['Samsung Galaxy S25 Ultra']
+  },
+
+  // ═══ ۲۱. آیفون ═══
+  {
+    id:'gl_iphone_47', title:'خانواده ۴.۷ اینچ اپل (iPhone 6 / 6s / 7 / 8 / SE 2020 / SE 2022)',
+    size:4.7, w:67.3, l:138.4, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'📱 کلید هوم', tags:[],
+    note:'همگی دقیقاً ۱۳۸.۴×۶۷.۳ میلی‌متر هستند.',
+    models:['Apple iPhone 6','Apple iPhone 6s','Apple iPhone 7','Apple iPhone 8','Apple iPhone SE 2020','Apple iPhone SE 2022']
+  },
+  {
+    id:'gl_iphone_55', title:'خانواده ۵.۵ اینچ اپل (6 Plus / 6s Plus / 7 Plus / 8 Plus)',
+    size:5.5, w:78.1, l:158.4, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'📱 کلید هوم', tags:[],
+    note:'همگی دقیقاً ۱۵۸.۴×۷۸.۱ میلی‌متر هستند.',
+    models:['Apple iPhone 6 Plus','Apple iPhone 6s Plus','Apple iPhone 7 Plus','Apple iPhone 8 Plus']
+  },
+  {
+    id:'gl_iphone_58', title:'خانواده ۵.۸ اینچ اپل (iPhone X / XS / 11 Pro)',
+    size:5.8, w:70.9, l:143.6, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'🍎 ناچ اپل', tags:[],
+    note:'iPhone X، XS و 11 Pro هر سه دقیقاً ۱۴۳.۶×۷۰.۹ میلی‌متر هستند.',
+    models:['Apple iPhone X','Apple iPhone XS','Apple iPhone 11 Pro']
+  },
+  {
+    id:'gl_iphone_61_notch', title:'خانواده ۶.۱ اینچ اپل2.5D (iPhone 11 / iPhone XR)',
+    size:6.1, w:75.7, l:150.9, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'🍎 ناچ پهن', tags:[],
+    note:'iPhone 11 و XR هر دو دقیقاً ۱۵۰.۹×۷۵.۷ میلی‌متر هستند.',
+    models:['Apple iPhone 11','Apple iPhone XR']
+  },
+  {
+    id:'gl_iphone_61_flat', title:'خانواده ۶.۱ اینچ فلت (iPhone 12 / 13 / 14 / 15 / 16 + S22 / S23 / S24 / S25)',
+    size:6.1, w:71.5, l:146.9, edge:'FLAT', edgeLabel:'📐 تخت', notch:'🍎 ناچ / داینامیک', tags:[],
+    note:'iPhone 12/13/14/15/16 و S22/S23/S24/S25 در تلورانس بسیار نزدیک.',
+    models:['Apple iPhone 12','Apple iPhone 12 Pro','Apple iPhone 13','Apple iPhone 13 Pro','Apple iPhone 14','Apple iPhone 14 Pro','Apple iPhone 15','Apple iPhone 15 Pro','Apple iPhone 16','Apple iPhone 16e','Apple iPhone 17e','Samsung Galaxy S22 5G','Samsung Galaxy S23 5G','Samsung Galaxy S24 5G','Samsung Galaxy S25 5G']
+  },
+  {
+    id:'gl_iphone_63', title:'خانواده ۶.۳ اینچ اپل (iPhone 16 Pro / iPhone 17 / iPhone 17 Pro)',
+    size:6.3, w:71.5, l:149.6, edge:'FLAT', edgeLabel:'📐 تخت', notch:'🍎 داینامیک', tags:[],
+    note:'iPhone 16 Pro، 17 و 17 Pro همگی دقیقاً ۱۴۹.۶×۷۱.۵ میلی‌متر هستند.',
+    models:['Apple iPhone 16 Pro','Apple iPhone 17','Apple iPhone 17 Pro']
+  },
+  {
+    id:'gl_iphone_67', title:'خانواده ۶.۷ اینچ اپل (12 Pro Max / 13 Pro Max / 14 Plus / 14 Pro Max / 15 Plus / 16 Plus)',
+    size:6.7, w:77.9, l:160.8, edge:'FLAT', edgeLabel:'📐 تخت', notch:'🍎 ناچ / داینامیک', tags:[],
+    note:'مدل‌های پلاس و پرو مکس سری ۱۲ تا ۱۶.',
+    models:['Apple iPhone 12 Pro Max','Apple iPhone 13 Pro Max','Apple iPhone 14 Plus','Apple iPhone 14 Pro Max','Apple iPhone 15 Plus','Apple iPhone 16 Plus']
+  },
+  {
+    id:'gl_iphone_15promax', title:'گلس اختصاصی Apple iPhone 15 Pro Max (۱۵۹.۹×۷۶.۷mm)',
+    size:6.7, w:76.7, l:159.9, edge:'FLAT', edgeLabel:'📐 تخت', notch:'🍎 داینامیک', tags:[],
+    note:'ابعاد ۱۵۹.۹×۷۶.۷ میلی‌متر.',
+    models:['Apple iPhone 15 Pro Max']
+  },
+  {
+    id:'gl_iphone_69', title:'خانواده ۶.۹ اینچ اپل (iPhone 16 Pro Max / iPhone 17 Pro Max)',
+    size:6.9, w:77.6, l:163.0, edge:'FLAT', edgeLabel:'📐 تخت', notch:'🍎 داینامیک', tags:[],
+    note:'ابعاد ۱۶۳.۰×۷۷.۶ میلی‌متر.',
+    models:['Apple iPhone 16 Pro Max','Apple iPhone 17 Pro Max']
+  },
+  {
+    id:'gl_iphone_air_standalone', title:'گلس اختصاصی Apple iPhone Air / 17 Air (۱۵۶.۲×۷۴.۶mm)',
+    size:6.6, w:74.6, l:156.2, edge:'FLAT', edgeLabel:'📐 تخت', notch:'🍎 داینامیک', tags:[],
+    note:'ابعاد ۱۵۶.۲×۷۴.۶ میلی‌متر.',
+    models:['Apple iPhone Air','Apple iPhone 17 Air']
+  },
+
+  // ═══ ۲۲. سری قدیمی ۵.۰ و ۵.۵ اینچ ═══
+  {
+    id:'gl_old_50', title:'خانواده ۵.۰ اینچ قدیمی (Grand Prime G530 / G531 / J2 Prime G532)',
+    size:5.0, w:72.1, l:144.8, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'📱 کلاسیک', tags:[],
+    note:'Grand Prime و J2 Prime همگی دقیقاً ۱۴۴.۸×۷۲.۱ میلی‌متر هستند.',
+    models:['Samsung Galaxy Grand Prime','Samsung Galaxy J2 Prime','Samsung Galaxy G532']
+  },
+  {
+    id:'gl_old_55', title:'خانواده ۵.۵ اینچ قدیمی (J7 Prime / J7 Pro / J7 2016 / Redmi Note 4X)',
+    size:5.5, w:75.2, l:151.7, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'📱 کلاسیک کلید هوم', tags:[],
+    note:'J7 Prime، J7 Pro، J7 2016 و Redmi Note 4X.',
+    models:['Samsung Galaxy J7 Prime','Samsung Galaxy J7 Pro','Samsung Galaxy J7 2016','Xiaomi Redmi Note 4','Xiaomi Redmi Note 4X']
+  },
+
+  // ═══ ۲۳. شیائومی ۶.۸۸ اینچ ═══
+  {
+    id:'gl_redmi14c', title:'خانواده ۶.۸۸ اینچ شیائومی (Redmi 14C / Poco C75 / Redmi A4 5G)',
+    size:6.88, w:77.8, l:171.9, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+    note:'Redmi 14C 4G/5G، Poco C75، Redmi A4 5G و Redmi 15C همگی ۱۷۱.۹×۷۷.۸ میلی‌متر هستند.',
+    models:['Xiaomi Redmi 14C','Xiaomi Redmi 14C 5G','Xiaomi Poco C75','Xiaomi Redmi A4 5G','Xiaomi Redmi 15C','Xiaomi Poco C85']
+  },
+
+  // ═══ ۲۴. نسل جدید ۲۰۲۵-۲۰۲۶ سامسونگ و شیائومی ═══
+  {
+    id:'gl_sam_2025_2026', title:'خانواده ۶.۷ اینچ نسل آینده سامسونگ (A27 / A37 / A57 / S25 FE)',
+    size:6.7, w:77.4, l:162.0, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['Open Pore'],
+    note:'ابعاد استاندارد ۱۶۲.۰×۷۷.۴ میلی‌متر.',
+    models:['Samsung Galaxy A27 5G','Samsung Galaxy A37 5G','Samsung Galaxy A57 5G','Samsung Galaxy S25 FE']
+  },
+  {
+    id:'gl_xiaomi_2025', title:'خانواده ۶.۶۷ اینچ نسل جدید شیائومی (Note 15 / Poco M7 / X7 / 15T)',
+    size:6.67, w:75.5, l:162.0, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['Open Pore'],
+    note:'ابعاد استاندارد ۱۶۲.۰×۷۵.۵ میلی‌متر.',
+    models:['Xiaomi Redmi Note 15','Xiaomi Redmi Note 15 Pro','Xiaomi Poco M7 5G','Xiaomi Poco X7 5G','Xiaomi 15T','Xiaomi 15T Pro']
+  }
+];
+// === پایان قسمت اول (کد قسمت دوم را دقیقاً زیر این خط پیست کنید) ===
+// =========================================================================
+// 📱 دیتابیس بخش دوم (الف): تاچ و ال‌سی‌دی‌های مشترک و اختصاصی
+// تمامی مدل‌ها به‌صورت مستقل و بدون اسلش ترکیبی ثبت شده‌اند
+// =========================================================================
+const DEFAULT_LCD_GROUPS = [
+  // ═══ شیائومی اقتصادی ═══
+  {
+    id:'lcd_redmi10c_pococ40', partType:'LCD',
+    title:'پنل مشترک Redmi 10C / Poco C40 / Redmi 10 Power',
+    frameType:'PANEL', frameLabel:'🟡 بدون فریم مشترک (تفاوت شاسی)',
+    panelSpec:'IPS LCD 6.71" (720×1650)',
+    codes:['220333QAG','220333QPG','220333QBI','C3Q'],
+    models:['Xiaomi Redmi 10C','Xiaomi Poco C40','Xiaomi Redmi 10 Power'],
+    note:'طبق لیست فنی نیا (REDMI10C_POCOC40)، پنل و فلتِ تاچ و ال‌سی‌دی Redmi 10C و Poco C40 صددرصد یکسان است.',
+    techWarn:'⚠️ شاسی (فریم) Poco C40 با Redmi 10C تفاوت دارد؛ برای استفاده مشترک بین این دو مدل حتماً نسخه «بدون فریم» تهیه کنید.'
+  },
+  {
+    id:'lcd_redmi12c_pococ55', partType:'LCD',
+    title:'پنل مشترک Redmi 12C / Poco C55',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (با فریم و بدون فریم)',
+    panelSpec:'IPS LCD 6.71" (720×1650)',
+    codes:['22120RN86G','22127RK46I'],
+    models:['Xiaomi Redmi 12C','Xiaomi Poco C55'],
+    note:'هر دو مدل از نظر پنل، فلت و فریم کاملاً یکسان هستند.',
+    techWarn:'⚠️ با اینکه گلس Redmi 12C با Redmi 10C بسیار نزدیک است، اما فلت ال‌سی‌دی 12C با 10C متفاوت است و به هم نمی‌خورند!'
+  },
+  {
+    id:'lcd_redmi13c_pococ65', partType:'LCD',
+    title:'پنل مشترک Redmi 13C / Poco C65 / Redmi 13R 5G',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (با فریم و بدون فریم)',
+    panelSpec:'IPS LCD 6.74" 90Hz',
+    codes:['23100RN82L','23108RN04Y','2310FPCA4G'],
+    models:['Xiaomi Redmi 13C','Xiaomi Poco C65','Xiaomi Redmi 13R 5G'],
+    note:'هم به صورت بدون فریم و هم با فریم ۱۰۰٪ مشترک هستند.',
+    techWarn:''
+  },
+  {
+    id:'lcd_redmi14c_pococ75', partType:'LCD',
+    title:'پنل مشترک Redmi 14C / Poco C75 / Redmi A3 Pro',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (با فریم و بدون فریم)',
+    panelSpec:'IPS LCD 6.88" 120Hz',
+    codes:['2409BRN2CA','2410FPCC5G'],
+    models:['Xiaomi Redmi 14C','Xiaomi Redmi 14C 5G','Xiaomi Poco C75','Xiaomi Redmi A3 Pro','Xiaomi Redmi A4 5G'],
+    note:'پنل ۶.۸۸ اینچی نسل جدید اقتصادی شیائومی بین تمام این مدل‌ها مشترک است.',
+    techWarn:''
+  },
+  {
+    id:'lcd_redmia1_a2', partType:'LCD',
+    title:'پنل مشترک Redmi A1 / A1+ / A2 / A2+ / Poco C50 / C51',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (بدون فریم)',
+    panelSpec:'IPS LCD 6.52" (720×1600)',
+    codes:['220733SL','23028RN4DG'],
+    models:['Xiaomi Redmi A1','Xiaomi Redmi A1 Plus','Xiaomi Redmi A2','Xiaomi Redmi A2 Plus','Xiaomi Poco C50','Xiaomi Poco C51'],
+    note:'پنل بدون فریم در تمام ۶ مدل یکسان است (در مدل‌های پلاس فقط جای سنسور اثرانگشت روی درب پشت متفاوت است).',
+    techWarn:''
+  },
+  {
+    id:'lcd_redmia3_pococ61', partType:'LCD',
+    title:'پنل مشترک Redmi A3 / Redmi A3x / Poco C61',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (با فریم و بدون فریم)',
+    panelSpec:'IPS LCD 6.71" 90Hz',
+    codes:['23129RN51X','24048RN6CG'],
+    models:['Xiaomi Redmi A3','Xiaomi Redmi A3x','Xiaomi Poco C61'],
+    note:'پنل و فلت در هر سه مدل کاملاً مشترک است.',
+    techWarn:''
+  },
+
+  // ═══ خانواده Poco X3 و Note 9 ═══
+  {
+    id:'lcd_pocox3_x3pro', partType:'LCD',
+    title:'پنل مشترک Poco X3 / Poco X3 NFC / Poco X3 Pro / Mi 10T Lite 5G',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل در Poco X3 (بی‌فریم با Mi 10T Lite)',
+    panelSpec:'IPS LCD 6.67" 120Hz (1080×2400)',
+    codes:['M2007J20CG','M2102J20SG','M2007J17G'],
+    models:['Xiaomi Poco X3','Xiaomi Poco X3 NFC','Xiaomi Poco X3 Pro','Xiaomi Mi 10T Lite 5G','Xiaomi Redmi Note 9 Pro 5G'],
+    note:'بین Poco X3، X3 NFC و X3 Pro هم با فریم و هم بدون فریم صددرصد یکسان است. با Mi 10T Lite 5G و Note 9 Pro 5G نیز به صورت «بدون فریم» کاملاً مشترک است.',
+    techWarn:'⚠️ با Redmi Note 9 Pro 4G و Note 9S اشتباه نگیرید (فلت و ابعاد شاسی متفاوت است).'
+  },
+  {
+    id:'lcd_pocox3gt_standalone', partType:'LCD',
+    title:'پنل اختصاصی Poco X3 GT / Redmi Note 10 Pro 5G (IPS 6.6")',
+    frameType:'FULL', frameLabel:'🟢 اختصاصی (مشترک با Note 10 Pro 5G China)',
+    panelSpec:'IPS LCD 6.6" 120Hz',
+    codes:['21061110AG'],
+    models:['Xiaomi Poco X3 GT','Xiaomi Redmi Note 10 Pro 5G'],
+    note:'سایز ۶.۶ اینچ IPS با نرخ نوسازی ۱۲۰ هرتز.',
+    techWarn:'⚠️ این پنل با Redmi Note 10 Pro 4G (که ۶.۶۷ اینچ AMOLED است) یا Poco X3 Pro تفاوت دارد و به آن‌ها نمی‌خورد.'
+  },
+  {
+    id:'lcd_note9s_note9pro_m2pro', partType:'LCD',
+    title:'پنل مشترک Redmi Note 9S / Note 9 Pro 4G / Note 9 Pro Max / Poco M2 Pro',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (با فریم و بدون فریم)',
+    panelSpec:'IPS LCD 6.67" 60Hz (1080×2400)',
+    codes:['M2003J6A1G','M2003J6B2G','M2003J6CI'],
+    models:['Xiaomi Redmi Note 9S','Xiaomi Redmi Note 9 Pro 4G','Xiaomi Redmi Note 9 Pro Max','Xiaomi Poco M2 Pro','Xiaomi Redmi Note 10 Lite'],
+    note:'تمام این ۵ مدل هم با فریم و هم بدون فریم ۱۰۰٪ یکسان هستند.',
+    techWarn:'⚠️ با Poco X3 اشتباه نگیرید — فلت متفاوت دارند.'
+  },
+
+  // ═══ خانواده طلایی OLED شیائومی ۶.۴۳ اینچ ═══
+  {
+    id:'lcd_note10_10s_11_m4pro', partType:'LCD',
+    title:'پنل طلایی مشترک Note 10 4G / 10S / 11 4G / 11S / 12S / Poco M4 Pro 4G / M5s',
+    frameType:'PANEL', frameLabel:'🟡 ۱۰۰٪ مشترک بدون فریم (تفاوت شاسی)',
+    panelSpec:'AMOLED 6.43" (1080×2400)',
+    codes:['M2101K7AG','M2101K7BG','2201117TG','2201117SG','2303CRA44A'],
+    models:['Xiaomi Redmi Note 10 4G','Xiaomi Redmi Note 10S','Xiaomi Redmi Note 11 4G','Xiaomi Redmi Note 11S 4G','Xiaomi Redmi Note 12S','Xiaomi Poco M4 Pro 4G','Xiaomi Poco M5s'],
+    note:'پرکاربردترین پنل OLED شیائومی! بدون فریم روی هر ۷ مدل بدون کوچک‌ترین خطایی کار می‌کند (اثرانگشت همه روی دکمه پاور بغل است).',
+    techWarn:'💡 شاسی‌ها: فریمِ Note 10، Note 10S و Poco M5s با هم یکی است (منحنی)؛ و فریمِ Note 11 4G، Note 11S و Poco M4 Pro 4G نیز با هم یکی است (تخت).'
+  },
+
+  // ═══ خانواده OLED شیائومی ۶.۶۷ اینچ ۱۲۰ هرتز ═══
+  {
+    id:'lcd_note12_pocox5', partType:'LCD',
+    title:'پنل مشترک Redmi Note 12 (4G / 5G) و Poco X5 5G',
+    frameType:'PANEL', frameLabel:'🟡 مشترک بدون فریم',
+    panelSpec:'AMOLED 6.67" 120Hz (1080×2400)',
+    codes:['23021RAAEG','23021RAA2Y','22111317G','22111317PG'],
+    models:['Xiaomi Redmi Note 12 4G','Xiaomi Redmi Note 12 5G','Xiaomi Poco X5 5G','Xiaomi Redmi Note 12R Pro'],
+    note:'پنل AMOLED بدون فریم بین هر ۴ مدل کاملاً یکسان است.',
+    techWarn:'⚠️ فریم مدل 4G با مدل 5G و Poco X5 متفاوت است؛ فقط پنل بدون فریم مشترک می‌باشد.'
+  },
+  {
+    id:'lcd_note10_11_12_amoled', partType:'LCD',
+    title:'پنل مشترک Note 10 Pro / Note 11 Pro (4G/5G) / Note 12 Pro 4G / Poco X4 Pro 5G',
+    frameType:'PANEL', frameLabel:'🟡 مشترک بدون فریم',
+    panelSpec:'Super AMOLED 6.67" 120Hz',
+    codes:['M2101K6G','2201116TG','2201116SG','2209116AG','2201116PG'],
+    models:['Xiaomi Redmi Note 10 Pro 4G','Xiaomi Redmi Note 10 Pro Max','Xiaomi Redmi Note 11 Pro 4G','Xiaomi Redmi Note 11 Pro 5G','Xiaomi Redmi Note 11 Pro+ 5G','Xiaomi Redmi Note 12 Pro 4G','Xiaomi Poco X4 Pro 5G'],
+    note:'پنل AMOLED ۶.۶۷ اینچ ۱۲۰ هرتز بدون فریم بین تمام این مدل‌ها کاملاً مشترک است. فریمِ Note 11 Pro 4G/5G، Note 12 Pro 4G و Poco X4 Pro نیز بسیار مشابه است.',
+    techWarn:'🚨 با Redmi Note 12 Pro 5G (کد 22101316G) و همچنین با Mi 10T Lite 5G یا Poco M4 Pro 5G (که IPS هستند) اشتباه نگیرید!'
+  },
+  {
+    id:'lcd_note12pro5g_pocox5pro', partType:'LCD',
+    title:'پنل مشترک Redmi Note 12 Pro 5G / Note 12 Pro+ 5G / Poco X5 Pro 5G',
+    frameType:'PANEL', frameLabel:'🟡 مشترک بدون فریم',
+    panelSpec:'Flow AMOLED 6.67" 120Hz',
+    codes:['22101316G','22101316UG','22101320G'],
+    models:['Xiaomi Redmi Note 12 Pro 5G','Xiaomi Redmi Note 12 Pro+ 5G','Xiaomi Poco X5 Pro 5G'],
+    note:'پنل بدون فریم بین Note 12 Pro 5G، Pro+ 5G و Poco X5 Pro 5G کاملاً مشترک است.',
+    techWarn:'🚨 به هیچ عنوان به Redmi Note 12 Pro 4G نمی‌خورد!'
+  },
+
+  // ═══ سری Redmi 9 / Redmi 12 / Poco M6 ═══
+  {
+    id:'lcd_redmi9a_9c_10a', partType:'LCD',
+    title:'پنل مشترک Redmi 9A / 9C / 9AT / 10A / Poco C3 / C31',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (9A/9C با فریم • 10A بی‌فریم)',
+    panelSpec:'IPS LCD 6.53" HD+ (720×1600)',
+    codes:['M2006C3LG','M2006C3MG','220233L2G'],
+    models:['Xiaomi Redmi 9A','Xiaomi Redmi 9C','Xiaomi Redmi 9AT','Xiaomi Redmi 9i','Xiaomi Redmi 10A','Xiaomi Poco C3','Xiaomi Poco C31'],
+    note:'پنل بدون فریم بین هر ۷ مدل مشترک است. شاسی (فریم) 9A و 9C نیز یکی است.',
+    techWarn:''
+  },
+  {
+    id:'lcd_redmi9_pocom2', partType:'LCD',
+    title:'پنل مشترک Redmi 9 (4G) / Poco M2 / Redmi 9 Prime',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (با فریم و بدون فریم)',
+    panelSpec:'IPS LCD 6.53" FHD+ (1080×2340)',
+    codes:['M2004J19G','M2004J19PI'],
+    models:['Xiaomi Redmi 9 4G','Xiaomi Redmi 9 Prime','Xiaomi Poco M2'],
+    note:'هم با فریم و هم بدون فریم ۱۰۰٪ یکسان هستند.',
+    techWarn:'⚠️ با Redmi 9A/9C (که HD+ هستند) و Redmi 9T اشتباه نگیرید!'
+  },
+  {
+    id:'lcd_redmi9t_pocom3', partType:'LCD',
+    title:'پنل مشترک Redmi 9T / Poco M3 / Redmi 9 Power',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (با فریم و بدون فریم)',
+    panelSpec:'IPS LCD 6.53" FHD+ (1080×2340)',
+    codes:['M2010J19SG','M2010J19CG','M2010J19SI'],
+    models:['Xiaomi Redmi 9T','Xiaomi Poco M3','Xiaomi Redmi 9 Power','Xiaomi Redmi Note 9 4G China'],
+    note:'پنل و فریم Redmi 9T و Poco M3 کاملاً مشترک است.',
+    techWarn:'⚠️ با Redmi 9 معمولی (M2004J19G) اشتباه نگیرید؛ خمیدگی فلت آن‌ها متفاوت است.'
+  },
+  {
+    id:'lcd_redmi12_m6pro5g', partType:'LCD',
+    title:'پنل مشترک Redmi 12 (4G/5G) / Poco M6 Pro 5G / Redmi Note 12R',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (بدون فریم و با فریم)',
+    panelSpec:'IPS LCD 6.79" 90Hz FHD+',
+    codes:['23053RN02A','23076RN4BI','23076PC4BI'],
+    models:['Xiaomi Redmi 12 4G','Xiaomi Redmi 12 5G','Xiaomi Poco M6 Pro 5G','Xiaomi Redmi Note 12R'],
+    note:'پنل ۶.۷۹ اینچی IPS بین Redmi 12 4G/5G و Poco M6 Pro 5G کاملاً مشترک است.',
+    techWarn:'🚨 با Poco M6 Pro 4G (که ۶.۶۷ اینچ AMOLED است) اشتباه نگیرید!'
+  },
+
+  // ═══ پنل‌های سری Note 13 و تله‌های تعمیراتی شیائومی ═══
+  {
+    id:'lcd_note13_4g_standalone', partType:'LCD',
+    title:'پنل اختصاصی Redmi Note 13 4G (اثرانگشت زیر صفحه)',
+    frameType:'TRAP', frameLabel:'🔴 غیرمشترک با نسخه 5G',
+    panelSpec:'AMOLED 6.67" 120Hz (Optical Fingerprint)',
+    codes:['23124RA7EO'],
+    models:['Xiaomi Redmi Note 13 4G'],
+    note:'دارای دریچه سنسور اثرانگشت نوری زیر صفحه.',
+    techWarn:'🚨 با Redmi Note 13 5G اشتباه نگیرید — نسخه 5G اثرانگشت روی پاور دارد و فلت ال‌سی‌دی آن کاملاً متفاوت است!'
+  },
+  {
+    id:'lcd_note13_5g_standalone', partType:'LCD',
+    title:'پنل مشترک Redmi Note 13 5G / Note 13R Pro / Poco X6 Neo 5G',
+    frameType:'PANEL', frameLabel:'🟡 مشترک بدون فریم (اثرانگشت روی پاور)',
+    panelSpec:'AMOLED 6.67" 120Hz (Side Fingerprint)',
+    codes:['23129RA5FL','2311FRAFDC'],
+    models:['Xiaomi Redmi Note 13 5G','Xiaomi Redmi Note 13R Pro','Xiaomi Poco X6 Neo 5G'],
+    note:'پنل بدون فریم بین Note 13 5G، Note 13R Pro و Poco X6 Neo یکسان است.',
+    techWarn:'🚨 به Redmi Note 13 4G نمی‌خورد!'
+  },
+  {
+    id:'lcd_note13pro4g_m6pro4g', partType:'LCD',
+    title:'پنل مشترک Redmi Note 13 Pro 4G و Poco M6 Pro 4G',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل',
+    panelSpec:'AMOLED 6.67" 120Hz (Optical FP)',
+    codes:['23117RA68G','2312FPCA6G'],
+    models:['Xiaomi Redmi Note 13 Pro 4G','Xiaomi Poco M6 Pro 4G'],
+    note:'پنل و فلت Redmi Note 13 Pro 4G و Poco M6 Pro 4G کاملاً یکسان است.',
+    techWarn:'🚨 با Note 13 Pro 5G / Poco X6 5G (که رزولوشن 1.5K دارند) متفاوت است!'
+  },
+  {
+    id:'lcd_note13pro5g_pocox6', partType:'LCD',
+    title:'پنل مشترک Redmi Note 13 Pro 5G و Poco X6 5G',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (1.5K AMOLED)',
+    panelSpec:'AMOLED 6.67" 120Hz (1220×2712)',
+    codes:['2312DRA50G','23122PCD1G'],
+    models:['Xiaomi Redmi Note 13 Pro 5G','Xiaomi Poco X6 5G'],
+    note:'پنل بدون فریم و با فریم بین این دو مدل کاملاً مشترک است.',
+    techWarn:''
+  },
+  {
+    id:'lcd_pocom4pro5g_note11_5g', partType:'LCD',
+    title:'پنل مشترک Poco M4 Pro 5G / Redmi Note 11 5G / Redmi Note 11T 5G',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (IPS 6.6" 90Hz)',
+    panelSpec:'IPS LCD 6.6" 90Hz (1080×2400)',
+    codes:['21091116AG','21091116AC','21091116AI'],
+    models:['Xiaomi Poco M4 Pro 5G','Xiaomi Redmi Note 11 5G','Xiaomi Redmi Note 11T 5G','Xiaomi Redmi Note 11S 5G'],
+    note:'این چهار مدل از نظر پنل IPS 6.6 اینچی کاملاً مشترک هستند.',
+    techWarn:'🚨 با Poco M4 Pro 4G (که ۶.۴۳ اینچ AMOLED است) و Poco X4 Pro 5G (که ۶.۶۷ اینچ AMOLED است) اشتباه نگیرید!'
+  },
+  {
+    id:'lcd_mi11lite_standalone', partType:'LCD',
+    title:'پنل مشترک Xiaomi Mi 11 Lite (4G / 5G) و تفاوت با نسخه NE',
+    frameType:'PANEL', frameLabel:'🟡 4G و 5G مشترک • نسخه NE متفاوت!',
+    panelSpec:'AMOLED 6.55" 90Hz',
+    codes:['M2101K9AG','M2101K9G','2109119DG'],
+    models:['Xiaomi Mi 11 Lite 4G','Xiaomi Mi 11 Lite 5G','Xiaomi 11 Lite 5G NE'],
+    note:'پنل Mi 11 Lite 4G و 5G معمولی به هم می‌خورد.',
+    techWarn:'⚠️ هشدار مهم: مدل Xiaomi 11 Lite 5G NE (کد 2109119DG) کانکتور و فلت متفاوتی دارد و پنل 4G روی آن تصویر نمی‌دهد!'
+  },
+
+  // ═══ سامسونگ ═══
+  {
+    id:'lcd_sam_a12_m12_a02s', partType:'LCD',
+    title:'پنل مشترک خانواده A12 (A125/A127) / M12 / F12 / A02 / A02s / A32 5G',
+    frameType:'PANEL', frameLabel:'🟡 مشترک بدون فریم (تفاوت شاسی)',
+    panelSpec:'PLS IPS 6.5" HD+ (720×1600)',
+    codes:['SM-A125F','SM-A127F','SM-M127F','SM-F127G','SM-A022F','SM-A025F','SM-A326B'],
+    models:['Samsung Galaxy A12 (A125)','Samsung Galaxy A12 Nacho (A127)','Samsung Galaxy M12 (M127)','Samsung Galaxy F12 (F127)','Samsung Galaxy A02 (A022)','Samsung Galaxy A02s (A025)','Samsung Galaxy A32 5G (A326)'],
+    note:'پنل بدون فریم یونیورسال بین تمام این ۷ مدل مشترک است. شاسی A125، A127 و M12 نیز به هم می‌خورد اما شاسی A02، A02s و A32 5G متفاوت است.',
+    techWarn:'⚠️ هشدار ورژن فلت: سری A12 دارای دو ورژن درایور (A125 و A127/M127) است. حتماً قبل از چسب زدن، کارکرد تاچ را پس از بالا آمدن کامل گوشی و یک‌بار قفل/باز کردن صفحه تست کنید!'
+  },
+  {
+    id:'lcd_sam_a30_a50_a50s', partType:'LCD',
+    title:'پنل مشترک خانواده A30 / A50 / A50s (FHD+ AMOLED)',
+    frameType:'PANEL', frameLabel:'🟡 بدون فریم مشترک (مشروط به سنسور اثرانگشت)',
+    panelSpec:'Super AMOLED 6.4" FHD+ (1080×2340)',
+    codes:['SM-A305F','SM-A505F','SM-A507F'],
+    models:['Samsung Galaxy A50 (A505)','Samsung Galaxy A50s (A507)','Samsung Galaxy A30 (A305)'],
+    note:'پنلِ A50/A50s بدون فریم روی هر سه مدل (A30, A50, A50s) کار می‌کند. فریم A50 و A50s نیز یکی است.',
+    techWarn:'🚨 تله تعمیراتی: ۱. فریم A30 دریچه اثرانگشت زیر صفحه ندارد. ۲. اگر پنلِ فابریک A30 را روی A50/A50s ببندید، تصویر می‌آید اما اثرانگشت نوری کار نمی‌کند (چون پشت پنل A30 کور است)!'
+  },
+  {
+    id:'lcd_sam_a20_m10s', partType:'LCD',
+    title:'پنل مشترک Samsung A20 و M10s (غیرمشترک با A30/A50!)',
+    frameType:'TRAP', frameLabel:'🔴 فقط A20 با M10s (به A30/A50 نمی‌خورد)',
+    panelSpec:'Super AMOLED 6.4" HD+ (720×1560)',
+    codes:['SM-A205F','SM-M107F'],
+    models:['Samsung Galaxy A20 (A205)','Samsung Galaxy M10s (M107)'],
+    note:'پنل بدون فریم A205 و M107 کاملاً یکسان است.',
+    techWarn:'🛑 هشدار مهم: فریب مشترک بودن گلس را نخورید! ال‌سی‌دی A20 (HD+) به هیچ عنوان به A30، A50 یا A30s نمی‌خورد.'
+  },
+  {
+    id:'lcd_sam_a30s_standalone', partType:'LCD',
+    title:'پنل اختصاصی Samsung A30s (کد فنی A307)',
+    frameType:'TRAP', frameLabel:'🔴 کاملاً اختصاصی (غیرمشترک با A30/A50/A31)',
+    panelSpec:'Super AMOLED 6.4" HD+ (720×1560)',
+    codes:['SM-A307F','SM-A307FN'],
+    models:['Samsung Galaxy A30s (A307)'],
+    note:'دارای دریچه اثرانگشت زیر صفحه اما با رزولوشن HD+.',
+    techWarn:'🚨 به هیچ‌کدام از مدل‌های A20، A30، A50، A31 یا A32 نمی‌خورد!'
+  },
+  {
+    id:'lcd_sam_a31_a32_trap', partType:'LCD',
+    title:'پنل‌های اختصاصی Samsung A31 (A315) و A32 4G (A325)',
+    frameType:'TRAP', frameLabel:'🔴 غیرمشترک با یکدیگر (فلت متفاوت)',
+    panelSpec:'Super AMOLED 6.4" FHD+ (60Hz vs 90Hz)',
+    codes:['SM-A315F','SM-A325F'],
+    models:['Samsung Galaxy A31 (A315)','Samsung Galaxy A32 4G (A325)'],
+    note:'با اینکه هر دو ۶.۴ اینچ AMOLED هستند، اما A32 4G دارای نرخ نوسازی ۹۰ هرتز و طراحی فلت متفاوت است.',
+    techWarn:'⚠️ پنل A31 و A32 4G به یکدیگر نمی‌خورند (و با A32 5G که ۶.۵ اینچ IPS است نیز کاملاً متفاوت‌اند).'
+  },
+  {
+    id:'lcd_sam_a10_m10', partType:'LCD',
+    title:'پنل مشترک Samsung A10 و M10 (و هشدار دو ورژن A10s)',
+    frameType:'PANEL', frameLabel:'🟡 A10 و M10 بدون فریم مشترک',
+    panelSpec:'PLS TFT 6.2" (720×1520)',
+    codes:['SM-A105F','SM-M105F','SM-A107F'],
+    models:['Samsung Galaxy A10 (A105)','Samsung Galaxy M10 (M105)','Samsung Galaxy A10s (A107)'],
+    note:'پنل بدون فریم A10 (A105) و M10 (M105) کاملاً مشترک است.',
+    techWarn:'🚨 هشدار A10s: ال‌سی‌دی A10s (A107) به A10 نمی‌خورد و خودش در بازار دارای دو ورژن فلت معروف (کد M10 و M12 روی فلت) است!'
+  },
+  {
+    id:'lcd_sam_a03_a03s_a04e', partType:'LCD',
+    title:'پنل مشترک خانواده A03 / A03s / A03 Core / A04e',
+    frameType:'PANEL', frameLabel:'🟡 بدون فریم مشترک (تفاوت شاسی)',
+    panelSpec:'PLS LCD 6.5" (720×1600)',
+    codes:['SM-A035F','SM-A037F','SM-A032F','SM-A042F'],
+    models:['Samsung Galaxy A03 (A035)','Samsung Galaxy A03s (A037)','Samsung Galaxy A03 Core (A032)','Samsung Galaxy A04e (A042)'],
+    note:'پنل‌های بدون فریم جدید بازار به صورت یونیورسال روی هر ۴ مدل تصویر و تاچ می‌دهند، اما فریم هر کدام جداست.',
+    techWarn:''
+  },
+  {
+    id:'lcd_sam_a04s_a13_5g', partType:'LCD',
+    title:'پنل مشترک خانواده A04 (A045) / A04s (A047) / A13 5G (A136) / M13 5G',
+    frameType:'PANEL', frameLabel:'🟡 بدون فریم مشترک',
+    panelSpec:'PLS LCD 6.5" 90Hz HD+',
+    codes:['SM-A045F','SM-A047F','SM-A136B','SM-M136B'],
+    models:['Samsung Galaxy A04 (A045)','Samsung Galaxy A04s (A047)','Samsung Galaxy A13 5G (A136)','Samsung Galaxy M13 5G (M136)'],
+    note:'پنل بدون فریم A04s و A13 5G کاملاً یکسان است.',
+    techWarn:'🚨 دقت کنید: ال‌سی‌دی A13 4G (کد A135/A137 که ۶.۶ اینچ FHD+ است) با A13 5G (کد A136 که ۶.۵ اینچ HD+ است) کاملاً فرق دارد!'
+  },
+  {
+    id:'lcd_sam_a15_a24', partType:'LCD',
+    title:'پنل مشترک خانواده A15 (4G / 5G) و A24 4G',
+    frameType:'PANEL', frameLabel:'🟡 بدون فریم مشترک (تفاوت شاسی)',
+    panelSpec:'Super AMOLED 6.5" 90Hz (1080×2340)',
+    codes:['SM-A155F','SM-A156B','SM-A245F'],
+    models:['Samsung Galaxy A15 4G (A155)','Samsung Galaxy A15 5G (A156)','Samsung Galaxy A24 4G (A245)'],
+    note:'پنل بدون فریم بین هر سه مدل ۱۰۰٪ مشترک است.',
+    techWarn:'⚠️ شاسی (فریم) A15 4G، A15 5G و A24 با هم تفاوت دارند؛ هنگام خرید با فریم حتماً کد دقیق را چک کنید.'
+  },
+  {
+    id:'lcd_sam_a52_family', partType:'LCD',
+    title:'پنل مشترک خانواده A52 (4G / 5G / A52s)',
+    frameType:'PANEL', frameLabel:'🟡 مشترک بدون فریم',
+    panelSpec:'Super AMOLED 6.5" 120Hz (1080×2400)',
+    codes:['SM-A525F','SM-A526B','SM-A528B'],
+    models:['Samsung Galaxy A52 4G (A525)','Samsung Galaxy A52 5G (A526)','Samsung Galaxy A52s 5G (A528)'],
+    note:'پنل AMOLED ۶.۵ اینچ بدون فریم بین هر سه مدل A52 4G، A52 5G و A52s 5G کاملاً مشترک است.',
+    techWarn:'⚠️ فریم (شاسی) مدل 4G (A525) جای آنتن‌های 5G را ندارد.'
+  },
+  {
+    id:'lcd_sam_a53_standalone', partType:'LCD',
+    title:'پنل اختصاصی Samsung Galaxy A53 5G (A536)',
+    frameType:'FULL', frameLabel:'🟢 اختصاصی (مشترک با A52 نیست!)',
+    panelSpec:'Super AMOLED 6.5" 120Hz (1080×2400)',
+    codes:['SM-A536B'],
+    models:['Samsung Galaxy A53 5G (A536)'],
+    note:'پنل A53 5G ابعاداً شبیه A52 است، اما شکل خم شدن فلت، تعداد پین‌ها و آی‌سی تاچ کاملاً متفاوت است.',
+    techWarn:'🛑 پنل A52 به A53 5G نمی‌خورد! فقط گلس شیشه‌ای رویشان مشترک است، نه ال‌سی‌دی.'
+  },
+  {
+    id:'lcd_sam_s20fe_standalone', partType:'LCD',
+    title:'پنل اختصاصی Samsung Galaxy S20 FE (G780 / G781)',
+    frameType:'FULL', frameLabel:'🟢 اختصاصی (مشترک با A52 نیست!)',
+    panelSpec:'Super AMOLED 6.5" 120Hz (1080×2400)',
+    codes:['SM-G780F','SM-G781B'],
+    models:['Samsung Galaxy S20 FE (G780)','Samsung Galaxy S20 FE 5G (G781)'],
+    note:'پنل S20 FE از نظر ابعاد فیزیکی نزدیک A52 است، اما فلت، آی‌سی تاچ و کانکتور آن کاملاً متفاوت است.',
+    techWarn:'🛑 پنل A52 هرگز روی S20 FE کار نمی‌کند و برعکس!'
+  },
+  {
+    id:'lcd_sam_a71_family', partType:'LCD',
+    title:'پنل مشترک A71 (4G/5G) / S10 Lite / Note 10 Lite (اثرانگشت نوری زیر صفحه)',
+    frameType:'PANEL', frameLabel:'🟡 مشترک بدون فریم',
+    panelSpec:'Super AMOLED 6.7" FHD+ (1080×2400) — Optical FP',
+    codes:['SM-A715F','SM-G770F','SM-N770F'],
+    models:['Samsung Galaxy A71 4G (A715)','Samsung Galaxy A71 5G','Samsung Galaxy S10 Lite (G770)','Samsung Galaxy Note 10 Lite (N770)'],
+    note:'پنل AMOLED ۶.۷ اینچ با دریچه اثرانگشت نوری زیر صفحه. سه مدل A71 4G، S10 Lite و Note 10 Lite بدون فریم کاملاً با هم مشترک‌اند.',
+    techWarn:'💡 پنل بدون فریم A71 به‌صورت یک‌طرفه روی M51/M62 هم تصویر می‌دهد — اما پنل فابریک M51 روی A71 اثرانگشت نوری را از کار می‌اندازد (چون پشت پنل M51 کور است).'
+  },
+  {
+    id:'lcd_sam_m51_m62_standalone', partType:'LCD',
+    title:'پنل مشترک Samsung M51 / M62 / F62 (اثرانگشت روی پاور)',
+    frameType:'PANEL', frameLabel:'🟡 مشترک بین M51/M62/F62',
+    panelSpec:'Super AMOLED Plus 6.7" FHD+ — Side FP',
+    codes:['SM-M515F','SM-M625F','SM-E625F'],
+    models:['Samsung Galaxy M51 (M515)','Samsung Galaxy M62 (M625)','Samsung Galaxy F62 (E625)'],
+    note:'پنل M51 و M62/F62 بین خودشان مشترک است (اثرانگشت روی پاور بغل).',
+    techWarn:'🛑 پنل فابریک M51/M62 سوراخ سنسور ندارد و اگر روی A71 یا S10 Lite بسته شود، اثرانگشت زیر صفحه آن‌ها کار نمی‌کند.'
+  },
+  {
+    id:'lcd_sam_a72_standalone', partType:'LCD',
+    title:'پنل اختصاصی Samsung Galaxy A72 (A725) — 90Hz',
+    frameType:'FULL', frameLabel:'🟢 اختصاصی (به A71 نمی‌خورد)',
+    panelSpec:'Super AMOLED 6.7" 90Hz — Optical FP',
+    codes:['SM-A725F'],
+    models:['Samsung Galaxy A72 (A725)'],
+    note:'پنل A72 نرخ نوسازی ۹۰ هرتز دارد و فلت آن با A71 (۶۰ هرتز) متفاوت است.',
+    techWarn:'🛑 پنل A72 و A71 با یکدیگر قابل تعویض نیستند!'
+  },
+  {
+    id:'lcd_sam_m52_m53_standalone', partType:'LCD',
+    title:'پنل‌های Samsung M52 5G (M526) و M53 5G (M536) — 120Hz',
+    frameType:'TRAP', frameLabel:'🔴 غیرمشترک با A71/A72',
+    panelSpec:'Super AMOLED Plus 6.7" 120Hz — Side FP',
+    codes:['SM-M526B','SM-M536B'],
+    models:['Samsung Galaxy M52 5G (M526)','Samsung Galaxy M53 5G (M536)'],
+    note:'پنل ۱۲۰ هرتز با فلت و پروتکل کاملاً متفاوت از A71 و A72.',
+    techWarn:'🛑 فلت M52/M53 به هیچ‌وجه به A71 یا A72 نمی‌خورد!'
+  },
+
+  // ═══ هواوی و آنر ═══
+  {
+    id:'lcd_hw_popup_y9prime', partType:'LCD',
+    title:'پنل مشترک Huawei Y9 Prime 2019 / Y9s / P Smart Z / Honor 9X',
+    frameType:'PANEL', frameLabel:'🟡 بدون فریم ۱۰۰٪ مشترک',
+    panelSpec:'LTPS IPS LCD 6.59" (تمام‌صفحه پاپ‌آپ)',
+    codes:['STK-L21','STK-L22','STK-LX3','HLK-AL00'],
+    models:['Huawei Y9 Prime 2019','Huawei Y9s','Huawei P Smart Z','Honor 9X','Honor 9X Pro'],
+    note:'پنل بدون فریم تمام این مدل‌های دوربین پاپ‌آپ ۱۰۰٪ یکسان است.',
+    techWarn:'⚠️ شاسی Y9 Prime اثرانگشت پشت دارد ولی Y9s و 9X Pro اثرانگشت روی پاور بغل دارند؛ بنابراین فقط بدون فریم مشترک‌اند.'
+  },
+  {
+    id:'lcd_hw_nova7i', partType:'LCD',
+    title:'پنل مشترک Huawei Nova 7i / P40 Lite / Nova 6 SE',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (با فریم و بدون فریم)',
+    panelSpec:'LTPS IPS LCD 6.4" (پانچ چپ)',
+    codes:['JNY-LX1','JNY-L21','JNY-AL10'],
+    models:['Huawei Nova 7i','Huawei P40 Lite','Huawei Nova 6 SE'],
+    note:'این سه گوشی در واقع یک مدل با نام‌های تجاری مختلف هستند و تمام قطعاتشان ۱۰۰٪ مشترک است.',
+    techWarn:''
+  },
+  {
+    id:'lcd_honor20', partType:'LCD',
+    title:'پنل مشترک Honor 20 / Honor 20 Pro / Huawei Nova 5T',
+    frameType:'FULL', frameLabel:'🟢 مشترک کامل (بدون فریم)',
+    panelSpec:'IPS LCD 6.26" FHD+ (1080×2340)',
+    codes:['YAL-L21','YAL-L41'],
+    models:['Honor 20','Honor 20 Pro','Huawei Nova 5T'],
+    note:'پنل بدون فریم در هر سه مدل Honor 20، 20 Pro و Nova 5T کاملاً مشترک است.',
+    techWarn:''
+  },
+
+  // ═══ آیفون ═══
+  {
+    id:'lcd_ip_12_12pro', partType:'LCD',
+    title:'تاچ و ال‌سی‌دی مشترک کامل iPhone 12 و iPhone 12 Pro',
+    frameType:'FULL', frameLabel:'🟢 ۱۰۰٪ مشترک کامل',
+    panelSpec:'Super Retina XDR OLED 6.1"',
+    codes:['A2403','A2407'],
+    models:['Apple iPhone 12','Apple iPhone 12 Pro'],
+    note:'فلت، شاسی و خارهای ال‌سی‌دی iPhone 12 و 12 Pro صددرصد یکسان است و روی هم بسته می‌شود.',
+    techWarn:'🚨 در iPhone 13 و 13 Pro فلت‌ها متفاوت‌اند و به هم نمی‌خورند (فقط در نسل ۱۲ مشترک است).'
+  },
+  {
+    id:'lcd_ip_13_13pro_trap', partType:'LCD',
+    title:'هشدار: ال‌سی‌دی iPhone 13 و iPhone 13 Pro (غیرمشترک!)',
+    frameType:'TRAP', frameLabel:'🔴 غیرمشترک (۶۰Hz در برابر ۱۲۰Hz ProMotion)',
+    panelSpec:'Super Retina XDR OLED 6.1"',
+    codes:['A2633','A2638'],
+    models:['Apple iPhone 13','Apple iPhone 13 Pro'],
+    note:'ظاهر ۶.۱ اینچی مشابه دارند اما پنل 13 Pro از نوع ۱۲۰ هرتز LTPO است و کانکتورهای کاملاً متفاوتی دارند.',
+    techWarn:'🛑 ال‌سی‌دی آیفون ۱۳ با ۱۳ پرو و ۱۲ هیچ اشتراکی ندارد!'
+  },
+  {
+    id:'lcd_ip_11_xr', partType:'LCD',
+    title:'هشدار: iPhone 11 و iPhone XR (غیرمشترک!)',
+    frameType:'TRAP', frameLabel:'🔴 غیرمشترک (تفاوت فلت و کلاف)',
+    panelSpec:'Liquid Retina IPS LCD 6.1"',
+    codes:['A2111','A1984','A2221','A2105','A2108'],
+    models:['Apple iPhone 11','Apple iPhone XR'],
+    note:'ظاهر ۶.۱ اینچی مشابه اما فلت‌ها در XR کمی بالاتر هستند و خارهای کلاف و پیچ‌های نگهدارنده Earpiece Flex با iPhone 11 فرق دارد.',
+    techWarn:'🛑 حتی پنل‌های Aftermarket بازاری (GX / Incell / JK) هم در جعبه‌های مجزا فروخته می‌شوند و به هم نمی‌خورند!'
+  }
+];
+
+// =========================================================================
+// 🔋 دیتابیس بخش دوم (ب): کدهای فنی باتری‌های مشترک (BN / BM / BP / EB / HB / BLP)
+// تمامی مدل‌ها به‌صورت مستقل و با نام کامل برند ثبت شده‌اند
+// =========================================================================
+const DEFAULT_BATTERY_GROUPS = [
+  {
+    id:'bat_bn61', partType:'BATTERY',
+    title:'باتری کد فنی BN61 (خانواده Poco X3 / X3 Pro)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: BN61 (5160mAh)',
+    panelSpec:'Li-Po 5160 mAh | 33W Fast Charge',
+    codes:['BN61'],
+    models:['Xiaomi Poco X3 NFC','Xiaomi Poco X3','Xiaomi Poco X3 Pro'],
+    note:'کد فنی باتری فابریک پوکو X3 و X3 Pro مدل BN61 با ظرفیت ۵۱۶۰ میلی‌آمپر است و صددرصد به هم می‌خورند.',
+    techWarn:'💡 نسخه هندی Poco X3 (بدون NFC) باتری ۶۰۰۰ میلی‌آمپر با کد BN62 دارد، اما BN61 هم به آن می‌خورد.'
+  },
+  {
+    id:'bat_bn57', partType:'BATTERY',
+    title:'باتری پرمصرف کد فنی BN57 (خانواده Note 9S / Note 9 Pro / Poco M2 Pro)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: BN57 (5020mAh)',
+    panelSpec:'Li-Po 5020 mAh | 33W',
+    codes:['BN57'],
+    models:['Xiaomi Redmi Note 9S','Xiaomi Redmi Note 9 Pro 4G','Xiaomi Redmi Note 9 Pro Max','Xiaomi Poco M2 Pro','Xiaomi Redmi Note 10 Lite'],
+    note:'یکی از پرتکرارترین باتری‌های شیائومی در بازار که روی هر ۵ مدل بالا مشترک است.',
+    techWarn:''
+  },
+  {
+    id:'bat_bn53', partType:'BATTERY',
+    title:'باتری کد فنی BN53 (مخصوص Redmi Note 10 Pro / Pro Max)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: BN53 (5020mAh)',
+    panelSpec:'Li-Po 5020 mAh | 33W',
+    codes:['BN53'],
+    models:['Xiaomi Redmi Note 10 Pro 4G','Xiaomi Redmi Note 10 Pro Max'],
+    note:'باتری مخصوص Redmi Note 10 Pro 4G.',
+    techWarn:'🚨 با باتری BN57 (مخصوص Note 9 Pro) اشتباه نگیرید — سوکت فلت آن‌ها متفاوت است!'
+  },
+  {
+    id:'bat_bn59', partType:'BATTERY',
+    title:'باتری کد فنی BN59 (خانواده Redmi Note 10 4G / Note 10S / Poco M5s)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: BN59 (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh | 33W',
+    codes:['BN59'],
+    models:['Xiaomi Redmi Note 10 4G','Xiaomi Redmi Note 10S','Xiaomi Poco M5s'],
+    note:'باتری BN59 بین نوت ۱۰ معمولی، نوت ۱۰ اس و پوکو M5s کاملاً مشترک است.',
+    techWarn:''
+  },
+  {
+    id:'bat_bn5d', partType:'BATTERY',
+    title:'باتری کد فنی BN5D (خانواده Note 11 4G / Note 11S / Note 12S / Poco M4 Pro 4G)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: BN5D (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh | 33W',
+    codes:['BN5D'],
+    models:['Xiaomi Redmi Note 11 4G','Xiaomi Redmi Note 11S 4G','Xiaomi Redmi Note 12S','Xiaomi Poco M4 Pro 4G'],
+    note:'باتری مشترک نسل ۱۱ و ۱۲ سری نوت شیائومی.',
+    techWarn:''
+  },
+  {
+    id:'bat_bn56', partType:'BATTERY',
+    title:'باتری کد فنی BN56 (خانواده Redmi 9A / 9C / 10A / Poco C3 / C31)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: BN56 (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh',
+    codes:['BN56'],
+    models:['Xiaomi Redmi 9A','Xiaomi Redmi 9C','Xiaomi Redmi 9AT','Xiaomi Redmi 9i','Xiaomi Redmi 10A','Xiaomi Poco C3','Xiaomi Poco C31'],
+    note:'باتری مشترک تمام اقتصادی‌های سری ۹ و ۱۰ شیائومی.',
+    techWarn:''
+  },
+  {
+    id:'bat_bn5g_bn5k', partType:'BATTERY',
+    title:'باتری‌های کد BN5G (Redmi 10C / Redmi 10) و BN5K (Redmi 12C / Poco C55)',
+    frameType:'PANEL', frameLabel:'🔋 کدها: BN5G و BN5K (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh',
+    codes:['BN5G','BN5K','BP4K','BP60'],
+    models:['Xiaomi Redmi 10C (BN5G)','Xiaomi Redmi 10 2022 (BN5G)','Xiaomi Redmi 12C (BN5K)','Xiaomi Poco C55 (BN5K)','Xiaomi Poco C40 (BP60 - 6000mAh)'],
+    note:'مدل Redmi 10C و Redmi 10 باتری BN5G می‌خورند؛ مدل Redmi 12C و Poco C55 باتری BN5K می‌خورند.',
+    techWarn:'⚠️ توجه: ۱. فلت BN5G با BN5K کمی تفاوت دارد. ۲. گوشی Poco C40 باتری ۶۰۰۰ میلی‌آمپری اختصاصی با کد BP60 دارد!'
+  },
+  {
+    id:'bat_bn54', partType:'BATTERY',
+    title:'باتری کد فنی BN54 (خانواده Redmi Note 9 4G / Redmi 9 / Poco M2)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: BN54 (5020mAh)',
+    panelSpec:'Li-Po 5020 mAh',
+    codes:['BN54'],
+    models:['Xiaomi Redmi Note 9 4G','Xiaomi Redmi 9 4G','Xiaomi Redmi 9 Prime','Xiaomi Poco M2'],
+    note:'باتری مشترک بین نوت ۹ معمولی، ردمی ۹ و پوکو M2.',
+    techWarn:''
+  },
+  {
+    id:'bat_bn62', partType:'BATTERY',
+    title:'باتری کد فنی BN62 (خانواده Redmi 9T / Poco M3 / Redmi 9 Power)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: BN62 (6000mAh)',
+    panelSpec:'Li-Po 6000 mAh',
+    codes:['BN62'],
+    models:['Xiaomi Redmi 9T','Xiaomi Poco M3','Xiaomi Redmi 9 Power','Xiaomi Redmi Note 9 4G China'],
+    note:'باتری پرظرفیت ۶۰۰۰ میلی‌آمپری مشترک بین پوکو M3 و ردمی 9T.',
+    techWarn:''
+  },
+  {
+    id:'bat_bn5j_bn5m', partType:'BATTERY',
+    title:'باتری کد فنی BN5J / BN5M (خانواده Redmi Note 12 4G/5G / Poco X5 5G)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: BN5J / BN5M (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh | 33W',
+    codes:['BN5J','BN5M'],
+    models:['Xiaomi Redmi Note 12 4G (BN5J)','Xiaomi Redmi Note 12 5G (BN5M)','Xiaomi Poco X5 5G (BN5M)'],
+    note:'نسخه 5G و Poco X5 دارای کد BN5M و نسخه 4G دارای کد BN5J است.',
+    techWarn:''
+  },
+  {
+    id:'bat_bn5p_bn5q', partType:'BATTERY',
+    title:'باتری‌های نسل جدید: BN5P (Note 13 4G / Poco M6 Pro 4G) و BN5Q (Redmi 13C / Poco C65)',
+    frameType:'FULL', frameLabel:'🔋 کدها: BN5P و BN5Q (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh',
+    codes:['BN5P','BN5Q','BN5X'],
+    models:['Xiaomi Redmi Note 13 4G (BN5P)','Xiaomi Poco M6 Pro 4G (BN5P)','Xiaomi Redmi 13C (BN5Q)','Xiaomi Poco C65 (BN5Q)','Xiaomi Redmi Note 14 5G (BN5X)'],
+    note:'کدهای فنی باتری سری ۱۳ و ۱۴ شیائومی.',
+    techWarn:''
+  },
+  {
+    id:'bat_bn5a_bn51', partType:'BATTERY',
+    title:'باتری‌های BN5A (Note 10 5G / Poco M3 Pro) و BN51 (Redmi 8 / 8A)',
+    frameType:'FULL', frameLabel:'🔋 کدها: BN5A و BN51 (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh',
+    codes:['BN5A','BN51'],
+    models:['Xiaomi Redmi Note 10 5G (BN5A)','Xiaomi Poco M3 Pro 5G (BN5A)','Xiaomi Redmi 10 5G (BN5A)','Xiaomi Redmi 8 (BN51)','Xiaomi Redmi 8A (BN51)'],
+    note:'باتری مشترک سری 5G اقتصادی (BN5A) و سری Redmi 8 (BN51).',
+    techWarn:''
+  },
+  {
+    id:'bat_bn46_bm4j', partType:'BATTERY',
+    title:'باتری‌های سری نوت ۸: BN46 (Note 8 / Redmi 7) و BM4J (Note 8 Pro)',
+    frameType:'FULL', frameLabel:'🔋 کدها: BN46 و BM4J',
+    panelSpec:'4000mAh (BN46) | 4500mAh (BM4J)',
+    codes:['BN46','BM4J'],
+    models:['Xiaomi Redmi Note 8 (BN46)','Xiaomi Redmi Note 8T (BN46)','Xiaomi Redmi 7 (BN46)','Xiaomi Redmi Note 8 Pro (BM4J)'],
+    note:'باتری BN46 بین Redmi Note 8، Note 8T و Redmi 7 مشترک است. مدل Note 8 Pro باتری BM4J می‌خورد.',
+    techWarn:''
+  },
+  {
+    id:'bat_bm4y_bm53_bp42', partType:'BATTERY',
+    title:'باتری‌های Poco F3 (BM4Y)، Mi 10T (BM53)، Poco X3 GT (BM58) و Mi 11 Lite 4G (BP42)',
+    frameType:'FULL', frameLabel:'🔋 کدها: BM4Y / BM53 / BM58 / BP42',
+    panelSpec:'4520mAh / 5000mAh / 4250mAh',
+    codes:['BM4Y','BM53','BM58','BP42'],
+    models:['Xiaomi Poco F3 (BM4Y)','Xiaomi Redmi K40 (BM4Y)','Xiaomi Mi 10T (BM53)','Xiaomi Mi 10T Pro (BM53)','Xiaomi Poco X3 GT (BM58)','Xiaomi Mi 11 Lite 4G (BP42)'],
+    note:'پارت‌نامبرهای دقیق باتری سری Mi و Poco F / GT.',
+    techWarn:''
+  },
+
+  // ═══ باتری‌های سامسونگ ═══
+  {
+    id:'bat_sam_a505', partType:'BATTERY',
+    title:'باتری طلایی سامسونگ EB-BA505ABU / WT-N6 (مشترک در ۷ مدل سری A)',
+    frameType:'FULL', frameLabel:'🔋 کد: EB-BA505ABU / WT-N6 (4000mAh)',
+    panelSpec:'Li-Po 4000 mAh',
+    codes:['EB-BA505ABU','SCUD-WT-N6'],
+    models:['Samsung Galaxy A20','Samsung Galaxy A30','Samsung Galaxy A50','Samsung Galaxy A30s','Samsung Galaxy A50s','Samsung Galaxy A10s (WT-N6)','Samsung Galaxy A20s'],
+    note:'پرمصرف‌ترین باتری سامسونگ در تعمیرات! روی تمام خانواده A20/A30/A50/A30s/A50s کاملاً مشترک است.',
+    techWarn:''
+  },
+  {
+    id:'bat_sam_a217', partType:'BATTERY',
+    title:'باتری ۵۰۰۰ سامسونگ EB-BA217ABY / WT-S-W1 (خانواده A12 / A21s / A02s / M12)',
+    frameType:'FULL', frameLabel:'🔋 کد: EB-BA217ABY / WT-S-W1 (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh',
+    codes:['EB-BA217ABY','WT-S-W1'],
+    models:['Samsung Galaxy A12','Samsung Galaxy A21s','Samsung Galaxy A02','Samsung Galaxy A02s','Samsung Galaxy A03s','Samsung Galaxy M12','Samsung Galaxy A13 4G'],
+    note:'باتری ۵۰۰۰ میلی‌آمپر مشترک بین سری A12، A21s، A02s، A03s و M12.',
+    techWarn:''
+  },
+  {
+    id:'bat_sam_ba336_ba536', partType:'BATTERY',
+    title:'باتری سامسونگ EB-BA336ABY (A33 5G / A53 5G)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: EB-BA336ABY / EB-BA536ABY (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh',
+    codes:['EB-BA336ABY','EB-BA536ABY'],
+    models:['Samsung Galaxy A33 5G','Samsung Galaxy A53 5G'],
+    note:'باتری مشترک A33 5G و A53 5G.',
+    techWarn:''
+  },
+  {
+    id:'bat_sam_ba546', partType:'BATTERY',
+    title:'باتری سامسونگ EB-BA546ABY (A34 5G / A54 5G)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: EB-BA546ABY (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh',
+    codes:['EB-BA546ABY'],
+    models:['Samsung Galaxy A34 5G (A346)','Samsung Galaxy A54 5G (A546)'],
+    note:'باتری مشترک A34 5G و A54 5G.',
+    techWarn:''
+  },
+  {
+    id:'bat_sam_ba146_ba246_wtn28', partType:'BATTERY',
+    title:'باتری سامسونگ EB-BA146ABY / WT-S-N28 (A14 / A05 / A05s / A06)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: EB-BA146ABY / WT-S-N28 (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh',
+    codes:['EB-BA146ABY','WT-S-N28'],
+    models:['Samsung Galaxy A14 4G (A145)','Samsung Galaxy A14 5G (A146)','Samsung Galaxy A05 (A055)','Samsung Galaxy A05s (A057)','Samsung Galaxy A06 (A065)'],
+    note:'روی باتری فابریک هر دو کد EB-BA146ABY و WT-S-N28 درج شده است. مشترک بین A14 4G/5G، A05، A05s و A06.',
+    techWarn:''
+  },
+  {
+    id:'bat_sam_ba156', partType:'BATTERY',
+    title:'باتری سامسونگ EB-BA156ABY (A15 4G/5G / A24 / A25)',
+    frameType:'FULL', frameLabel:'🔋 کد باتری: EB-BA156ABY (5000mAh)',
+    panelSpec:'Li-Po 5000 mAh',
+    codes:['EB-BA156ABY'],
+    models:['Samsung Galaxy A15 4G (A155)','Samsung Galaxy A15 5G (A156)','Samsung Galaxy A24 4G (A245)','Samsung Galaxy A25 5G (A256)'],
+    note:'باتری مشترک A15 4G/5G، A24 4G و A25 5G.',
+    techWarn:'💡 اگر در بازار A25 5G باتری با کد EB-BA256ABY داشت، آن نسخه را جدا کنید.'
+  },
+  {
+    id:'bat_sam_bg781_bm526', partType:'BATTERY',
+    title:'باتری‌های EB-BG781ABY (S20 FE / A52 / A52s) و EB-BM526ABY (M23 / M33 / M52 / A23 5G)',
+    frameType:'FULL', frameLabel:'🔋 کدها: EB-BG781ABY و EB-BM526ABY',
+    panelSpec:'4500mAh / 5000mAh',
+    codes:['EB-BG781ABY','EB-BM526ABY','EB-BA750ABU'],
+    models:['Samsung Galaxy S20 FE (EB-BG781ABY)','Samsung Galaxy A52 4G (EB-BG781ABY)','Samsung Galaxy A52 5G (EB-BG781ABY)','Samsung Galaxy A52s 5G (EB-BG781ABY)','Samsung Galaxy M52 5G (EB-BM526ABY)','Samsung Galaxy M53 5G (EB-BM526ABY)','Samsung Galaxy M23 5G (EB-BM526ABY)','Samsung Galaxy M33 5G (EB-BM526ABY)','Samsung Galaxy A23 5G (EB-BM526ABY)','Samsung Galaxy A10 (EB-BA750ABU)','Samsung Galaxy A7 2018 (EB-BA750ABU)'],
+    note:'اشتراک باتری در میان‌رده‌های سامسونگ.',
+    techWarn:'⚠️ توجه: باتری S21 FE کد EB-BG990ABY است و با S20 FE تفاوت دارد.'
+  },
+
+  // ═══ باتری‌های هواوی و آنر (تک‌به‌تک و مستقل برای تشخیص ۱۰۰٪ برند) ═══
+{
+  id:'bat_hw_hb406689', partType:'BATTERY',
+  title:'باتری کد HB406689ECW (خانواده Y9 / Y7 Prime)',
+  frameType:'FULL', frameLabel:'🔋 کد باتری: HB406689ECW (4000mAh)',
+  panelSpec:'Li-Po 4000 mAh',
+  codes:['HB406689ECW'],
+  models:['Huawei Y9 2019','Huawei Y9 Prime 2019','Huawei Y7 Prime 2017','Huawei Y7 Prime 2019'],
+  note:'باتری ۴۰۰۰mAh مخصوص Y9 2019، Y9 Prime 2019 و Y7 Prime (2017/2019).',
+  techWarn:''
+},
+{
+  id:'bat_hw_hb446486', partType:'BATTERY',
+  title:'باتری کد HB446486ECW (Honor 9X / Y9s / P Smart Z / Nova 5i)',
+  frameType:'FULL', frameLabel:'🔋 کد باتری: HB446486ECW',
+  panelSpec:'Li-Po 4000 mAh',
+  codes:['HB446486ECW'],
+  models:['Honor 9X','Huawei Y9s','Huawei P Smart Z','Huawei Nova 5i'],
+  note:'باتری HB446486ECW مشترک بین Honor 9X، Y9s، P Smart Z و Nova 5i.',
+  techWarn:''
+},
+{
+  id:'bat_hw_hb386589', partType:'BATTERY',
+  title:'باتری کد HB386589ECW (Honor 8X / P30 Lite / Mate 20 Lite / Nova 3i)',
+  frameType:'FULL', frameLabel:'🔋 کد باتری: HB386589ECW',
+  panelSpec:'Li-Po 3340 mAh',
+  codes:['HB386589ECW'],
+  models:['Honor 8X','Huawei P30 Lite','Huawei Mate 20 Lite','Huawei Nova 3i'],
+  note:'باتری HB386589ECW مشترک بین Honor 8X، P30 Lite، Mate 20 Lite و Nova 3i.',
+  techWarn:''
+},
+
+  // ═══ باتری‌های ریلمی و تکنو (تک‌به‌تک و مستقل) ═══
+  {
+    id:'bat_realme_tecno', partType:'BATTERY',
+    title:'باتری‌های مشترک ریلمی (BLP793 / BLP729 / BLP877) و تکنو (BL-49FT)',
+    frameType:'FULL', frameLabel:'🔋 کدهای ۵۰۰۰mAh ریلمی و تکنو',
+    panelSpec:'Li-Po 5000 mAh',
+    codes:['BLP793','BLP729','BLP877','BL-49FT'],
+    models:[
+      'Realme C11 (BLP793)',
+      'Realme C12 (BLP793)',
+      'Realme C15 (BLP793)',
+      'Realme C25 (BLP793)',
+      'Realme C25s (BLP793)',
+      'Realme C3 (BLP729)',
+      'Realme C20 (BLP729)',
+      'Realme C21 (BLP729)',
+      'Realme 5i (BLP729)',
+      'Realme 8i (BLP877)',
+      'Realme C30 (BLP877)',
+      'Realme C33 (BLP877)',
+      'Tecno Spark 5 (BL-49FT)',
+      'Tecno Spark 6 Go (BL-49FT)',
+      'Tecno Spark 7 (BL-49FT)',
+      'Tecno Spark 8C (BL-49FT)',
+      'Tecno Camon 15 (BL-49FT)',
+      'Tecno Camon 16 (BL-49FT)'
+    ],
+    note:'باتری‌های مشترک خانواده ریلمی و تکنو.',
+    techWarn:''
+  }
+];
+
+// =========================================================================
+// 🔌 دیتابیس بخش دوم (ج): برد شارژ و فلت‌های مشترک (مرجع نیا)
+// =========================================================================
+const DEFAULT_BOARD_GROUPS = [
+  {
+    id:'brd_redmi10c_c40_flex', partType:'BOARD',
+    title:'فلت پاور/ولوم مشترک Redmi 10C / Poco C40 / Redmi 9 / Note 9',
+    frameType:'FULL', frameLabel:'🔌 فلت کلید پاور و ولوم مشترک',
+    panelSpec:'Power & Volume Flex Cable',
+    codes:['FLEX-10C-C40'],
+    models:['Xiaomi Poco C40','Xiaomi Redmi 10C','Xiaomi Redmi 9 4G','Xiaomi Redmi Note 9 4G'],
+    note:'طبق دسته‌بندی فنی موبایل نیا، فلت پاور و ولوم Poco C40 با Redmi 10C، Redmi 9 و Note 9 مشترک است.',
+    techWarn:'⚠️ برد شارژِ پایینِ Redmi 10C با Poco C40 متفاوت است!'
+  },
+  {
+    id:'brd_pocox3_subboard', partType:'BOARD',
+    title:'برد شارژ و فلت وسط مشترک Poco X3 / Poco X3 NFC / Poco X3 Pro',
+    frameType:'FULL', frameLabel:'🔌 برد شارژ + فلت وسط مشترک',
+    panelSpec:'Type-C Sub-Board 33W + Main Flex',
+    codes:['SUB-POCOX3'],
+    models:['Xiaomi Poco X3','Xiaomi Poco X3 NFC','Xiaomi Poco X3 Pro'],
+    note:'برد شارژ و فلت رابط بین برد در سری Poco X3 و X3 Pro مشترک است.',
+    techWarn:'💡 هنگام تعویض برد شارژ حتماً از نسخه «آی‌سی‌دار اورجینال» استفاده کنید تا شارژ سریع ۳۳ وات (Mi Turbo Charge) و آنتن‌دهی قطع نشود.'
+  },
+  {
+    id:'brd_redmi9a_9c_subboard', partType:'BOARD',
+    title:'برد شارژ مشترک Redmi 9A / Redmi 9C / Redmi 10A / Poco C3',
+    frameType:'FULL', frameLabel:'🔌 برد شارژ Micro-USB مشترک',
+    panelSpec:'Charging Sub-Board',
+    codes:['SUB-9A-9C'],
+    models:['Xiaomi Redmi 9A','Xiaomi Redmi 9C','Xiaomi Redmi 9AT','Xiaomi Redmi 10A','Xiaomi Poco C3','Xiaomi Poco C31'],
+    note:'برد شارژ تمام این مدل‌ها کاملاً یکسان است.',
+    techWarn:''
+  },
+  {
+    id:'brd_note10_11_subboard', partType:'BOARD',
+    title:'برد شارژ مشترک Redmi Note 10 4G / 10S / Poco M5s و گروه Note 11 / 11S / Poco M4 Pro 4G',
+    frameType:'PANEL', frameLabel:'🔌 برد شارژ (تفکیک دو گروه)',
+    panelSpec:'Type-C Sub-Board 33W',
+    codes:['SUB-NOTE10','SUB-NOTE11'],
+    models:['Xiaomi Redmi Note 10 4G (گروه ۱)','Xiaomi Redmi Note 10S (گروه ۱)','Xiaomi Poco M5s (گروه ۱)','Xiaomi Redmi Note 11 4G (گروه ۲)','Xiaomi Redmi Note 11S 4G (گروه ۲)','Xiaomi Poco M4 Pro 4G (گروه ۲)'],
+    note:'گروه ۱ (Note 10 / 10S / M5s) برد شارژ یکسان دارند. گروه ۲ (Note 11 / 11S / Poco M4 Pro 4G) نیز با هم برد شارژ یکسان دارند.',
+    techWarn:''
+  },
+  {
+    id:'brd_sam_a12_a02s_subboard', partType:'BOARD',
+    title:'برد شارژ خانواده A12 (A125/A127) / M12 / A02s / A03s',
+    frameType:'PANEL', frameLabel:'🔌 برد شارژ (توجه به فلت وسط)',
+    panelSpec:'Type-C Charging Board',
+    codes:['SM-A125F','SM-A127F','SM-M127F','SM-A025F','A125'],
+    models:['Samsung Galaxy A12 (A125)','Samsung Galaxy A12 Nacho (A127)','Samsung Galaxy M12 (M127)','Samsung Galaxy A02s (A025)','Samsung Galaxy A03s (A037)'],
+    note:'برد شارژ A02s و A03s کاملاً مشترک است. برد شارژ A125، A127 و M12 نیز از نظر سوکت و ابعاد یکی است.',
+    techWarn:'⚠️ فلتِ وسط (Main Flex) در A125 با A127 تفاوت دارد! همچنین انداختن برد شارژ متفرقه روی A12 باعث خطای دمای شارژ (مثلث زرد) می‌شود.'
+  },
+  {
+    id:'brd_sam_a10_m10_subboard', partType:'BOARD',
+    title:'برد شارژ مشترک A10 / M10 و هشدار مهم سری A20 / A30 / A50',
+    frameType:'TRAP', frameLabel:'🔴 A10/M10 مشترک • A20/A30/A50 غیرمشترک!',
+    panelSpec:'Sub-Board Warning',
+    codes:['A105-M105','A205-A305-A505'],
+    models:['Samsung Galaxy A10 (مشترک با M10)','Samsung Galaxy M10 (مشترک با A10)','Samsung Galaxy A20 (اختصاصی)','Samsung Galaxy A30 (اختصاصی)','Samsung Galaxy A50 (اختصاصی)'],
+    note:'برد شارژ A105 و M105 کاملاً مشترک است.',
+    techWarn:'🛑 تله تعمیراتی: بردهای شارژ A20، A30 و A50 ظاهری شبیه به هم دارند اما به هم نمی‌خورند (در A50 سوکت سنسور اثرانگشت روی برد شارژ است و در صورت جابجایی، فست‌شارژ یا میکروفون از کار می‌افتد)!'
+  },
+  {
+    id:'brd_hw_y9prime_9x_subboard', partType:'BOARD',
+    title:'برد شارژ و فلت شارژ مشترک Huawei Y9 Prime 2019 / Y9s / Honor 9X',
+    frameType:'FULL', frameLabel:'🔌 برد شارژ و فلت ۱۰۰٪ مشترک',
+    panelSpec:'Type-C Sub-Board + Flex',
+    codes:['STK-SUB'],
+    models:['Huawei Y9 Prime 2019','Huawei Y9s','Honor 9X','Huawei P Smart Z'],
+    note:'هم برد شارژ و هم فلت رابط شارژ بین این ۴ مدل کاملاً مشترک است.',
+    techWarn:''
+  }
+];
+// === پایان قسمت دوم (کد قسمت سوم را دقیقاً زیر این خط پیست کنید) ===
+// =========================================================================
+
+// =========================================================================
+// 🧠 قسمت ۳-الف: پچ خودکار تکمیل مدل‌ها (≤ 1.0mm) و موتور جستجوی دوطرفه ضدباگ
+// =========================================================================
+let ALL_GLASS = [];
+let ALL_PARTS = [];
+let currentMainTab = 'GLASS';
+let currentPartsSub = 'ALL';
+let activeBrand = 'ALL';
+
+const LS_GLASS_KEY = 'pm_pro_custom_glass';
+const LS_PARTS_KEY = 'pm_pro_custom_parts';
+
+// پچ خودکار مهندسی: اصلاح ۵ گروه گلس به تلورانس مطلق ≤ 1.0mm و افزودن تمام مدل‌های تب قطعات به تب گلس
+function applyFinalPrecisionPatches() {
+  if (window._patchesApplied) return;
+  window._patchesApplied = true;
+
+  // ۱. اصلاح دقیق گروه‌های موجود برای رعایت ۱۰۰٪ قانون ≤ 1.0mm
+  DEFAULT_GLASS_GROUPS.forEach(g => {
+    // الف) جداسازی A05 (طول 168.8) از گروه A05s/A06/A14 (طول 167.3 تا 168.0)
+    if (g.id === 'gl_a05_a06_a14_redmi13c') {
+      g.title = 'خانواده ۶.۷ اینچ جدید (A05s / A06 / A14 / Redmi 13C / Poco C65)';
+      g.l = 167.7; g.w = 77.7;
+      g.note = 'A05s (۱۶۸.۰×۷۷.۸)، A06 4G/5G (۱۶۷.۳×۷۷.۳)، A14 4G/5G (۱۶۷.۷×۷۸.۰) و Redmi 13C / Poco C65 (۱۶۸.۰×۷۸.۰). حداکثر اختلاف ۰.۷mm.';
+      g.models = ['Samsung Galaxy A05s','Samsung Galaxy A06 4G','Samsung Galaxy A06 5G','Samsung Galaxy A07 5G','Samsung Galaxy F05','Samsung Galaxy A14 4G','Samsung Galaxy A14 5G','Xiaomi Redmi 13C','Xiaomi Poco C65','Xiaomi Redmi 13R 5G'];
+    }
+    // ب) افزودن A32 5G به گروه هم‌ابعاد A12 (164.2×76.1)
+    if (g.id === 'gl_a12_a02_a03_family' && !g.models.includes('Samsung Galaxy A32 5G')) {
+      g.models.push('Samsung Galaxy A32 5G');
+    }
+    // ج) افزودن M10s به گروه هم‌ابعاد A20/A30/A50 (158.5×74.7)
+    if (g.id === 'gl_a20_a30_a50' && !g.models.includes('Samsung Galaxy M10s')) {
+      g.models.push('Samsung Galaxy M10s');
+    }
+    // د) خارج کردن Honor 90 Lite (طول 162.9) از گروه 161.2 میلی‌متری Note 13 5G
+    if (g.id === 'gl_note13_5g_pro_f5_x6') {
+      g.title = 'خانواده ۶.۶۷ اینچ کم‌حاشیه شیائومی (Note 13 5G / Note 13 Pro / Poco F5 / Poco X6 / M6 Pro 4G)';
+      g.note = 'Note 13 5G / Poco X6 Neo (۱۶۱.۱×۷۵.۰)، Note 13 Pro 4G / Poco M6 Pro 4G (۱۶۱.۱×۷۵.۰)، Note 13 Pro 5G / Poco X6 5G (۱۶۱.۲×۷۴.۲)، Poco F5 (۱۶۱.۱×۷۵.۰) و Honor X8b (۱۶۱.۱×۷۴.۶). اختلاف ۰.۱mm!';
+      g.models = g.models.filter(m => m !== 'Honor 90 Lite');
+    }
+    // هـ) تفکیک Honor X9 (طول 166.0) از Honor X8 / X8a / 90 Lite (طول 162.9 تا 163.4)
+    if (g.id === 'gl_honor_x8_x9') {
+      g.title = 'خانواده ۶.۷ اینچ فلت آنر (Honor X8 4G / Honor X8a / Honor 90 Lite)';
+      g.l = 163.1; g.w = 74.6;
+      g.note = 'Honor X8 4G (۱۶۳.۴×۷۴.۷)، Honor X8a (۱۶۲.۹×۷۴.۵) و Honor 90 Lite (۱۶۲.۹×۷۴.۵). اختلاف فقط ۰.۵ میلی‌متر!';
+      g.models = ['Honor X8 4G','Honor X8a','Honor 90 Lite'];
+    }
+
+    // ز) افزودن Note 14 Pro 5G به گروه خمیده 162.5mm
+    if (g.id === 'gl_curved_honor_x9c_note14proplus' && !g.models.includes('Xiaomi Redmi Note 14 Pro 5G')) {
+      g.models.push('Xiaomi Redmi Note 14 Pro 5G');
+    }
+  });
+
+  // ۲. افزودن گروه‌های گلسِ جامانده (هم‌تراز با تب ال‌سی‌دی و باتری با دقت ≤ 1.0mm)
+  const EXTRA_GLASS_GROUPS = [
+    {
+      id:'gl_a05_m05_standalone', title:'گلس اختصاصی Samsung Galaxy A05 / M05 (۱۶۸.۸×۷۸.۲mm)',
+      size:6.7, w:78.2, l:168.8, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+      note:'A05 و M05 ابعاد ۱۶۸.۸×۷۸.۲ میلی‌متر دارند (۱.۱ تا ۱.۵mm بلندتر از A06/A14).',
+      models:['Samsung Galaxy A05','Samsung Galaxy M05']
+    },
+    {
+      id:'gl_mi11lite_family', title:'خانواده ۶.۵۵ اینچ شیائومی (Mi 11 Lite 4G / 5G / 11 Lite 5G NE / Mi 12 Lite)',
+      size:6.55, w:75.7, l:160.5, edge:'FLAT', edgeLabel:'📐 تخت', notch:'↖️ پانچ چپ / وسط', tags:['No Holes'],
+      note:'Mi 11 Lite 4G، Mi 11 Lite 5G و 11 Lite 5G NE همگی دقیقاً ۱۶۰.۵×۷۵.۷ میلی‌متر هستند (تطابق ۱۰۰٪).',
+      models:['Xiaomi Mi 11 Lite 4G','Xiaomi Mi 11 Lite 5G','Xiaomi 11 Lite 5G NE','Xiaomi 12 Lite']
+    },
+    {
+      id:'gl_pocom4pro5g_note11_5g', title:'خانواده ۶.۶ اینچ شیائومی (Poco M4 Pro 5G / Redmi Note 11 5G / 11T 5G / 11S 5G / Realme 8i)',
+      size:6.6, w:75.8, l:163.6, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+      note:'Poco M4 Pro 5G، Note 11 5G، Note 11T 5G، Note 11S 5G (۱۶۳.۶×۷۵.۸) و Realme 8i / 9i (۱۶۴.۱×۷۵.۶). اختلاف ≤ ۰.۵mm!',
+      models:['Xiaomi Poco M4 Pro 5G','Xiaomi Redmi Note 11 5G','Xiaomi Redmi Note 11T 5G','Xiaomi Redmi Note 11S 5G','Realme 8i','Realme 9i']
+    },
+    {
+      id:'gl_redmi10_2022_note11_4g', title:'خانواده ۶.۵ اینچ شیائومی (Redmi 10 / Redmi 10 2022 / Redmi 10 Prime / Note 11SE)',
+      size:6.5, w:75.5, l:162.0, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+      note:'Redmi 10، Redmi 10 2022 و Redmi 10 Prime همگی دقیقاً ۱۶۲.۰×۷۵.۵ میلی‌متر هستند (تطابق ۱۰۰٪).',
+      models:['Xiaomi Redmi 10','Xiaomi Redmi 10 2022','Xiaomi Redmi 10 Prime']
+    },
+    {
+      id:'gl_redmia1_a2_c50', title:'خانواده ۶.۵۲ اینچ اقتصادی شیائومی (Redmi A1 / A1+ / A2 / A2+ / Poco C50 / C51)',
+      size:6.52, w:76.8, l:164.9, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+      note:'تمامی ۶ مدل دقیقاً ۱۶۴.۹×۷۶.۸ میلی‌متر هستند (تطابق ۱۰۰٪ و هم‌سایز با Redmi 9A/9C).',
+      models:['Xiaomi Redmi A1','Xiaomi Redmi A1 Plus','Xiaomi Redmi A2','Xiaomi Redmi A2 Plus','Xiaomi Poco C50','Xiaomi Poco C51']
+    },
+    {
+      id:'gl_realme_c11_c12_c15_c20_c3', title:'خانواده ۶.۵ اینچ ریلمی و تکنو (Realme C11 / C12 / C15 / C20 / C3 / 5i / Spark 6 Go / 8C)',
+      size:6.5, w:75.9, l:164.5, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+      note:'Realme C11/C12/C15/C20/C3/5i (۱۶۴.۴×۷۵.۹) و Tecno Spark 6 Go / Spark 7 / Spark 8C (۱۶۴.۵×۷۶.۰). اختلاف ۰.۱mm (تطابق ۱۰۰٪)!',
+      models:['Realme C11','Realme C12','Realme C15','Realme C25s','Realme C3','Realme C20','Realme 5i','Tecno Spark 6 Go','Tecno Spark 7','Tecno Spark 8C']
+    },
+    {
+      id:'gl_tecno_spark5_camon15', title:'خانواده ۶.۶ اینچ تکنو (Tecno Spark 5 / Camon 15 / Camon 16)',
+      size:6.6, w:76.3, l:164.5, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'↖️ پانچ چپ', tags:['No Holes'],
+      note:'Tecno Spark 5 و Camon 15 همگی ۱۶۴.۱ تا ۱۶۴.۷ در ۷۶.۳ میلی‌متر هستند.',
+      models:['Tecno Spark 5','Tecno Camon 15','Tecno Camon 16']
+    },
+    {
+      id:'gl_sam_s21fe_m13_5g', title:'گلس اختصاصی Samsung Galaxy S21 FE 5G (۱۵۵.۷×۷۴.۵mm)',
+      size:6.4, w:74.5, l:155.7, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+      note:'S21 FE 5G ابعاد ۱۵۵.۷×۷۴.۵ میلی‌متر دارد.',
+      models:['Samsung Galaxy S21 FE 5G']
+    },
+    {
+  id:'gl_sam_m13_5g_standalone', title:'گلس اختصاصی Samsung Galaxy M13 5G (۶.۵ اینچ / ۱۶۴.۵×۷۶.۵mm)',
+  size:6.5, w:76.5, l:164.5, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+  note:'Samsung M13 5G ابعاد ۱۶۴.۵×۷۶.۵ دارد. A04 و A04s در گروه‌های اقتصادی A12 / Redmi 9A جدا هستند.',
+  models:['Samsung Galaxy M13 5G']
+},
+    {
+  id:'gl_sam_a7_2018_standalone', title:'گلس اختصاصی Samsung Galaxy A7 2018 (۶.۰ اینچ / ۱۵۹.۸×۷۶.۸mm)',
+  size:6.0, w:76.8, l:159.8, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'📱 کلاسیک بدون ناچ', tags:[],
+  note:'Samsung A7 2018 ابعاد ۱۵۹.۸×۷۶.۸ دارد. با هیچ مدل دیگری در بانک فاصله < ۱mm ندارد.',
+  models:['Samsung Galaxy A7 2018']
+},
+{
+  id:'gl_hw_y7p2017_standalone', title:'گلس اختصاصی Huawei Y7 Prime 2017 (۵.۵ اینچ / ۱۵۳.۶×۷۶.۴mm)',
+  size:5.5, w:76.4, l:153.6, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'📱 کلاسیک بدون ناچ', tags:[],
+  note:'Huawei Y7 Prime 2017 ابعاد ۱۵۳.۶×۷۶.۴ دارد — ۶.۲mm کوتاه‌تر از A7 2018. مستقل شد.',
+  models:['Huawei Y7 Prime 2017']
+},
+    {
+      id:'gl_hw_p30lite_nova4e', title:'خانواده ۶.۱۵ اینچ هواوی (Huawei P30 Lite / Nova 4e)',
+      size:6.15, w:72.7, l:152.9, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+      note:'Huawei P30 Lite و Nova 4e هر دو دقیقاً ۱۵۲.۹×۷۲.۷ میلی‌متر هستند.',
+      models:['Huawei P30 Lite','Huawei Nova 4e']
+    },
+    {
+      id:'gl_hw_mate20lite_nova5i', title:'خانواده ۶.۳ و ۶.۴ اینچ هواوی (Huawei Mate 20 Lite / Nova 5i)',
+      size:6.3, w:75.3, l:158.3, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'📱 ناچ کلاسیک / پانچ چپ', tags:['No Holes'],
+      note:'Mate 20 Lite (۱۵۸.۳×۷۵.۳) و Nova 5i (۱۵۹.۱×۷۵.۹). اختلاف ۰.۸ میلی‌متر.',
+      models:['Huawei Mate 20 Lite','Huawei Nova 5i']
+    },
+    {
+  id:'gl_honor_x9_4g_5g', title:'خانواده ۶.۸۱ اینچ آنر (Honor X9 4G / X9 5G / Magic4 Lite 5G)',
+  size:6.81, w:75.8, l:166.0, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+  note:'Honor X9 4G، X9 5G و Magic4 Lite 5G هر سه دقیقاً ۱۶۶.۰×۷۵.۸ میلی‌متر هستند (تطابق ۱۰۰٪ — همان دستگاه با نام تجاری متفاوت).',
+  models:['Honor X9 4G','Honor X9 5G','Honor Magic4 Lite 5G']
+},
+    {
+  id:'gl_redmi_note8t_standalone', title:'گلس اختصاصی Xiaomi Redmi Note 8T (۶.۳ اینچ / ۱۶۱.۱×۷۵.۴mm)',
+  size:6.3, w:75.4, l:161.1, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+  note:'Redmi Note 8T حاشیه پایینی بلندتری از Note 8 معمولی (۱۵۸.۳mm) دارد و مستقل است.',
+  models:['Xiaomi Redmi Note 8T']
+},
+{
+  id:'gl_nokia32_standalone', title:'گلس اختصاصی Nokia 3.2 (۶.۳ اینچ / ۱۵۹.۴×۷۶.۲mm)',
+  size:6.3, w:76.2, l:159.4, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+  note:'Nokia 3.2 عرض ۷۶.۲ دارد — از گروه ۷۵.۳ میلی‌متری Nokia 6.2/7.2 جدا شد.',
+  models:['Nokia 3.2']
+},
+    {
+      id:'gl_nokia23_standalone', title:'گلس اختصاصی Nokia 2.3 (۱۵۷.۷×۷۵.۴mm)',
+      size:6.2, w:75.4, l:157.7, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
+      note:'Nokia 2.3 ابعاد ۱۵۷.۷×۷۵.۴ میلی‌متر دارد.',
+      models:['Nokia 2.3']
+    }
+  ];
+
+  EXTRA_GLASS_GROUPS.forEach(eg => {
+    if (!DEFAULT_GLASS_GROUPS.some(x => x.id === eg.id)) {
+      DEFAULT_GLASS_GROUPS.push(eg);
+    }
+  });
+
+  // ۳. افزودن ال‌سی‌دی و باتری Xiaomi 11T / 11T Pro و S21 FE به تب قطعات
+  if (!DEFAULT_LCD_GROUPS.some(x => x.id === 'lcd_xiaomi_11t_pro')) {
+    DEFAULT_LCD_GROUPS.push({
+      id:'lcd_xiaomi_11t_pro', partType:'LCD',
+      title:'پنل مشترک Xiaomi 11T 5G و Xiaomi 11T Pro 5G',
+      frameType:'PANEL', frameLabel:'🟡 مشترک بدون فریم (تفاوت شاسی)',
+      panelSpec:'AMOLED 6.67" 120Hz',
+      codes:['21081111RG','2107113SG'],
+      models:['Xiaomi Mi 11T','Xiaomi Mi 11T Pro'],
+      note:'پنل بدون فریم بین 11T و 11T Pro کاملاً مشترک است.',
+      techWarn:'⚠️ شاسی (فریم) 11T با 11T Pro تفاوت جزئی در جای اسپیکر و قطعات دارد؛ بدون فریم ۱۰۰٪ مشترک‌اند.'
+    });
+  }
+  if (!DEFAULT_BATTERY_GROUPS.some(x => x.id === 'bat_sam_bg990_s21fe')) {
+    DEFAULT_BATTERY_GROUPS.push({
+      id:'bat_sam_bg990_s21fe', partType:'BATTERY',
+      title:'باتری سامسونگ EB-BG990ABY (S21 FE 5G) و EB-BA705ABU (A70 / A70s)',
+      frameType:'FULL', frameLabel:'🔋 کدها: EB-BG990ABY و EB-BA705ABU',
+      panelSpec:'4500 mAh',
+      codes:['EB-BG990ABY','EB-BA705ABU','BM58'],
+      models:['Samsung Galaxy S21 FE 5G (EB-BG990ABY)','Samsung Galaxy A70 (EB-BA705ABU)','Samsung Galaxy A70s (EB-BA705ABU)','Xiaomi Mi 11T (BM58)'],
+      note:'باتری S21 FE کد EB-BG990ABY دارد. باتری Mi 11T نیز با Poco X3 GT (کد BM58) مشترک است.',
+      techWarn:''
+    });
+  }
+}
+
+function loadDatabases() {
+  applyFinalPrecisionPatches();
+  let customGlass = [], customParts = [];
+  try { customGlass = JSON.parse(localStorage.getItem(LS_GLASS_KEY) || '[]'); } catch(e){ customGlass = []; }
+  try { customParts = JSON.parse(localStorage.getItem(LS_PARTS_KEY) || '[]'); } catch(e){ customParts = []; }
+  if (!Array.isArray(customGlass)) customGlass = [];
+  if (!Array.isArray(customParts)) customParts = [];
+  ALL_GLASS = customGlass.concat(DEFAULT_GLASS_GROUPS);
+  ALL_PARTS = customParts.concat(DEFAULT_LCD_GROUPS, DEFAULT_BATTERY_GROUPS, DEFAULT_BOARD_GROUPS);
+  updateStats();
+}
+
+function updateStats() {
+  const gModels = ALL_GLASS.reduce((a,g)=>a+g.models.length,0);
+  const pModels = ALL_PARTS.reduce((a,g)=>a+g.models.length,0);
+  const el = document.getElementById('stats-bar');
+  if (el) el.innerText = `${gModels} مدل گلس • ${pModels} مدل قطعه در بانک`;
+}
+
+// استانداردسازی اعداد، علائم (+ به plus) و معادل‌های فارسی
+function cleanDigitsAndSpaces(str) {
+  return String(str || '').toLowerCase()
+    .replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)])
+    .replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)])
+    .replace(/\+/g, ' plus ')
+    .replace(/آیفون|ایفون|اپل/g, 'iphone')
+    .replace(/سامسونگ|گلکسی/g, 'samsung')
+    .replace(/شیائومی|شیاومی/g, 'xiaomi')
+    .replace(/ردمی/g, 'redmi')
+    .replace(/پوکو/g, 'poco')
+    .replace(/هواوی|هوآوی/g, 'huawei')
+    .replace(/آنر|انر|هانر/g, 'honor')
+    .replace(/نوکیا/g, 'nokia')
+    .replace(/ریلمی/g, 'realme')
+    .replace(/تکنو/g, 'tecno')
+    .replace(/اینفینیکس/g, 'infinix');
+}
+
+// نرمال‌سازی با حفظ زیربرندهای کلیدی (حذف mi اضافه تا "Xiaomi 11T" و "Xiaomi Mi 11T" هر دو یکسان شوند)
+function normalizeCore(str) {
+  return cleanDigitsAndSpaces(str)
+    .replace(/\b(samsung|galaxy|xiaomi|apple|huawei)\b/g, '')
+    .replace(/\bmi\s+(?=\d)/g, '')
+    .replace(/\bsm-/g, '')
+    .replace(/[\s\-_\/\(\)،,]+/g, '');
+}
+
+// نرمال‌سازیِ خالص مدل (بدون نام برند)
+function normalizeBareModel(str) {
+  return cleanDigitsAndSpaces(str)
+    .replace(/\b(samsung|galaxy|xiaomi|redmi|poco|mi|apple|iphone|huawei|honor|nokia|realme|tecno|infinix)\b/g, '')
+    .replace(/\bsm-/g, '')
+    .replace(/[\s\-_\/\(\)،,]+/g, '');
+}
+
+function detectExplicitBrandInQuery(rawQuery) {
+  const s = cleanDigitsAndSpaces(rawQuery);
+  if (/\b(iphone|apple)\b/.test(s)) return 'apple';
+  if (/\b(samsung|galaxy|sm-)\b/.test(s)) return 'samsung';
+  if (/\b(xiaomi|redmi|poco|mi)\b/.test(s)) return 'xiaomi';
+  if (/\b(honor)\b/.test(s)) return 'honor';
+  if (/\b(huawei|nova|y9|y7|y6|p30|p40|mate)\b/.test(s)) return 'huawei';
+  if (/\b(nokia)\b/.test(s)) return 'nokia';
+  if (/\b(realme|narzo)\b/.test(s)) return 'realme';
+  if (/\b(tecno|spark|camon)\b/.test(s)) return 'tecno';
+  if (/\b(infinix)\b/.test(s)) return 'infinix';
+  return null;
+}
+
+// تشخیص دقیق برند هر مدل (بررسی Honor قبل از الگوهای هواوی برای جلوگیری از تداخل Honor 9X / 8X)
+function detectBrand(name) {
+  const n = String(name).toLowerCase();
+  if (/\bhonor\b/.test(n)) return 'honor';
+  if (/iphone|apple/.test(n)) return 'apple';
+  if (/samsung|galaxy|sm-/.test(n)) return 'samsung';
+  if (/xiaomi|redmi|poco|\bmi\b/.test(n)) return 'xiaomi';
+  if (/huawei|nova|y9|y7|y6|p40|p30|mate/.test(n)) return 'huawei';
+  if (/nokia/.test(n)) return 'nokia';
+  if (/realme|narzo/.test(n)) return 'realme';
+  if (/tecno|spark|camon/.test(n)) return 'tecno';
+  if (/infinix/.test(n)) return 'infinix';
+  return 'samsung';
+}
+
+const brandIcon = {apple:'🍎',samsung:'🔵',xiaomi:'🟠',huawei:'🔴',honor:'🟣',nokia:'🟢',realme:'🟡',tecno:'🟤',infinix:'🔘'};
+
+function filterByBrand(list) {
+  if (activeBrand === 'ALL') return list;
+  return list.filter(g => g.models.some(m => {
+    const b = detectBrand(m);
+    if (activeBrand === 'realme') return b === 'realme' || b === 'tecno' || b === 'infinix';
+    return b === activeBrand;
+  }));
+}
+
+function expandSlashVariants(mainModelPart) {
+  const expanded = mainModelPart.replace(/\b(\S+)\s+4g\s*\/\s*5g\b/gi, '$1 4G / $1 5G');
+  const rawParts = expanded.split('/').map(s => s.trim()).filter(Boolean);
+  if (rawParts.length <= 1) return rawParts;
+
+  const firstWords = rawParts[0].split(/\s+/);
+  const brandPrefix = firstWords.slice(0, Math.min(2, firstWords.length - 1)).join(' ');
+  return rawParts.map((p, idx) => {
+    if (idx === 0) return p;
+    if (/^(samsung|galaxy|xiaomi|redmi|poco|apple|iphone|huawei|honor|nokia|realme|tecno|infinix)\b/i.test(p)) return p;
+    return brandPrefix ? (brandPrefix + ' ' + p) : p;
+  });
+}
+
+// بررسی دقیق تطابق مدل با کوئری کاربر
+function modelMatchesQuery(modelStr, rawQuery) {
+  const qClean = cleanDigitsAndSpaces(rawQuery).trim();
+  if (!qClean) return false;
+
+  const queryBrand = detectExplicitBrandInQuery(qClean);
+  const modelBrand = detectBrand(modelStr);
+
+  if (queryBrand && queryBrand !== modelBrand) return false;
+
+  const parenMatch = modelStr.match(/\((.*?)\)/);
+  const mainModelPart = modelStr.replace(/\s*\(.*?\)/g, '').trim();
+  const parenPart = parenMatch ? parenMatch[1].trim() : '';
+
+  const subParts = expandSlashVariants(mainModelPart);
+  const qCore = normalizeCore(qClean);
+  const qBare = normalizeBareModel(qClean);
+
+  if (parenPart && qBare.length >= 3) {
+    const pNorm = normalizeCore(parenPart);
+    if (pNorm === qBare || pNorm.includes(qBare)) return true;
+  }
+
+  const isShortPureNum = /^\d{1,2}$/.test(qBare);
+
+  for (let i = 0; i < subParts.length; i++) {
+    const partStr = subParts[i];
+    const mCore = normalizeCore(partStr);
+    const mBare = normalizeBareModel(partStr);
+
+    if (checkTokenBoundaryMatch(mCore, qCore)) return true;
+
+    if (!isShortPureNum && qBare.length >= 2) {
+      if (checkTokenBoundaryMatch(mBare, qBare)) return true;
+    }
+  }
+
+  return false;
+}
+
+// بررسی مرز کلمه پس از تطابق (پشتیبانی دوطرفه از 4G/5G/NFC و سال‌های تولید 2017-2026)
+function checkTokenBoundaryMatch(targetNorm, queryNorm) {
+  if (!targetNorm || !queryNorm) return false;
+  if (targetNorm === queryNorm) return true;
+
+  // تطابق معکوس برای زمانی که کوئری کاربر دارای پسوند 4g/5g/nfc است اما نام مدل در تب گلس بدون 4g/5g ثبت شده (مثلاً "Note 10 Pro 4G" -> "Note 10 Pro")
+  const qStripped = queryNorm.replace(/(4g|5g|nfc)+$/, '');
+  if (qStripped && qStripped !== queryNorm && targetNorm === qStripped) return true;
+
+  const idx = targetNorm.indexOf(queryNorm);
+  if (idx === -1) return false;
+
+  if (idx > 0 && queryNorm.length < 3) return false;
+
+  const remainder = targetNorm.slice(idx + queryNorm.length);
+  if (!remainder) return true;
+
+  if (/^(201\d|202\d)(4g|5g|nfc)?$/.test(remainder)) return true;
+  if (/^\d/.test(remainder)) return false;
+  if (/^(4g|5g|nfc|china|global|india|duos)+$/.test(remainder)) return true;
+
+  return false;
+}
+// === پایان قسمت ۳-الف (کد قسمت ۳-ب را دقیقاً زیر این خط پیست کنید) ===
+// =========================================================================
+// 🎨 قسمت ۳-ب: الگوریتم هندسی گلس (≤ 1.0mm)، رندر کارت‌ها و کنترلرهای برنامه
+// =========================================================================
+function findAllMatches(rawQuery) {
+  const qCore = normalizeCore(rawQuery);
+  const detectedBrand = detectExplicitBrandInQuery(rawQuery);
+
+  // 🆕 اگر کاربر فقط نام برند رو تایپ کرده، مثل فیلتر برند رفتار کن
+  const stripped = normalizeCore(
+    cleanDigitsAndSpaces(rawQuery).replace(detectedBrand || '', '')
+  );
+  if (detectedBrand && !stripped) {
+    const brandSource = ALL_GLASS.filter(g =>
+      g.models.some(m => detectBrand(m) === detectedBrand)
+    );
+    const partsSource = ALL_PARTS.filter(g =>
+      g.models.some(m => detectBrand(m) === detectedBrand)
+    );
+    return {
+      isDefaultView: true,
+      exactGlass: brandSource.map(g => ({ group: g, matched: [] })),
+      sizeGlass: [],
+      exactParts: partsSource.map(g => ({ group: g, matched: [], matchedCodes: [] }))
+    };
+  }
+
+  const qCore = normalizeCore(rawQuery);
+  const glassSource = filterByBrand(ALL_GLASS);
+  const partsSource = filterByBrand(ALL_PARTS);
+
+  if (!qCore) {
+    let filteredParts = partsSource;
+    if (currentPartsSub === 'LCD') filteredParts = filteredParts.filter(g => g.partType === 'LCD');
+    else if (currentPartsSub === 'BATTERY') filteredParts = filteredParts.filter(g => g.partType === 'BATTERY');
+    else if (currentPartsSub === 'BOARD') filteredParts = filteredParts.filter(g => g.partType === 'BOARD');
+
+    return {
+      isDefaultView: true,
+      exactGlass: glassSource.map(g => ({group: g, matched: []})),
+      sizeGlass: [],
+      exactParts: filteredParts.map(g => ({group: g, matched: [], matchedCodes: []}))
+    };
+  }
+
+  // ۱. جستجوی دقیق در گلس‌ها
+  const exactGlass = [];
+  glassSource.forEach(g => {
+    const matched = g.models.filter(m => modelMatchesQuery(m, rawQuery));
+    if (matched.length > 0) {
+      exactGlass.push({group: g, matched});
+    }
+  });
+
+  // ۲. الگوریتم هندسی گلس‌های هم‌ابعاد با تلورانس سخت‌گیرانه حداکثر ±۱.۰ میلی‌متر در طول و عرض
+  const sizeGlass = [];
+  if (exactGlass.length > 0) {
+    const refGroups = exactGlass.map(e => e.group);
+    glassSource.forEach(candidate => {
+      if (exactGlass.some(e => e.group.id === candidate.id)) return;
+      for (const ref of refGroups) {
+        if ((ref.edge === 'CURVED' && candidate.edge !== 'CURVED') || (ref.edge !== 'CURVED' && candidate.edge === 'CURVED')) continue;
+        const widthDiff = (ref.w && candidate.w) ? Math.abs(ref.w - candidate.w) : 99;
+        const lenDiff = (ref.l && candidate.l) ? Math.abs(ref.l - candidate.l) : 99;
+
+        if (widthDiff <= 1.0 && lenDiff <= 1.0) {
+          const dL = Math.round(lenDiff * 10) / 10;
+          const dW = Math.round(widthDiff * 10) / 10;
+          const edgeWarn = ref.edge !== candidate.edge
+            ? `تطابق ابعاد (${candidate.l}×${candidate.w}mm) — توجه به تفاوت لبه (${candidate.edgeLabel})`
+            : `تطابق هندسی در محدوده ≤ ۱mm (${candidate.l}×${candidate.w}mm | اختلاف طول: ${dL}mm، عرض: ${dW}mm)`;
+          sizeGlass.push({group: candidate, matched: [], geoNote: edgeWarn});
+          break;
+        }
+      }
+    });
+  }
+
+  // ۳. جستجوی دقیق در ال‌سی‌دی، باتری و برد شارژ
+  const exactParts = [];
+  partsSource.forEach(g => {
+    if (currentPartsSub === 'LCD' && g.partType !== 'LCD') return;
+    if (currentPartsSub === 'BATTERY' && g.partType !== 'BATTERY') return;
+    if (currentPartsSub === 'BOARD' && g.partType !== 'BOARD') return;
+
+    const matchedModels = g.models.filter(m => modelMatchesQuery(m, rawQuery));
+    const matchedCodes = (g.codes || []).filter(c => {
+      const cNorm = normalizeCore(c);
+      return cNorm === qCore || (qCore.length >= 3 && cNorm.includes(qCore));
+    });
+
+    if (matchedModels.length > 0 || matchedCodes.length > 0) {
+      exactParts.push({group: g, matched: matchedModels, matchedCodes});
+    }
+  });
+
+  return { isDefaultView: false, exactGlass, sizeGlass, exactParts, rawQuery };
+}
+
+function getCleanSearchTermFromModel(fullModelStr) {
+  let s = fullModelStr.replace(/\s*\(.*?\)/g, '').trim();
+  s = s.replace(/^(Samsung Galaxy|Samsung|Xiaomi|Redmi|Poco|Apple|iPhone|Huawei|Honor|Nokia|Realme|Tecno|Infinix)\s+/i, '').trim();
+  if (s.includes('/')) s = s.split('/')[0].trim();
+  return s.replace(/'/g, '');
+}
+
+function renderGlassCard(entry, isSizeAlt) {
+  const g = entry.group;
+  const matchedSet = new Set(entry.matched || []);
+  const isCustom = String(g.id).startsWith('custom_gl_');
+
+  const pillsHTML = g.models.map(m => {
+    const brand = detectBrand(m);
+    const isMatch = matchedSet.has(m);
+    const shortName = m.replace(/^(Samsung Galaxy|Xiaomi|Apple|Huawei|Honor|Nokia|Realme|Tecno|Infinix)\s+/i, '');
+    const clickTerm = getCleanSearchTermFromModel(m);
+    return `<span class="model-pill brand-${brand}${isMatch?' searched':''}" onclick="quickSearch('${clickTerm}')">
+              ${brandIcon[brand]||'📱'} ${shortName}
+            </span>`;
+  }).join('');
+
+  const dimBadge = (g.l && g.w) ? `<span class="spec-badge" dir="ltr">📐 ${g.l} × ${g.w} mm</span>` : '';
+  const edgeCls = 'edge-badge-' + (g.edge || 'FLAT');
+  const ggTagsHTML = (g.tags || []).map(t => `<span class="gg-tag">${t}</span>`).join('');
+  const delBtn = isCustom ? `<button class="delete-btn" onclick="deleteCustomEntry('GLASS','${g.id}')">🗑 حذف</button>` : '';
+
+  return `
+    <div class="card group-card ${isSizeAlt ? 'size-card' : ''}">
+      <div class="group-header">
+        <div class="group-title"><span>🛡️ ${g.title}</span>${delBtn}</div>
+        <div class="spec-badges">
+          <span class="spec-badge">📏 ${g.size} اینچ</span>
+          ${dimBadge}
+          <span class="spec-badge ${edgeCls}">${g.edgeLabel || '📐 استاندارد'}</span>
+          <span class="spec-badge">${g.notch || ''}</span>
+          ${ggTagsHTML}
+        </div>
+      </div>
+      <div class="models-grid">${pillsHTML}</div>
+      ${entry.geoNote ? `<div class="tech-warn" style="background:#fff7ed;color:#c2410c;border-color:#f97316;">⚖️ ارزیابی هندسی: ${entry.geoNote}</div>` : ''}
+      ${g.note ? `<div class="fit-note">💡 ${g.note}</div>` : ''}
+    </div>
+  `;
+}
+
+function renderPartsCard(entry) {
+  const g = entry.group;
+  const matchedSet = new Set(entry.matched || []);
+  const isCustom = String(g.id).startsWith('custom_part_');
+  const isTrap = g.frameType === 'TRAP';
+  const isBat = g.partType === 'BATTERY';
+  const isBoard = g.partType === 'BOARD';
+
+  const pillsHTML = g.models.map(m => {
+    const brand = detectBrand(m);
+    const isMatch = matchedSet.has(m);
+    const shortName = m.replace(/^(Samsung Galaxy|Xiaomi|Apple|Huawei|Honor|Nokia|Realme|Tecno|Infinix)\s+/i, '');
+    const clickTerm = getCleanSearchTermFromModel(m);
+    return `<span class="model-pill brand-${brand}${isMatch?' searched':''}" onclick="quickSearch('${clickTerm}')">
+              ${brandIcon[brand]||'📱'} ${shortName}
+            </span>`;
+  }).join('');
+
+  const codesHTML = (g.codes && g.codes.length > 0)
+    ? `<div class="code-box">
+         <span style="font-weight:800;color:var(--muted);">${isBat ? '🔋 کد باتری:' : (isBoard ? '🔌 کد برد:' : '🔩 کد فلت:')}</span>
+         <div style="display:flex;gap:5px;flex-wrap:wrap;">
+           ${g.codes.map(c => `<span class="code-pill ${isBat?'bat-code':''}" onclick="quickSearch('${String(c).replace(/'/g,'')}')">${c}</span>`).join('')}
+         </div>
+       </div>`
+    : '';
+
+  let cardCls = 'lcd-card';
+  if (isTrap) cardCls = 'lcd-warn-card';
+  else if (isBat) cardCls = 'bat-card';
+  else if (isBoard) cardCls = 'board-card';
+
+  const delBtn = isCustom ? `<button class="delete-btn" onclick="deleteCustomEntry('PARTS','${g.id}')">🗑 حذف</button>` : '';
+
+  return `
+    <div class="card group-card ${cardCls}">
+      <div class="group-header">
+        <div class="group-title"><span>${isBat ? '🔋' : (isBoard ? '🔌' : '📱')} ${g.title}</span>${delBtn}</div>
+        <div class="spec-badges">
+          <span class="frame-badge-${g.frameType || 'PANEL'}">${g.frameLabel || 'مشترک'}</span>
+          ${g.panelSpec ? `<span class="spec-badge" dir="ltr">🔬 ${g.panelSpec}</span>` : ''}
+        </div>
+      </div>
+      ${codesHTML}
+      <div class="models-grid">${pillsHTML}</div>
+      ${g.note ? `<div class="fit-note">💡 ${g.note}</div>` : ''}
+      ${g.techWarn ? `<div class="tech-warn">${g.techWarn}</div>` : ''}
+    </div>
+  `;
+}
+
+function handleSearch() {
+  const rawQuery = document.getElementById('search-input').value.trim();
+  document.getElementById('clear-btn').style.display = rawQuery ? 'flex' : 'none';
+  document.getElementById('search-hint').style.display = rawQuery ? 'none' : 'flex';
+
+  const res = findAllMatches(rawQuery);
+  const container = document.getElementById('results');
+  let html = '';
+
+  if (currentMainTab === 'GLASS') {
+    if (res.exactGlass.length > 0) {
+      html += `<div class="section-banner banner-exact">
+                 <span>🛡️ گلس‌های هم‌قالب و تأییدشده (${res.exactGlass.length} گروه)</span>
+                 <span style="font-size:.72rem;opacity:.85;">تطابق ۱۰۰٪ یا حداکثر ±۱mm</span>
+               </div>`;
+      res.exactGlass.forEach(e => { html += renderGlassCard(e, false); });
+    }
+    if (!res.isDefaultView && res.sizeGlass.length > 0) {
+      html += `<div class="section-banner banner-size">
+                 <span>📐 گلس‌های جایگزین بسیار نزدیک (${res.sizeGlass.length} گروه)</span>
+                 <span style="font-size:.72rem;">تلورانس طول و عرض ≤ ۱.۰mm</span>
+               </div>`;
+      res.sizeGlass.forEach(e => { html += renderGlassCard(e, true); });
+    }
+  } else {
+    if (res.exactParts.length > 0) {
+      html += `<div class="section-banner banner-lcd">
+                 <span>📱 ال‌سی‌دی، باتری و برد (${res.exactParts.length} مورد)</span>
+                 <span style="font-size:.72rem;opacity:.85;">بر اساس کد فنی</span>
+               </div>`;
+      res.exactParts.forEach(e => { html += renderPartsCard(e); });
+    }
+  }
+
+  if (!html) {
+    const tabName = (currentMainTab === 'GLASS') ? 'گلس' : 'ال‌سی‌دی/قطعات';
+    const q = rawQuery.replace(/'/g,'');
+    html = `<div class="card empty-state">
+              <div style="font-size:3rem;margin-bottom:8px;">🧐</div>
+              <div style="font-weight:900;font-size:1rem;">موردی برای «${rawQuery}» در بخش ${tabName} پیدا نشد</div>
+              <div style="font-size:.82rem;color:var(--muted);margin:8px 0 14px 0;">می‌توانید این تجربه فنی را به دیتابیس اضافه کنید:</div>
+              <button class="btn-primary" style="width:auto;padding:10px 22px;" onclick="openCustomModal('${q}')">➕ ثبت در بانک</button>
+            </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function switchMainSection(tabKey, btnEl) {
+  currentMainTab = tabKey;
+  document.querySelectorAll('.main-tab-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+
+  const subBar = document.getElementById('parts-subfilter-bar');
+  const quickBox = document.getElementById('quick-chips-box');
+  const quickLabel = document.getElementById('quick-chips-label');
+
+  if (tabKey === 'GLASS') {
+    subBar.classList.remove('visible');
+    document.body.classList.remove('parts-mode-active');
+    document.getElementById('header-icon').innerText = '🛡️';
+    document.getElementById('header-title').innerText = 'بانک مهندسی گلس مشابه';
+    quickLabel.innerText = '⚡ میانبرهای سریع گلس:';
+    quickBox.innerHTML = `
+      <span class="chip" onclick="quickSearch('Poco X3 Pro')">📱 Poco X3 Pro</span>
+      <span class="chip" onclick="quickSearch('Poco X3 GT')">📱 Poco X3 GT</span>
+      <span class="chip" onclick="quickSearch('Redmi 10C')">📱 Redmi 10C</span>
+      <span class="chip" onclick="quickSearch('A20')">📱 A20 / A30 / A50</span>
+      <span class="chip" onclick="quickSearch('A12')">📱 A12</span>
+      <span class="chip" onclick="quickSearch('A54')">📱 A54</span>
+      <span class="chip" onclick="quickSearch('iPhone 13')">🍎 iPhone 13</span>
+    `;
+  } else {
+    subBar.classList.add('visible');
+    document.body.classList.add('parts-mode-active');
+    document.getElementById('header-icon').innerText = '📱';
+    document.getElementById('header-title').innerText = 'ال‌سی‌دی، باتری و قطعات';
+    quickLabel.innerText = '⚡ میانبرهای سریع قطعات:';
+    quickBox.innerHTML = `
+      <span class="chip" onclick="quickSearch('BN61')">🔋 BN61 (Poco X3)</span>
+      <span class="chip" onclick="quickSearch('BN57')">🔋 BN57 (Note 9S)</span>
+      <span class="chip" onclick="quickSearch('BN5K')">🔋 BN5K (12C)</span>
+      <span class="chip" onclick="quickSearch('Redmi 10C')">📱 LCD 10C / C40</span>
+      <span class="chip" onclick="quickSearch('Note 11 Pro')">📱 Note 11 Pro</span>
+      <span class="chip" onclick="quickSearch('A125')">🔩 فلت و برد A12</span>
+      <span class="chip" onclick="quickSearch('EB-BA505')">🔋 EB-BA505 (A50)</span>
+    `;
+  }
+  handleSearch();
+}
+
+function setPartsSubFilter(subKey, btnEl) {
+  currentPartsSub = subKey;
+  document.querySelectorAll('.subfilter-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  handleSearch();
+}
+
+function quickSearch(term) {
+  document.getElementById('search-input').value = term;
+  activeBrand = 'ALL';
+  document.querySelectorAll('#brand-filter .chip').forEach(c => {
+    c.classList.toggle('active', c.getAttribute('data-brand') === 'ALL');
+  });
+  handleSearch();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function clearSearch() {
+  const inp = document.getElementById('search-input');
+  inp.value = '';
+  handleSearch();
+  inp.focus();
+}
+
+function setBrandFilter(brand, chipEl) {
+  activeBrand = brand;
+  document.querySelectorAll('#brand-filter .chip').forEach(c => c.classList.remove('active'));
+  chipEl.classList.add('active');
+  handleSearch();
+}
+
+function openMagicSearch() {
+  document.getElementById('magic-overlay').classList.add('open');
+  const inp = document.getElementById('magic-input');
+  inp.value = '';
+  handleMagicSearch('');
+  setTimeout(() => inp.focus(), 80);
+}
+function closeMagicSearch() {
+  document.getElementById('magic-overlay').classList.remove('open');
+}
+function handleMagicSearch(qRaw) {
+  const q = normalizeCore(qRaw);
+  const box = document.getElementById('magic-results');
+  if (!q) {
+    box.innerHTML = `<div style="padding:25px;text-align:center;color:var(--muted);font-size:.85rem;">مدل (مثل <b>A50</b> یا <b>iPhone SE</b>)، کد باتری (مثل <b>BN61</b>) یا کد فلت را تایپ کنید...</div>`;
+    return;
+  }
+  const res = findAllMatches(qRaw);
+  let html = '';
+  res.exactParts.slice(0, 5).forEach(e => {
+    html += `<div class="magic-result" onclick="selectMagic('${qRaw.replace(/'/g,'')}','PARTS')">
+               <div style="font-size:1.3rem;">📱</div>
+               <div style="flex:1;">
+                 <div style="font-weight:900;font-size:.88rem;color:var(--parts-color);">${e.group.title}</div>
+                 <div style="font-size:.74rem;color:var(--muted);">${e.group.frameLabel} • ${(e.group.codes||[]).join(', ')}</div>
+               </div>
+             </div>`;
+  });
+  res.exactGlass.slice(0, 5).forEach(e => {
+    html += `<div class="magic-result" onclick="selectMagic('${qRaw.replace(/'/g,'')}','GLASS')">
+               <div style="font-size:1.3rem;">🛡️</div>
+               <div style="flex:1;">
+                 <div style="font-weight:900;font-size:.88rem;color:var(--primary);">${e.group.title}</div>
+                 <div style="font-size:.74rem;color:var(--muted);">📏 ${e.group.size}" • ${e.group.edgeLabel}</div>
+               </div>
+             </div>`;
+  });
+  box.innerHTML = html || `<div style="padding:25px;text-align:center;color:var(--muted);">موردی یافت نشد.</div>`;
+}
+function selectMagic(term, targetTab) {
+  closeMagicSearch();
+  if (targetTab && targetTab !== currentMainTab) {
+    const btn = document.querySelector(`.main-tab-btn[data-tab="${targetTab}"]`);
+    if (btn) switchMainSection(targetTab, btn);
+  }
+  quickSearch(term);
+}
+
+function openCustomModal(prefill) {
+  document.getElementById('cg-title').value = prefill ? `مشترک ${prefill}` : '';
+  document.getElementById('cg-models').value = prefill ? `${prefill}, ` : '';
+  document.getElementById('cg-note').value = '';
+  document.getElementById('cg-codes').value = '';
+  document.getElementById('modal-custom').classList.add('open');
+  toggleCustomFormFields();
+}
+function closeCustomModal() { document.getElementById('modal-custom').classList.remove('open'); }
+
+function toggleCustomFormFields() {
+  const t = document.getElementById('cg-type').value;
+  document.getElementById('cg-glass-fields').style.display = (t === 'GLASS') ? 'block' : 'none';
+  document.getElementById('cg-parts-fields').style.display = (t !== 'GLASS') ? 'block' : 'none';
+}
+
+function saveCustomEntry() {
+  const type = document.getElementById('cg-type').value;
+  const titleIn = document.getElementById('cg-title').value.trim();
+  const rawModels = document.getElementById('cg-models').value;
+  const note = document.getElementById('cg-note').value.trim();
+  const models = rawModels.split(/[,،\n\-|]+/).map(s => s.trim()).filter(Boolean);
+  if (models.length < 1) return showToast('⚠️ حداقل یک مدل وارد کنید');
+
+  if (type === 'GLASS') {
+    const size = parseFloat(document.getElementById('cg-size').value) || 6.5;
+    const dimStr = document.getElementById('cg-dim').value.trim();
+    let l = 0, w = 0;
+    if (dimStr) {
+      const p = dimStr.split(/[×xX*,\s]+/).map(Number).filter(Boolean);
+      if (p.length >= 2) { l = Math.max(p[0], p[1]); w = Math.min(p[0], p[1]); }
+    }
+    const edgeSel = document.getElementById('cg-edge');
+    const edge = edgeSel.value;
+    const edgeLabel = edgeSel.options[edgeSel.selectedIndex].text;
+    const notch = document.getElementById('cg-notch').value;
+    const newG = {
+      id: 'custom_gl_' + Date.now(),
+      title: titleIn || `گلس مشترک ${models.slice(0,2).join(' / ')}`,
+      size, l, w, edge, edgeLabel, notch, note, models, tags: []
+    };
+    let saved = [];
+    try { saved = JSON.parse(localStorage.getItem(LS_GLASS_KEY) || '[]'); } catch(e){ saved = []; }
+    if (!Array.isArray(saved)) saved = [];
+    saved.unshift(newG);
+    localStorage.setItem(LS_GLASS_KEY, JSON.stringify(saved));
+  } else {
+    const frameSel = document.getElementById('cg-frame');
+    const frameType = frameSel.value;
+    const frameLabel = frameSel.options[frameSel.selectedIndex].text;
+    const panelSpec = document.getElementById('cg-panel').value.trim();
+    const codes = document.getElementById('cg-codes').value.split(/[,،\s]+/).map(s=>s.trim()).filter(Boolean);
+    const partType = (type === 'BATTERY') ? 'BATTERY' : ((type === 'BOARD') ? 'BOARD' : 'LCD');
+    const newP = {
+      id: 'custom_part_' + Date.now(),
+      partType,
+      title: titleIn || `${type === 'BATTERY' ? 'باتری' : (type === 'BOARD' ? 'برد' : 'ال‌سی‌دی')} مشترک ${models.slice(0,2).join(' / ')}`,
+      frameType, frameLabel, panelSpec, codes, models, note, techWarn: ''
+    };
+    let saved = [];
+    try { saved = JSON.parse(localStorage.getItem(LS_PARTS_KEY) || '[]'); } catch(e){ saved = []; }
+    if (!Array.isArray(saved)) saved = [];
+    saved.unshift(newP);
+    localStorage.setItem(LS_PARTS_KEY, JSON.stringify(saved));
+  }
+
+  loadDatabases();
+  closeCustomModal();
+  handleSearch();
+  showToast('✅ ذخیره شد');
+}
+
+function deleteCustomEntry(type, id) {
+  if (!confirm('این گروه حذف شود؟')) return;
+  const key = (type === 'GLASS') ? LS_GLASS_KEY : LS_PARTS_KEY;
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e){ saved = []; }
+  if (!Array.isArray(saved)) saved = [];
+  saved = saved.filter(g => g.id !== id);
+  localStorage.setItem(key, JSON.stringify(saved));
+  loadDatabases();
+  handleSearch();
+  showToast('🗑️ حذف شد');
+}
+
+function openDataImportModal() { document.getElementById('modal-data-import').classList.add('open'); }
+function closeDataImportModal() { document.getElementById('modal-data-import').classList.remove('open'); }
+
+function exportBackupJSON() {
+  const data = {
+    version: 'PersiaMobile_PartsPro_v8_Ultimate',
+    date: new Date().toISOString(),
+    customGlass: JSON.parse(localStorage.getItem(LS_GLASS_KEY) || '[]'),
+    customParts: JSON.parse(localStorage.getItem(LS_PARTS_KEY) || '[]')
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Persia_Parts_Pro_Backup.json';
+  a.click();
+  showToast('✅ بکاپ دانلود شد');
+}
+
+function importBackupJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const d = JSON.parse(evt.target.result);
+      if (Array.isArray(d.customGlass)) localStorage.setItem(LS_GLASS_KEY, JSON.stringify(d.customGlass));
+      if (Array.isArray(d.customParts)) localStorage.setItem(LS_PARTS_KEY, JSON.stringify(d.customParts));
+      loadDatabases();
+      handleSearch();
+      closeDataImportModal();
+      showToast('✅ بکاپ بازیابی شد');
+    } catch(err) { showToast('❌ فایل نامعتبر'); }
+  };
+  reader.readAsText(file);
+}
+
+function processBatchImport() {
+  const txt = document.getElementById('import-text-area').value.trim();
+  if (!txt) return showToast('⚠️ متنی وارد نشده');
+  const models = txt.split(/[\n,،\-|]+/).map(s=>s.trim()).filter(s=>s.length>2);
+  if (models.length === 0) return;
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS_GLASS_KEY) || '[]'); } catch(e){ saved = []; }
+  if (!Array.isArray(saved)) saved = [];
+  saved.unshift({
+    id: 'custom_gl_' + Date.now(),
+    title: '📥 ' + models.slice(0,2).join(' / '),
+    size: 6.5, l: 161, w: 75, edge: 'FLAT', edgeLabel: '📐 تخت',
+    notch: '⚫ پانچ وسط', note: 'اضافه‌شده از ورود دسته‌ای.', models, tags: []
+  });
+  localStorage.setItem(LS_GLASS_KEY, JSON.stringify(saved));
+  loadDatabases();
+  closeDataImportModal();
+  handleSearch();
+  showToast(`✅ ${models.length} مدل اضافه شد`);
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('pm_glass_theme', isDark ? 'dark' : 'light');
+  document.getElementById('theme-btn').innerText = isDark ? '☀️' : '🌙';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerText = msg;
+  t.classList.add('show');
+  clearTimeout(window._tTimer);
+  window._tTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    openMagicSearch();
+  } else if (e.key === 'Escape') {
+    closeMagicSearch();
+  }
+});
+
+document.getElementById('search-input').addEventListener('input', handleSearch);
+
+(function init() {
+  if (localStorage.getItem('pm_glass_theme') === 'dark') {
+    document.body.classList.add('dark-mode');
+    document.getElementById('theme-btn').innerText = '☀️';
+  }
+  loadDatabases();
+  handleSearch();
+})();
+</script>
+</body>
+</html>

@@ -337,25 +337,28 @@ input,select,textarea{width:100%;padding:11px 13px;border-radius:10px;border:1px
 <div id="toast"></div>
 
 <script>
-// فعال‌سازی استایل‌های بدون هدر در حالت نمایش درون برنامه اصلی
-if (location.search.includes('embed=1') || window.parent !== window) {
-  document.documentElement.classList.add('embedded');
-  document.body.classList.add('embedded');
-
-  // حذف autofocus در حالت embedded
-  const inp = document.getElementById('search-input');
-  if (inp) inp.removeAttribute('autofocus');
-  
-  // هدایت دکمه Back / Escape به برنامه اصلی
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      window.parent.postMessage('glass-back-requested', '*');
-    }
-  });
-  window.addEventListener('popstate', function() {
-    window.parent.postMessage('glass-back-requested', '*');
-  });
-}
+// 🛡️ اسکریپت قفل‌شکن و مخفی‌کننده هدر در حالت iframe
+(function() {
+  var isEmbed = location.search.indexOf('embed=1') !== -1 || window.parent !== window;
+  if (isEmbed) {
+    document.documentElement.classList.add('embedded');
+    
+    // به محض لود شدن DOM، هدرها رو مخفی کن
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.classList.add('embedded');
+      var header = document.querySelector('header');
+      if (header) header.style.display = 'none';
+      var fab = document.querySelector('.magic-fab');
+      if (fab) fab.style.display = 'none';
+      var tabs = document.querySelector('.nav-tabs');
+      if (tabs) tabs.style.display = 'none';
+      
+      // حذف فاصله بالای صفحه
+      document.body.style.paddingTop = '0';
+    });
+  }
+})();
+</script>
 // =========================================================================
 // 🛡️ دیتابیس مهندسی گلس — قانون سخت‌گیرانه: تطابق ۱۰۰٪ یا حداکثر تلورانس ±۱.۰ میلی‌متر
 // تمامی مدل‌ها به‌صورت رشته‌های مستقل و استاندارد ثبت شده‌اند

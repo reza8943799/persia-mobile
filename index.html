@@ -2516,7 +2516,7 @@ body.dark-mode .expand-indicator {
 
 <!-- باکس هشدار اتمام موجودی -->
 <div id="low-stock-alert-box" style="display:none; background:#fef2f2; border:1.5px dashed #fca5a5; border-radius:10px; padding:12px; margin-bottom:14px;">
-  <div style="font-weight:800; font-size:0.9rem; color:#dc2626; margin-bottom:6px;">⚠️ هشدار اتمام موجودی (۳ عدد و کمتر):</div>
+  <div style="font-weight:800; font-size:0.9rem; color:#dc2626; margin-bottom:6px;">⚠️ هشدار اتمام موجودی :</div>
   <div id="low-stock-items" style="font-size:0.82rem; color:#991b1b; line-height:1.7;"></div>
 </div>
 
@@ -6183,7 +6183,7 @@ function renderParts() {
   var countBadge = document.getElementById('parts-count'); if (countBadge) countBadge.innerText = filtered.length + ' قلم';
   var lowStockBox = document.getElementById('low-stock-alert-box'); var lowStockItemsEl = document.getElementById('low-stock-items');
   if (lowStockBox && lowStockItemsEl) {
-    var lowItems = parts.filter(p => !p.deleted && (Number(p.qty) || 0) <= 3);
+    var lowItems = parts.filter(p => !p.deleted && (Number(p.qty) || 0) === 0);
     if (lowItems.length > 0) { lowStockItemsEl.innerHTML = lowItems.map(p => '• ' + esc(p.model) + ' <b style="color:#dc2626;">(' + (p.qty || 0) + ' عدد)</b>').join('<br>'); lowStockBox.style.display = 'block'; }
     else lowStockBox.style.display = 'none';
   }
@@ -15894,5 +15894,714 @@ window.showCustomerList = function() {
   setTimeout(applyFixes, 1500);
 })();
 </script>
+
+<!-- 🛠️ فیکس باگ دکمه بیشتر در تب گلس (افزایش z-index) -->
+<style>
+  /* بالا بردن لایه تاری و منو تا روی صفحه گلس قرار بگیرند */
+  .more-menu-overlay {
+    z-index: 99998 !important;
+  }
+  .more-menu-box {
+    z-index: 99999 !important;
+  }
+</style>
+<!-- 🛠️ فیکس قطعی z-index برای تمام مودال‌ها در تب گلس -->
+<style>
+  /* بالا بردن لایه تمام مودال‌ها (قفل، ویرایش، تسویه و...) تا روی گلس قرار بگیرند */
+  .modal-overlay {
+    z-index: 10000 !important;
+  }
+</style>
+
+<!-- 🔔 سیستم زنگوله اعلان‌ها (بدون عدد + هشدار انبار فقط برای صفر) -->
+<style>
+  /* ۱. استایل دکمه زنگوله */
+  #notif-bell-btn {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: none;
+    transition: all 0.3s ease;
+  }
+
+  /* ۲. استایل دکمه وقتی اعلان وجود دارد (رنگ نارنجی و تکون خوردن) */
+  #notif-bell-btn.has-alerts {
+    background: rgba(245, 158, 11, 0.35) !important;
+    border-color: rgba(245, 158, 11, 0.8) !important;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+    animation: ringBell 2s infinite;
+  }
+
+  /* ۳. انیمیشن تکون خوردن زنگوله */
+  @keyframes ringBell {
+    0%, 100% { transform: rotate(0deg); }
+    5% { transform: rotate(15deg); }
+    10% { transform: rotate(-15deg); }
+    15% { transform: rotate(10deg); }
+    20% { transform: rotate(-10deg); }
+    25% { transform: rotate(5deg); }
+    30% { transform: rotate(-5deg); }
+    35% { transform: rotate(0deg); }
+  }
+
+  /* ۴. پنل اعلان‌ها */
+  .notif-panel-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: none;
+    background: rgba(0, 0, 0, 0.2);
+  }
+  .notif-panel-overlay.open { display: block; }
+  
+  .notif-panel-box {
+    position: absolute;
+    top: 65px;
+    left: 10px;
+    right: 10px;
+    max-width: 400px;
+    margin: 0 auto;
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideDownFade 0.3s ease-out;
+  }
+
+  .notif-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 900;
+    color: var(--text);
+    background: var(--card);
+    border-radius: 16px 16px 0 0;
+  }
+  
+  .notif-close {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .notif-list {
+    overflow-y: auto;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: 1px solid transparent;
+  }
+  .notif-item:hover { background: var(--primary-light); border-color: var(--primary); }
+  .notif-item-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .notif-item-text { flex: 1; font-size: 0.82rem; color: var(--text); line-height: 1.6; }
+  .notif-item-text b { color: var(--primary); }
+  
+  .notif-empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+
+<script>
+(function setupNotificationCenter() {
+  if (window._notifCenterLoaded) return;
+  window._notifCenterLoaded = true;
+
+  // ۱. تزریق دکمه زنگوله (بدون بج)
+  setTimeout(function() {
+    var headerLeft = document.getElementById('header-left-actions');
+    if (headerLeft && !document.getElementById('notif-bell-btn')) {
+      var btn = document.createElement('button');
+      btn.id = 'notif-bell-btn';
+      btn.title = 'اعلان‌های هوشمند';
+      btn.innerHTML = '🔔'; // فقط آیکون
+      btn.onclick = function(e) {
+        e.preventDefault();
+        toggleNotifPanel();
+      };
+      headerLeft.insertBefore(btn, headerLeft.firstChild);
+    }
+  }, 1200);
+
+  // ۲. ساخت پنل اعلان‌ها
+  if (!document.getElementById('notif-panel-overlay')) {
+    var panelHtml = `
+      <div class="notif-panel-overlay" id="notif-panel-overlay" onclick="if(event.target===this) toggleNotifPanel()">
+        <div class="notif-panel-box">
+          <div class="notif-header">
+            <span>🔔 اعلان‌های سیستم</span>
+            <button type="button" class="notif-close" onclick="toggleNotifPanel()">✕</button>
+          </div>
+          <div class="notif-list" id="notif-list-container"></div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', panelHtml);
+  }
+
+  // ۳. باز و بسته کردن پنل
+  window.toggleNotifPanel = function() {
+    var overlay = document.getElementById('notif-panel-overlay');
+    if (!overlay) return;
+    
+    if (overlay.classList.contains('open')) {
+      overlay.classList.remove('open');
+    } else {
+      renderNotifications();
+      overlay.classList.add('open');
+    }
+  };
+
+  // ۴. محاسبه و رندر اعلان‌ها
+  window.renderNotifications = function() {
+    var listEl = document.getElementById('notif-list-container');
+    if (!listEl) return;
+    
+    var alerts = [];
+
+    // الف) دستگاه‌های رسوب‌کرده (> ۲۰ روز)
+    var overdueDevices = quotes.filter(function(q) {
+      if (q.deleted) return false;
+      var st = q.deviceStatus || 'QUEUE';
+      return getDaysPassed(q.date) >= 20 && (st === 'READY' || st === 'UNREPAIRABLE' || st === 'WAIT_APPROVAL');
+    });
+    if (overdueDevices.length > 0) {
+      alerts.push({
+        icon: '⚠️',
+        html: '<b>' + overdueDevices.length + ' دستگاه</b> بیش از ۲۰ روز در کارگاه مانده است.',
+        action: "openTab('workshop'); setTimeout(function(){ setWorkshopFilter('OVERDUE', document.querySelector('.filter-btn[data-status=\"OVERDUE\"]')); toggleNotifPanel(); }, 300);"
+      });
+    }
+
+    // ب) مشتریان معوق
+    var overdueCustomers = customers.filter(function(c) {
+      if (c.deleted) return false;
+      return getBalance(c.id) > 0 && customerHasOverdueDue(c.id);
+    });
+    if (overdueCustomers.length > 0) {
+      alerts.push({
+        icon: '💰',
+        html: '<b>' + overdueCustomers.length + ' مشتری</b> موعد تسویه آن‌ها گذشته است.',
+        action: "openTab('customers'); setTimeout(function(){ document.getElementById('cust-filter-status').value='OVERDUE_DUE'; renderCustomers(); toggleNotifPanel(); }, 300);"
+      });
+    }
+
+    // ج) قطعات کم‌موجود (فقط موجودی صفر)
+    var outOfStockParts = parts.filter(function(p) {
+      return !p.deleted && (Number(p.qty) || 0) === 0;
+    });
+    if (outOfStockParts.length > 0) {
+      alerts.push({
+        icon: '📦',
+        html: '<b>' + outOfStockParts.length + ' قطعه</b> در انبار موجودی آن‌ها صفر شده است.',
+        action: "openTab('parts'); toggleNotifPanel();"
+      });
+    }
+
+    // د) فیش‌های تایید نشده
+    var pendingReceipts = quotes.filter(function(q) {
+      return !q.deleted && q.depositReceiptUrl && !q.depositReceiptVerified;
+    });
+    if (pendingReceipts.length > 0) {
+      alerts.push({
+        icon: '📩',
+        html: '<b>' + pendingReceipts.length + ' فیش واریزی</b> در انتظار تایید شماست.',
+        action: "openTab('deposits'); toggleNotifPanel();"
+      });
+    }
+
+    // رندر لیست
+    if (alerts.length === 0) {
+      listEl.innerHTML = '<div class="notif-empty">✅ هیچ اعلان مهمی وجود ندارد.<br>همه چیز مرتب است!</div>';
+    } else {
+      var html = '';
+      alerts.forEach(function(a) {
+        html += '<div class="notif-item" onclick="' + a.action + '">' +
+                  '<div class="notif-item-icon">' + a.icon + '</div>' +
+                  '<div class="notif-item-text">' + a.html + '</div>' +
+                '</div>';
+      });
+      listEl.innerHTML = html;
+    }
+
+    updateNotifBell(alerts.length);
+  };
+
+  // ۵. آپدیت ظاهر زنگوله
+  window.updateNotifBell = function(count) {
+    var btn = document.getElementById('notif-bell-btn');
+    if (!btn) return;
+    
+    if (count > 0) {
+      btn.classList.add('has-alerts');
+    } else {
+      btn.classList.remove('has-alerts');
+    }
+  };
+
+  // ۶. اتصال به رندرهای اصلی برای آپدیت خودکار
+  var _baseRenderCust = window.renderCustomers;
+  if (typeof _baseRenderCust === 'function') {
+    window.renderCustomers = function() {
+      _baseRenderCust();
+      setTimeout(renderNotifications, 500);
+    };
+  }
+
+  var _baseRenderWorkshop = window.renderWorkshopBoard;
+  if (typeof _baseRenderWorkshop === 'function') {
+    window.renderWorkshopBoard = function() {
+      _baseRenderWorkshop();
+      setTimeout(renderNotifications, 500);
+    };
+  }
+
+  // اجرای اولیه و آپدیت هر ۵ دقیقه
+  setTimeout(renderNotifications, 2500);
+  setInterval(renderNotifications, 5 * 60 * 1000);
+
+  console.log('[notification-center] Ready (No Badge & Zero Stock Only) ✅');
+})();
+</script>
+
+<!-- 🎤 قابلیت جستجوی صوتی (Voice Search) برای Spotlight -->
+<style>
+  /* استایل دکمه میکروفون */
+  #voice-search-btn {
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-left: 8px;
+    flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(239, 68, 68, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  #voice-search-btn:active {
+    transform: scale(0.9);
+  }
+
+  /* انیمیشن وقتی در حال ضبط صدا هستیم */
+  #voice-search-btn.listening {
+    background: #dc2626;
+    animation: pulseMic 1.5s infinite;
+  }
+
+  @keyframes pulseMic {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  }
+</style>
+
+<script>
+(function setupVoiceSearch() {
+  // چک کردن پشتیبانی مرورگر از ضبط صدا
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    console.log('مرورگر شما از جستجوی صوتی پشتیبانی نمی‌کند.');
+    return;
+  }
+
+  var recognition = new SpeechRecognition();
+  recognition.lang = 'fa-IR'; // زبان فارسی
+  recognition.interimResults = false; // فقط نتیجه نهایی را بده
+  recognition.maxAlternatives = 1;
+
+  // تزریق دکمه میکروفون به باکس جستجوی Spotlight
+  setTimeout(function() {
+    var spotlightWrap = document.querySelector('.spotlight-input-wrap');
+    if (spotlightWrap && !document.getElementById('voice-search-btn')) {
+      var micBtn = document.createElement('button');
+      micBtn.id = 'voice-search-btn';
+      micBtn.type = 'button';
+      micBtn.title = 'جستجوی صوتی';
+      micBtn.innerHTML = '🎤';
+      
+      // قرار دادن دکمه قبل از دکمه بستن (X) در Spotlight
+      var closeBtn = spotlightWrap.querySelector('.spotlight-close');
+      if (closeBtn) {
+        spotlightWrap.insertBefore(micBtn, closeBtn);
+      } else {
+        spotlightWrap.appendChild(micBtn);
+      }
+
+      // رویداد کلیک روی میکروفون
+      micBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        try {
+          recognition.start();
+          micBtn.classList.add('listening');
+          micBtn.innerHTML = '🛑'; // تغییر آیکون به استاپ
+        } catch(err) {
+          console.warn('Recognition already started.');
+        }
+      });
+
+      // وقتی ضبط تمام شد یا خطا داد، ظاهر دکمه به حالت اول برگردد
+      recognition.onend = function() {
+        micBtn.classList.remove('listening');
+        micBtn.innerHTML = '🎤';
+      };
+
+      recognition.onerror = function(event) {
+        micBtn.classList.remove('listening');
+        micBtn.innerHTML = '🎤';
+        if (event.error === 'not-allowed') {
+          showToast('❌ دسترسی به میکروفون داده نشده است.', 'error');
+        } else if (event.error === 'no-speech') {
+          showToast('⚠️ صدایی شنیده نشد. دوباره تلاش کنید.', 'warning');
+        } else {
+          showToast('❌ خطا در جستجوی صوتی: ' + event.error, 'error');
+        }
+      };
+
+      // وقتی صدایی تشخیص داده شد
+      recognition.onresult = function(event) {
+        var transcript = event.results[0][0].transcript;
+        var spotlightInput = document.getElementById('spotlight-input');
+        
+        if (spotlightInput) {
+          spotlightInput.value = transcript;
+          // اجرای جستجوی اسپات‌لایت با متن شنیده شده
+          handleSpotlightSearch(transcript);
+          if (navigator.vibrate) navigator.vibrate(50); // ویبره کوتاه برای تایید
+        }
+      };
+    }
+  }, 1500); // صبر می‌کنیم تا اسپات‌لایت توسط برنامه اصلی ساخته شود
+
+  console.log('[voice-search] Ready ✅');
+})();
+</script>
+<!-- 🛠️ حالت تعمیرکار پیشرفته (زوم سراسری + کارت‌های عملیاتی بزرگ) -->
+<style>
+  /* ═══════════════════════════════════════════════════ */
+  /* ۱. زوم سراسری کل برنامه */
+  /* ═══════════════════════════════════════════════════ */
+  body.technician-mode .container {
+    zoom: 1.15;
+  }
+  body.technician-mode .nav-tabs {
+    height: calc(75px + env(safe-area-inset-bottom)) !important;
+  }
+  body.technician-mode .nav-icon {
+    font-size: 1.8rem !important;
+  }
+
+  /* ═══════════════════════════════════════════════════ */
+  /* ۲. طراحی مجدد کارت‌های کارگاه (حذف شلوغی، بزرگ کردن دکمه‌ها) */
+  /* ═══════════════════════════════════════════════════ */
+  
+  /* الف) مخفی کردن QR Code و آیکون‌های کنارش */
+  body.technician-mode .workshop-card .qr-scanner-box,
+  body.technician-mode .workshop-card .qr-scanner-box + div {
+    display: none !important;
+  }
+
+  /* ب) مخفی کردن اطلاعات ریز (کد قبض، پیگیری، تاریخ، تایم‌لاین و نشانه‌ها) */
+  body.technician-mode .workshop-card div[style*="font-size:.75rem;color:#0284c7"],
+  body.technician-mode .workshop-card div[style*="font-size:.75rem;color:#7c3aed"],
+  body.technician-mode .workshop-card .time-badge,
+  body.technician-mode .workshop-card .expand-indicator,
+  body.technician-mode .workshop-card .repair-timeline,
+  body.technician-mode .workshop-card [style*="font-size:.75rem;color:#7c3aed"] {
+    display: none !important;
+  }
+
+  /* ج) بزرگ کردن نام دستگاه (خیلی درشت) */
+  body.technician-mode .workshop-card div[style*="font-weight:800;font-size:1rem;color:#1e293b"] {
+    font-size: 1.6rem !important;
+    line-height: 1.3 !important;
+    color: var(--text) !important;
+  }
+
+  /* د) بزرگ کردن متن ایراد دستگاه */
+  body.technician-mode .workshop-card div[style*="font-size:.83rem;color:#475569"] {
+    font-size: 1.2rem !important;
+    color: var(--text) !important;
+    margin-top: 8px !important;
+  }
+
+  /* هـ) بزرگ کردن نام مشتری */
+  body.technician-mode .workshop-card div[style*="font-size:.82rem;color:#64748b"] {
+    font-size: 1.1rem !important;
+    margin-top: 8px !important;
+    color: var(--muted) !important;
+  }
+
+  /* و) بزرگ کردن بج وضعیت (در نوبت، آماده تحویل و...) */
+  body.technician-mode .workshop-card .badge {
+    font-size: 1rem !important;
+    padding: 8px 14px !important;
+    border-radius: 10px !important;
+  }
+
+  /* ز) بزرگ کردن دراپ‌داون وضعیت (مثل دکمه‌های آسانسور) */
+  body.technician-mode .workshop-card select.smart-dropdown {
+    font-size: 1.1rem !important;
+    padding: 12px 16px !important;
+    height: 55px !important;
+    border-radius: 12px !important;
+    margin-top: 10px !important;
+    width: 100% !important;
+  }
+
+  /* ح) تبدیل دکمه‌های عملیاتی به دکمه‌های بزرگ ۲ ستونی */
+  body.technician-mode .workshop-card .action-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    margin-top: 16px !important;
+  }
+  
+  body.technician-mode .workshop-card .action-row button {
+    font-size: 1.1rem !important;
+    padding: 16px 8px !important;
+    min-height: 65px !important;
+    border-radius: 14px !important;
+    font-weight: 900 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+  }
+
+  /* ط) بزرگ کردن فاصله داخلی کارت تا هوا بخوره */
+  body.technician-mode .workshop-card {
+    padding: 20px !important;
+  }
+</style>
+
+<script>
+(function setupAdvancedTechnicianMode() {
+  // بارگذاری وضعیت ذخیره شده
+  var isTechMode = localStorage.getItem('db_technician_mode') === 'true';
+  if (isTechMode) document.body.classList.add('technician-mode');
+
+  function injectTechModeCard() {
+    var backupTab = document.getElementById('tab-content-backup');
+    if (!backupTab) return;
+    var container = backupTab.querySelector('.container');
+    if (!container || document.getElementById('tech-mode-card')) return;
+
+    var card = document.createElement('div');
+    card.id = 'tech-mode-card';
+    card.className = 'card';
+    card.style.cssText = 'border:1.5px solid #fcd34d;background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%) !important; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;';
+    
+    card.innerHTML = `
+      <div style="flex:1;min-width:200px;">
+        <div style="font-weight:900;font-size:1.05rem;color:#92400e;display:flex;align-items:center;gap:6px;">
+          <span style="font-size:1.2rem;">🛠️</span> حالت تعمیرکار (پیشرفته)
+        </div>
+        <div style="font-size:0.82rem;color:#78350f;margin-top:4px;line-height:1.6;">
+          بزرگ‌نمایی کل برنامه + تبدیل کارت‌های کارگاه به دکمه‌های درشت و آسان برای لمس.
+        </div>
+      </div>
+      <button type="button" id="tech-mode-toggle-btn" style="width:auto; margin:0; padding:10px 20px; border-radius:12px; font-weight:900; font-size:0.9rem; box-shadow:0 4px 10px rgba(0,0,0,0.1); transition:all 0.3s;">
+        ...
+      </button>
+    `;
+    
+    container.insertBefore(card, container.firstChild);
+    var toggleBtn = document.getElementById('tech-mode-toggle-btn');
+    
+    function updateBtnUI() {
+      if (document.body.classList.contains('technician-mode')) {
+        toggleBtn.innerText = '✅ فعال است';
+        toggleBtn.style.background = '#10b981';
+        toggleBtn.style.color = '#fff';
+      } else {
+        toggleBtn.innerText = '🔘 غیرفعال';
+        toggleBtn.style.background = '#cbd5e1';
+        toggleBtn.style.color = '#1e293b';
+      }
+    }
+    
+    updateBtnUI();
+    toggleBtn.addEventListener('click', function() {
+      document.body.classList.toggle('technician-mode');
+      var isActive = document.body.classList.contains('technician-mode');
+      localStorage.setItem('db_technician_mode', isActive ? 'true' : 'false');
+      updateBtnUI();
+      
+      if (navigator.vibrate) navigator.vibrate(50);
+      if (typeof showToast === 'function') showToast(isActive ? '🛠️ حالت تعمیرکار فعال شد' : 'حالت عادی برگشت', 'success');
+      
+      // رفرش کارگاه برای اعمال استایل‌های جدید
+      if (typeof renderWorkshopBoard === 'function') {
+        renderWorkshopBoard();
+      }
+    });
+  }
+
+  // اتصال به تب تنظیمات
+  var _baseOpenTab = window.openTab;
+  if (typeof _baseOpenTab === 'function') {
+    window.openTab = function(tabName) {
+      _baseOpenTab(tabName);
+      if (tabName === 'backup') setTimeout(injectTechModeCard, 200);
+    };
+  }
+  
+  setTimeout(function() {
+    if (document.getElementById('tab-content-backup') && document.getElementById('tab-content-backup').style.display === 'block') {
+      injectTechModeCard();
+    }
+  }, 2000);
+
+  console.log('[technician-mode-v2] Ready ✅');
+})();
+</script>
+
+<!-- 🛠️ فیکس باگ باز شدن کارت اول (رفع تداخل ID کارت‌ها) -->
+<script>
+(function fixFirstCardBug() {
+  // بازنویسی تابع باز کردن کارت برای استفاده از المانی که کلیک شده (currentTarget)
+  window.toggleWorkshopDetails = function(qId, event) {
+    var tag = event.target.tagName;
+    // اگر روی دکمه، منو یا آیکون کلیک شد، کاری نکن
+    if (tag === 'BUTTON' || tag === 'SELECT' || tag === 'A' || tag === 'INPUT' || tag === 'OPTION' || tag === 'IMG') return;
+
+    var container = document.getElementById('workshop-cards-container');
+    var isCompact = container && container.classList.contains('workshop-compact');
+    
+    // اگر در حالت فشرده بودیم، به حالت درشت برو
+    if (isCompact) {
+      try { localStorage.setItem('db_workshop_view_mode', 'full'); } catch(e) {}
+      container.classList.remove('workshop-compact');
+      
+      var btn = document.getElementById('workshop-view-toggle');
+      if (btn) {
+        btn.innerHTML = '🔲 حالت فشرده';
+        btn.title = 'نمایش کارت‌ها به صورت فشرده';
+      }
+      
+      if (navigator.vibrate) navigator.vibrate(20);
+      if (typeof showToast === 'function') showToast('🔳 حالت درشت فعال شد', 'info');
+      
+      setTimeout(function() {
+        try { 
+          var currentCard = event.currentTarget;
+          var details = currentCard.querySelector('.workshop-details-box');
+          var expand = currentCard.querySelector('.workshop-expandable');
+          if (expand) expand.classList.add('open');
+          if (details) details.classList.add('open');
+          var indicator = currentCard.querySelector('.expand-indicator');
+          if (indicator) indicator.innerHTML = '🔼 بستن';
+        } catch(e) {}
+      }, 250);
+      return;
+    }
+    
+    // حالت عادی: دقیقاً همان کارتی که کلیک شده را باز کن
+    var card = event.currentTarget;
+    if (!card) return;
+
+    var details = card.querySelector('.workshop-details-box');
+    var expand = card.querySelector('.workshop-expandable');
+
+    if (expand) expand.classList.toggle('open');
+    if (details) details.classList.toggle('open');
+
+    var indicator = card.querySelector('.expand-indicator');
+    if (indicator) {
+      var isOpen = expand && expand.classList.contains('open');
+      indicator.innerHTML = isOpen ? '🔼 بستن' : '🔽 جزئیات';
+    }
+    if (navigator.vibrate) navigator.vibrate(15);
+  };
+
+  console.log('[fix-first-card-bug] Ready ✅');
+})();
+</script>
+<!-- ✨ افکت نهایی و مینیمال برای دکمه افزودن پرونده (3D Press & Subtle Shine) -->
+<style>
+  button[onclick="addCustomer()"] {
+    position: relative !important;
+    overflow: hidden !important; /* برای نگه داشتن نور داخل دکمه */
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    color: #fff !important;
+    font-weight: 900 !important;
+    font-size: 1.05rem !important;
+    padding: 14px 20px !important;
+    border-radius: 14px !important;
+    border: none !important;
+    
+    /* سایه بیرونی نرم + سایه داخلی برای حس سه‌بعدی */
+    box-shadow: 0 6px 15px rgba(29, 78, 216, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  }
+
+  /* ۱. افکت رد شدن نور (فقط یک بار هر چند ثانیه، خیلی ملایم) */
+  button[onclick="addCustomer()"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transform: skewX(-25deg);
+    animation: subtleShine 4s infinite;
+    pointer-events: none; /* که با کلیک تداخلی نداشته باشه */
+  }
+
+  /* ۲. حس فشرده شدن دکمه هنگام کلیک (مثل دکمه‌های واقعی) */
+  button[onclick="addCustomer()"]:active {
+    transform: translateY(3px) scale(0.98) !important;
+    box-shadow: 0 2px 5px rgba(29, 78, 216, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+  }
+
+  /* انیمیشن رد شدن نور */
+  @keyframes subtleShine {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
+  }
+</style>
+
 </body>
 </html>

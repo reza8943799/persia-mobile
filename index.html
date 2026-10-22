@@ -15311,6 +15311,588 @@ window.showCustomerList = function() {
   console.log('[fix-glass-ref-stuck] Ready ✅');
 })();
 </script>
+<!-- ✨ افکت نهایی (روش ساندویچی: لیزر + گرادیانت + نابودی کادر استاتیک) -->
+<style>
+  @property --angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
 
+  /* ۱. آماده‌سازی قاب بیرونی (باید کاملاً تمیز باشه) */
+  .swipe-wrapper {
+    padding: 0 !important;
+    background: transparent !important;
+    margin-bottom: 14px !important;
+    overflow: hidden !important; /* برای اینکه گوشه‌ها گرد بمونن */
+    border-radius: 26px !important;
+    box-shadow: 0 4px 15px var(--beam-glow, rgba(0,0,0,0.1)) !important;
+  }
+
+  /* ۲. تعریف رنگ‌ها */
+  .workshop-card:has(.badge-blue)   { --beam-color: #3b82f6; --beam-glow: rgba(59, 130, 246, 0.2); --bg-move-color: rgba(59, 130, 246, 0.1); } 
+  .workshop-card:has(.badge-orange) { --beam-color: #f59e0b; --beam-glow: rgba(245, 158, 11, 0.2); --bg-move-color: rgba(245, 158, 11, 0.1); } 
+  .workshop-card:has(.badge-purple) { --beam-color: #a855f7; --beam-glow: rgba(168, 85, 247, 0.2); --bg-move-color: rgba(168, 85, 247, 0.1); } 
+  .workshop-card:has(.badge-green)  { --beam-color: #10b981; --beam-glow: rgba(16, 185, 129, 0.2); --bg-move-color: rgba(16, 185, 129, 0.1); } 
+  .workshop-card:has(.badge-red)    { --beam-color: #ef4444; --beam-glow: rgba(239, 68, 68, 0.2); --bg-move-color: rgba(239, 68, 68, 0.1); } 
+  .workshop-card:has(.badge-collab) { --beam-color: #ea580c; --beam-glow: rgba(234, 88, 12, 0.2); --bg-move-color: rgba(234, 88, 12, 0.1); } 
+  .workshop-card.overdue            { --beam-color: #ef4444; --beam-glow: rgba(239, 68, 68, 0.3); --bg-move-color: rgba(239, 68, 68, 0.15); } 
+
+  /* ۳. کارت اصلی (حذف کامل کادرها و پس‌زمینه‌های قبلی) */
+  .workshop-card,
+  .workshop-card:has(.badge-blue),
+  .workshop-card:has(.badge-orange),
+  .workshop-card:has(.badge-purple),
+  .workshop-card:has(.badge-green),
+  .workshop-card:has(.badge-red),
+  .workshop-card:has(.badge-collab),
+  .workshop-card.overdue {
+    margin: 0 !important;
+    border: none !important; /* 💥 نابودی کادر ۶ پیکسلی سمت راست */
+    border-right: none !important;
+    border-radius: 26px !important;
+    background: transparent !important;
+    position: relative !important;
+    z-index: 1 !important;
+    padding: 16px !important; /* حفظ فاصله داخلی */
+  }
+
+  /* ۴. لایه اول: لیزر چرخان (پشت همه چیز) */
+  .workshop-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: 26px;
+    background: conic-gradient(
+      from var(--angle), 
+      transparent 60%, 
+      #22d3ee 80%, 
+      #ffffff 92%, 
+      #22d3ee 98%, 
+      transparent 100%
+    );
+    animation: borderSpin 3s linear infinite;
+  }
+
+<!-- ✨ افکت نهایی: لیزر هوشمند + گرادیانت متحرک (نسخه پایدار) -->
+<style>
+  /* ۱. تعریف رنگ‌ها */
+  .workshop-card:has(.badge-blue)   { --beam-color: #3b82f6; --beam-glow: rgba(59, 130, 246, 0.2); --bg-move-color: rgba(59, 130, 246, 0.15); } 
+  .workshop-card:has(.badge-orange) { --beam-color: #f59e0b; --beam-glow: rgba(245, 158, 11, 0.2); --bg-move-color: rgba(245, 158, 11, 0.15); } 
+  .workshop-card:has(.badge-purple) { --beam-color: #a855f7; --beam-glow: rgba(168, 85, 247, 0.2); --bg-move-color: rgba(168, 85, 247, 0.15); } 
+  .workshop-card:has(.badge-green)  { --beam-color: #10b981; --beam-glow: rgba(16, 185, 129, 0.2); --bg-move-color: rgba(16, 185, 129, 0.15); } 
+  .workshop-card:has(.badge-red)    { --beam-color: #ef4444; --beam-glow: rgba(239, 68, 68, 0.2); --bg-move-color: rgba(239, 68, 68, 0.15); } 
+  .workshop-card:has(.badge-collab) { --beam-color: #ea580c; --beam-glow: rgba(234, 88, 12, 0.2); --bg-move-color: rgba(234, 88, 12, 0.15); } 
+  .workshop-card.overdue            { --beam-color: #ef4444; --beam-glow: rgba(239, 68, 68, 0.4); --bg-move-color: rgba(239, 68, 68, 0.25); } 
+
+  /* ۲. قاب بیرونی */
+  .swipe-wrapper {
+    position: relative !important;
+    padding: 2.5px !important;
+    border-radius: 26px !important;
+    overflow: hidden !important;
+    margin-bottom: 14px !important;
+    background: var(--border) !important;
+    box-shadow: 0 4px 20px var(--beam-glow, rgba(0,0,0,0.1)) !important;
+    z-index: 1 !important;
+  }
+
+  /* ۳. لیزر چرخان (با متغیر رنگ وضعیت) */
+  .swipe-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+      transparent 40%, 
+      var(--beam-color, #22d3ee) 80%, 
+      #ffffff 90%, 
+      transparent 100%
+    );
+    animation: spinLaser 3s linear infinite;
+    z-index: 0;
+  }
+
+  /* ۴. کارت اصلی + گرادیانت متحرک پررنگ‌تر */
+  .workshop-card,
+  .workshop-card:has(.badge-blue),
+  .workshop-card:has(.badge-orange),
+  .workshop-card:has(.badge-purple),
+  .workshop-card:has(.badge-green),
+  .workshop-card:has(.badge-red),
+  .workshop-card:has(.badge-collab),
+  .workshop-card.overdue {
+    margin: 0 !important;
+    border-radius: 23.5px !important; 
+    border: none !important; 
+    border-right: none !important;
+    position: relative !important;
+    z-index: 1 !important; 
+    
+    background-color: var(--card) !important;
+    background-image: linear-gradient(120deg, transparent 20%, var(--bg-move-color) 50%, transparent 80%) !important;
+    background-size: 200% 200% !important;
+    
+  }
+
+  /* ۵. انیمیشن‌ها */
+  @keyframes spinLaser {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  @keyframes bgMove {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+</style>
+  <!-- 🛠️ فیکس نهایی (نوار وفاداری بدون خرابی ظاهر) + دکمه تغییر تم -->
+<script>
+(function fixCustomerBarsAndAddThemeBtn() {
+  
+  // ═══════════════════════════════════════════════════════
+  // ۱. اضافه کردن دکمه تغییر حالت روز/شب به هدر
+  // ═══════════════════════════════════════════════════════
+  setTimeout(function() {
+    var headerLeft = document.getElementById('header-left-actions');
+    if (headerLeft && !document.getElementById('header-theme-btn')) {
+      var btn = document.createElement('button');
+      btn.id = 'header-theme-btn';
+      // آیکون رو بر اساس وضعیت فعلی تنظیم کن
+      btn.innerHTML = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+      btn.title = 'تغییر حالت روز/شب';
+      btn.style.cssText = 'width:32px;height:32px;border-radius:50%;font-size:0.95rem;cursor:pointer;padding:0;margin:0;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.3);color:#fff;background:rgba(255,255,255,0.15);box-shadow:none;';
+      
+      btn.onclick = function(e) {
+        e.preventDefault();
+        // فراخوانی تابع اصلی تغییر تم
+        if (typeof toggleDarkMode === 'function') {
+          toggleDarkMode();
+          btn.innerHTML = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        }
+      };
+      
+      // اضافه کردن به عنوان اولین دکمه در سمت چپ هدر
+      headerLeft.insertBefore(btn, headerLeft.firstChild);
+    }
+  }, 1000);
+
+
+  // ═══════════════════════════════════════════════════════
+  // ۲. فیکس کردن نوار پیشرفت بدون دست زدن به ظاهر کارت‌ها
+  // ═══════════════════════════════════════════════════════
+  function attachLoyaltyBarsSafely() {
+    var listEl = document.getElementById('customer-list');
+    if (!listEl) return;
+
+    // پیدا کردن کارت‌های اصلی (بدون دست زدن به قاب بیرونی swipe)
+    var cards = listEl.querySelectorAll('.card');
+
+    cards.forEach(function(card) {
+      // اگر قبلاً پردازش شده، رد شو
+      if (card.dataset.loyaltyFixed === '1') return;
+
+      var cust = null;
+
+      // اولویت اول: پیدا کردن مشتری از روی شماره تلفن (لینک تماس)
+      var telLink = card.querySelector('a[href^="tel:"]');
+      if (telLink) {
+        var phone = telLink.getAttribute('href').replace('tel:', '').replace(/\s/g, '');
+        if (phone) {
+          cust = customers.find(function(c) { return !c.deleted && cleanNumber(c.phone) === phone; });
+        }
+      }
+
+      // اولویت دوم: اگر تلفن نبود، از روی اسم پیدا کن
+      if (!cust) {
+        var nameEl = card.querySelector('div[style*="font-weight:bold"][style*="font-size:.95rem"]');
+        if (nameEl) {
+          var name = '';
+          nameEl.childNodes.forEach(function(n) { if (n.nodeType === 3) name += n.textContent; });
+          name = name.trim();
+          cust = customers.find(function(c) { return !c.deleted && c.name === name; });
+        }
+      }
+
+      if (!cust) return;
+
+      var loyalty = getCustomerLoyalty(cust.id);
+
+      // پاک کردن نوار قبلی (اگر وجود داشت)
+      var oldBar = card.querySelector('.loyalty-progress-wrap');
+      if (oldBar) oldBar.remove();
+
+      // ساخت نوار جدید
+      var barWrap = document.createElement('div');
+      barWrap.className = 'loyalty-progress-wrap';
+      barWrap.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);';
+
+      if (loyalty.visits >= 10) {
+        barWrap.innerHTML = 
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:0.7rem;font-weight:bold;">' +
+            '<span style="color:#b45309;">⭐ مشتری طلایی (بیش از ۱۰ مراجعه)</span>' +
+            '<span style="color:#94a3b8;">' + loyalty.visits + '/10</span>' +
+          '</div>' +
+          '<div style="background:#fef3c7;border-radius:10px;height:8px;overflow:hidden;">' +
+            '<div style="background:linear-gradient(90deg, #fbbf24, #f59e0b);height:100%;width:100%;border-radius:10px;"></div>' +
+          '</div>';
+      } else {
+        var nextTier, currentThreshold, nextThreshold, barColor, barBg;
+        if (loyalty.visits < 5) {
+          nextTier = 'نقره‌ای'; currentThreshold = 0; nextThreshold = 5;
+          barColor = 'linear-gradient(90deg, #94a3b8, #cbd5e1)'; barBg = '#f1f5f9';
+        } else {
+          nextTier = 'طلایی'; currentThreshold = 5; nextThreshold = 10;
+          barColor = 'linear-gradient(90deg, #fbbf24, #f59e0b)'; barBg = '#fef3c7';
+        }
+        
+        var progress = (loyalty.visits - currentThreshold) / (nextThreshold - currentThreshold);
+        var percent = Math.round(progress * 100);
+        var remaining = nextThreshold - loyalty.visits;
+
+        barWrap.innerHTML =
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:0.7rem;font-weight:bold;">' +
+            '<span style="color:var(--muted);">' + remaining + ' مراجعه تا ' + nextTier + '</span>' +
+            '<span style="color:var(--muted);">' + loyalty.visits + '/' + nextThreshold + '</span>' +
+          '</div>' +
+          '<div style="background:' + barBg + ';border-radius:10px;height:8px;overflow:hidden;position:relative;">' +
+            '<div style="background:' + barColor + ';height:100%;width:' + percent + '%;border-radius:10px;transition:width 0.6s ease;"></div>' +
+          '</div>';
+      }
+
+      card.appendChild(barWrap);
+      card.dataset.loyaltyFixed = '1'; // علامت‌گذاری که دیگه تکرار نشه
+    });
+  }
+
+  // اجرای این تابع هر بار که لیست مشتریان رندر میشه
+  var _baseRender = renderCustomers;
+  renderCustomers = function() {
+    _baseRender();
+    setTimeout(attachLoyaltyBarsSafely, 150); // صبر میکنیم تا رندر تموم بشه
+  };
+
+  // اجرا برای اولین بارگذاری صفحه
+  setTimeout(attachLoyaltyBarsSafely, 1500);
+
+})();
+</script>
+
+<!-- 🎨 پچ نهایی: اصلاح هدر و فشرده‌سازی کادر همگام‌سازی -->
+<style>
+  /* ۱. اصلاح هدر (جلوگیری از فشرده شدن لوگو و متن) */
+  header {
+    padding: 10px 12px !important; /* کاهش پدینگ هدر برای جا باز کردن */
+  }
+  
+  /* باکس لوگو و متن سمت راست هدر */
+  header > div:first-child {
+    flex-shrink: 0 !important;
+    gap: 8px !important; /* کاهش فاصله بین لوگو و متن */
+  }
+  
+  /* متون موبایل پرشیا */
+  header > div:first-child > div {
+    white-space: nowrap !important;
+  }
+  header span {
+    font-size: 1.1rem !important; /* کمی کوچیک‌تر کردن فونت */
+  }
+  header .text-wave {
+    font-size: 0.65rem !important;
+  }
+  
+  /* کانتینر دکمه‌های سمت چپ (جستجو، قفل، تم) */
+  #header-left-actions {
+    gap: 4px !important; /* کاهش فاصله دکمه‌ها */
+    flex-wrap: nowrap !important;
+  }
+  
+  #header-left-actions button {
+    width: 30px !important; /* کوچیک‌تر کردن دکمه‌ها */
+    height: 30px !important;
+    font-size: 0.85rem !important;
+  }
+
+
+  /* ۲. کوچک‌تر و فشرده‌تر کردن کادر همگام‌سازی (Sync Card) */
+  .sync-card-premium {
+    padding: 10px 14px !important; /* کاهش پدینگ کارت */
+    margin-bottom: 10px !important; /* کاهش فاصله با پایین */
+  }
+  
+  .sync-card-premium .btn-smart-sync {
+    padding: 8px 12px !important; /* کاهش ارتفاع دکمه */
+    font-size: 0.85rem !important; /* کوچیک‌تر کردن متن دکمه */
+    border-radius: 10px !important;
+  }
+  
+  .sync-card-premium .btn-smart-sync svg {
+    width: 18px !important; /* کوچیک‌تر کردن آیکون دکمه */
+    height: 18px !important;
+  }
+
+  .sync-card-premium #main-sync-status {
+    margin-top: 8px !important;
+    font-size: 0.72rem !important; /* کوچیک‌تر کردن متن وضعیت */
+  }
+</style>
+<!-- ⏱️ فشرده‌سازی و زیباسازی دکمه همگام‌سازی در هدر -->
+<style>
+  /* قفل کردن سایز دکمه و چیدمان داخلی */
+  #sync-status-btn {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+    box-shadow: none !important;
+  }
+
+  /* استایل ابر (بالای دکمه) */
+  #sync-status-btn .sync-cloud {
+    font-size: 11px !important;
+    line-height: 1 !important;
+    margin-bottom: 2px !important;
+    display: block !important;
+  }
+
+  /* استایل متن زمان (پایین دکمه) */
+  #sync-status-btn .sync-text {
+    font-size: 8px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    font-family: Tahoma, Arial, sans-serif !important;
+    display: block !important;
+    color: #fff !important;
+    margin-top: -1px !important;
+  }
+</style>
+
+<script>
+(function compactSyncBadgeFinal() {
+  // بازنویسی تابع برای اعمال استایل‌های جدید
+  updateSyncStatusBadge = function() {
+    var btn = document.getElementById('sync-status-btn');
+    if (!btn) return;
+
+    var lastSync = 0;
+    try { lastSync = Number(localStorage.getItem('db_last_sync_time')) || 0; } catch(e) {}
+
+    if (lastSync === 0) {
+      btn.innerHTML = '<span class="sync-cloud">☁️</span><span class="sync-text">---</span>';
+      btn.style.background = 'rgba(239,68,68,0.3)';
+      btn.style.border = '1px solid rgba(239,68,68,0.6)';
+      return;
+    }
+
+    var diffMs = Date.now() - lastSync;
+    var diffMins = Math.floor(diffMs / (1000 * 60));
+    var diffHours = Math.floor(diffMins / 60);
+    var diffDays = Math.floor(diffHours / 24);
+
+    var shortText = '';
+    var bg = '';
+    var border = '';
+
+    // تبدیل زمان به کدهای کوتاه (دقیقه: د، ساعت: س، روز: ر)
+    if (diffMins < 60) {
+      shortText = Math.max(1, diffMins) + 'د';
+      bg = 'rgba(16,185,129,0.25)'; // سبز شیشه‌ای
+      border = '1px solid rgba(16,185,129,0.5)';
+    } else if (diffHours < 24) {
+      shortText = diffHours + 'س';
+      bg = 'rgba(16,185,129,0.25)';
+      border = '1px solid rgba(16,185,129,0.5)';
+    } else if (diffDays < 30) {
+      shortText = diffDays + 'ر';
+      bg = 'rgba(245,158,11,0.25)'; // زرد شیشه‌ای
+      border = '1px solid rgba(245,158,11,0.5)';
+    } else {
+      shortText = Math.floor(diffDays / 30) + 'م';
+      bg = 'rgba(239,68,68,0.25)'; // قرمز شیشه‌ای
+      border = '1px solid rgba(239,68,68,0.5)';
+    }
+
+    // قرار دادن ابر در بالا و متن در پایین
+    btn.innerHTML = '<span class="sync-cloud">☁️</span><span class="sync-text">' + shortText + '</span>';
+    btn.style.background = bg;
+    btn.style.border = border;
+  };
+
+  // اجرای فوری
+  setTimeout(updateSyncStatusBadge, 500);
+
+  // آپدیت شدن هر ۱ دقیقه
+  setInterval(updateSyncStatusBadge, 60000);
+
+  console.log('[compact-sync-final] Ready ✅');
+})();
+</script>
+
+<!-- 🖨️ پچ نهایی اصلاح پرینتر (جلوگیری از حذف انتهای فاکتور A5) -->
+<style>
+  @media print {
+    /* ۱. تعریف ابعاد دقیق استاندارد A5 */
+    @page {
+      size: 148mm 210mm; /* عرض ۱۴۸ و ارتفاع ۲۱۰ */
+      margin: 0;
+    }
+
+    /* ۲. آزاد کردن ارتفاع بدنه برای جلوگیری از کات شدن */
+    html, body {
+      width: 100%;
+      height: auto !important;
+      min-height: 100% !important;
+      overflow: visible !important; 
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    #print-section {
+      height: auto !important;
+      overflow: visible !important;
+      page-break-after: avoid;
+    }
+
+    /* ۳. تنظیم صفحه اصلی چاپ */
+    .print-page {
+      width: 148mm;
+      height: 210mm;
+      box-sizing: border-box;
+      padding: 1mm 2mm !important; /* حاشیه امن داخلی */
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      page-break-after: avoid;
+      
+      /* 🔥 ترفند طلایی: کوچک کردن ۴ درصدی کل صفحه تا پرینتر لبه‌ها رو نخوره */
+      transform: scale(0.96); 
+      transform-origin: top center;
+    }
+
+    /* ۴. بهینه‌سازی فاصله‌های داخلی نصفه‌های کاغذ */
+    .print-half {
+      flex: 1;
+      overflow: hidden;
+      box-sizing: border-box;
+      padding: 2.5mm 3mm !important; /* کاهش پدینگ برای جا باز کردن */
+      border: 1.5px solid #333;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      position: relative;
+    }
+
+    /* ۵. فشرده‌سازی جدول و متون حقوقی برای جا شدن در یک صفحه */
+    .r-table td {
+      padding: 0.6mm 1mm !important; /* کاهش ارتفاع سلول‌ها */
+    }
+    .r-law {
+      font-size: 4.8pt !important; /* کوچیک‌تر کردن متن قوانین */
+      margin-top: 1mm !important;
+    }
+    .r-totals {
+      margin-top: 1mm !important;
+    }
+    .r-sign {
+      margin-top: auto !important;
+      padding-top: 1mm !important;
+    }
+  }
+</style>
+<!-- 🌙 فیکس قطعی کادر خلاصه امروز (با جاوااسکریپت) -->
+<script>
+(function fixDashboardThemeColors() {
+  function applyFixes() {
+    var dashboard = document.getElementById('quick-dashboard');
+    if (!dashboard) return;
+    
+    var isDark = document.body.classList.contains('dark-mode');
+    
+    // ۱. اصلاح پس‌زمینه کارت اصلی
+    if (isDark) {
+      dashboard.style.setProperty('background', '#1e293b', 'important');
+      dashboard.style.setProperty('border-color', '#334155', 'important');
+      // اصلاح رنگ عنوان بالای کارت
+      if(dashboard.children[0]) {
+        dashboard.children[0].children[0].style.setProperty('color', '#cbd5e1', 'important');
+        dashboard.children[0].children[1].style.setProperty('color', '#94a3b8', 'important');
+      }
+    } else {
+      dashboard.style.setProperty('background', 'linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%)', 'important');
+      dashboard.style.setProperty('border-color', '#e2e8f0', 'important');
+    }
+    
+    // ۲. اصلاح ۴ کادر داخلی
+    var flexWrap = dashboard.children[1];
+    if (flexWrap && flexWrap.children) {
+      Array.from(flexWrap.children).forEach(function(chip) {
+        if (isDark) {
+          if (chip.getAttribute('onclick') && chip.getAttribute('onclick').indexOf('unlockDashCash') !== -1) {
+            // کادر دخل (که زرد و قفل است)
+            chip.style.setProperty('background', 'linear-gradient(135deg, #422006 0%, #78350f 100%)', 'important');
+            chip.style.setProperty('border-color', '#92400e', 'important');
+            if(chip.children[0]) chip.children[0].style.setProperty('color', '#fcd34d', 'important');
+            if(chip.children[1]) chip.children[1].style.setProperty('color', '#fef3c7', 'important');
+          } else {
+            // کادرهای دیگر (تیره)
+            chip.style.setProperty('background', '#0f172a', 'important');
+            chip.style.setProperty('border-color', '#334155', 'important');
+            if(chip.children[0]) chip.children[0].style.setProperty('color', '#94a3b8', 'important');
+          }
+        } else {
+          // حالت روز (برگرداندن به حالت روشن)
+          if (chip.getAttribute('onclick') && chip.getAttribute('onclick').indexOf('unlockDashCash') !== -1) {
+            chip.style.setProperty('background', 'linear-gradient(135deg,#fef3c7 0%,#fde68a 100%)', 'important');
+            chip.style.setProperty('border-color', '#fbbf24', 'important');
+          } else {
+            chip.style.setProperty('background', '#fff', 'important');
+            chip.style.setProperty('border-color', '#e2e8f0', 'important');
+            if(chip.children[0]) chip.children[0].style.setProperty('color', '#64748b', 'important');
+          }
+        }
+      });
+    }
+  }
+
+  // اتصال به دکمه تغییر تم
+  var _toggleDark = window.toggleDarkMode;
+  if (typeof _toggleDark === 'function') {
+    window.toggleDarkMode = function() {
+      _toggleDark.apply(this, arguments);
+      setTimeout(applyFixes, 100);
+    };
+  }
+
+  // اتصال به رندر شدن مشتریان (که باعث ساخت این کادر میشه)
+  var _render = window.renderCustomers;
+  if (typeof _render === 'function') {
+    window.renderCustomers = function() {
+      _render.apply(this, arguments);
+      setTimeout(applyFixes, 200);
+    };
+  }
+  
+  var _renderRep = window.renderReports;
+  if (typeof _renderRep === 'function') {
+    window.renderReports = function() {
+      _renderRep.apply(this, arguments);
+      setTimeout(applyFixes, 200);
+    };
+  }
+
+  // اجرای اولیه هنگام لود
+  setTimeout(applyFixes, 1500);
+})();
+</script>
 </body>
 </html>

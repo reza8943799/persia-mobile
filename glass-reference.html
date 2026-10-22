@@ -11,7 +11,6 @@ body.embedded header,
 body.embedded .nav-tabs,
 body.embedded .magic-fab { display: none !important; }
 body.embedded { padding-bottom: 12px !important; }
-
 @font-face{font-family:'Vazirmatn';font-weight:400;font-display:swap;src:url('font/Vazirmatn-Regular.woff2') format('woff2'),url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');}
 @font-face{font-family:'Vazirmatn';font-weight:700;font-display:swap;src:url('font/Vazirmatn-Bold.woff2') format('woff2'),url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Bold.woff2') format('woff2');}
 
@@ -179,7 +178,6 @@ input,select,textarea{width:100%;padding:11px 13px;border-radius:10px;border:1px
 
 #toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,23,42,.95);color:#fff;padding:10px 20px;border-radius:12px;font-size:.85rem;font-weight:bold;opacity:0;pointer-events:none;transition:all .3s;z-index:9999;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
 </style>
 </head>
 <body>
@@ -344,6 +342,10 @@ if (location.search.includes('embed=1') || window.parent !== window) {
   document.documentElement.classList.add('embedded');
   document.body.classList.add('embedded');
 
+  // حذف autofocus در حالت embedded
+  const inp = document.getElementById('search-input');
+  if (inp) inp.removeAttribute('autofocus');
+  
   // هدایت دکمه Back / Escape به برنامه اصلی
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
@@ -354,8 +356,6 @@ if (location.search.includes('embed=1') || window.parent !== window) {
     window.parent.postMessage('glass-back-requested', '*');
   });
 }
-
-
 // =========================================================================
 // 🛡️ دیتابیس مهندسی گلس — قانون سخت‌گیرانه: تطابق ۱۰۰٪ یا حداکثر تلورانس ±۱.۰ میلی‌متر
 // تمامی مدل‌ها به‌صورت رشته‌های مستقل و استاندارد ثبت شده‌اند
@@ -484,13 +484,7 @@ const DEFAULT_GLASS_GROUPS = [
     id:'gl_sam_a16_a17_a26', title:'خانواده ۶.۷ اینچ سامسونگ (A16 / A17 / A18 / A26 / M16 / M17)',
     size:6.7, w:77.9, l:164.2, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای فلت', tags:['Open Pore'],
     note:'A16 4G/5G، A17، A26 5G و M16 همگی ۱۶۴.۰ تا ۱۶۴.۴ در ۷۷.۹ میلی‌متر هستند.',
-    models:['Samsung Galaxy A16 4G','Samsung Galaxy A16 5G','Samsung Galaxy A17 5G','Samsung Galaxy A18 5G','Samsung Galaxy A26 5G','Samsung Galaxy M16 5G','Samsung Galaxy M17 5G']
-  },
-  {
-    id:'gl_a36_a56_s24fe', title:'خانواده ۶.۷ اینچ فلت سامسونگ (A36 5G / A56 5G / S24 FE 5G)',
-    size:6.7, w:77.5, l:162.3, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['Open Pore'],
-    note:'A36 5G (۱۶۲.۹×۷۸.۰)، A56 5G (۱۶۲.۲×۷۷.۵) و S24 FE 5G (۱۶۲.۰×۷۷.۳).',
-    models:['Samsung Galaxy A36 5G','Samsung Galaxy A56 5G','Samsung Galaxy S24 FE 5G']
+    models:['Samsung Galaxy A16 4G','Samsung Galaxy A16 5G','Samsung Galaxy A17 5G','Samsung Galaxy A18 5G','Samsung Galaxy A26 5G','Samsung Galaxy M16 5G','Samsung Galaxy M17 5G','Samsung Galaxy F16 5G']
   },
   {
     id:'gl_s24plus_s25plus', title:'خانواده ۶.۷ اینچ پرچمدار سامسونگ (S24 Plus / S25 Plus)',
@@ -533,12 +527,6 @@ const DEFAULT_GLASS_GROUPS = [
     size:6.5, w:75.3, l:161.8, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
     note:'Note 10 5G، Note 10T 5G و Poco M3 Pro 5G همگی ۱۶۱.۸×۷۵.۳ میلی‌متر هستند.',
     models:['Xiaomi Redmi Note 10 5G','Xiaomi Redmi Note 10T 5G','Xiaomi Poco M3 Pro 5G']
-  },
-  {
-    id:'gl_a31_a32_glass', title:'خانواده ۶.۴ اینچ سامسونگ (A31 / A32 4G / A32 5G)',
-    size:6.4, w:73.4, l:158.7, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ / ناچ قطره‌ای', tags:[],
-    note:'Samsung A31 (۱۵۹.۳×۷۳.۱)، A32 4G (۱۵۸.۹×۷۳.۶) و A32 5G (۱۶۴.۲×۷۶.۱ - توجه: A32 5G بزرگ‌تر است و در گروه A12 قرار دارد).',
-    models:['Samsung Galaxy A31','Samsung Galaxy A32 4G']
   },
 
   // ═══ ۱۳. خانواده ۶.۷ اینچ سامسونگ (A71 / M51 / M52 / M53 / Note 10 Lite) ═══
@@ -652,7 +640,8 @@ const DEFAULT_GLASS_GROUPS = [
     note:'A10/M10 (۱۵۵.۶×۷۵.۶)، A10s (۱۵۶.۹×۷۵.۸)، M20 (۱۵۶.۴×۷۴.۵) و Redmi 8 / 8A (۱۵۶.۵×۷۵.۴).',
     models:['Samsung Galaxy A10','Samsung Galaxy A10s','Samsung Galaxy M10','Samsung Galaxy M20','Xiaomi Redmi 8','Xiaomi Redmi 8A']
   },
-  
+  // و) اصلاح گروه ۶.۳ اینچ شیائومی برای رعایت تلورانس ≤ 1.0mm (تفکیک Nokia به گروه جداگانه)
+
 {
   id:'gl_nokia_6_2_7_2_family', title:'خانواده ۶.۳ اینچ نوکیا (Nokia 6.2 / 7.2)',
   size:6.3, w:75.2, l:159.9, edge:'25D', edgeLabel:'💧 لبه 2.5D', notch:'💧 ناچ قطره‌ای', tags:[],
@@ -1757,6 +1746,7 @@ function applyFinalPrecisionPatches() {
   // ۱. اصلاح دقیق گروه‌های موجود برای رعایت ۱۰۰٪ قانون ≤ 1.0mm
   DEFAULT_GLASS_GROUPS.forEach(g => {
     // الف) جداسازی A05 (طول 168.8) از گروه A05s/A06/A14 (طول 167.3 تا 168.0)
+    
     if (g.id === 'gl_a05_a06_a14_redmi13c') {
       g.title = 'خانواده ۶.۷ اینچ جدید (A05s / A06 / A14 / Redmi 13C / Poco C65)';
       g.l = 167.7; g.w = 77.7;
@@ -1784,7 +1774,8 @@ function applyFinalPrecisionPatches() {
       g.note = 'Honor X8 4G (۱۶۳.۴×۷۴.۷)، Honor X8a (۱۶۲.۹×۷۴.۵) و Honor 90 Lite (۱۶۲.۹×۷۴.۵). اختلاف فقط ۰.۵ میلی‌متر!';
       g.models = ['Honor X8 4G','Honor X8a','Honor 90 Lite'];
     }
-
+    // و) اصلاح گروه ۶.۳ اینچ شیائومی و نوکیا برای رعایت تلورانس ≤ 1.0mm
+    
     // ز) افزودن Note 14 Pro 5G به گروه خمیده 162.5mm
     if (g.id === 'gl_curved_honor_x9c_note14proplus' && !g.models.includes('Xiaomi Redmi Note 14 Pro 5G')) {
       g.models.push('Xiaomi Redmi Note 14 Pro 5G');
@@ -1793,6 +1784,97 @@ function applyFinalPrecisionPatches() {
 
   // ۲. افزودن گروه‌های گلسِ جامانده (هم‌تراز با تب ال‌سی‌دی و باتری با دقت ≤ 1.0mm)
   const EXTRA_GLASS_GROUPS = [
+// =====================================================
+// 🛡️ گروه‌های گلس مشترک جدید (فقط گلس! - نه ال‌سی‌دی)
+// =====================================================
+
+// ─── سامسونگ ───
+{
+  id:'gl_sam_a22_5g_f42', title:'گلس مشترک سامسونگ A22 5G / F42 5G',
+  size:6.4, w:76.4, l:167.2, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+  note:'A22 5G و F42 5G هم‌سایز (۱۶۷.۲×۷۶.۴) هستند. فقط گلس مشترک است.',
+  models:['Samsung Galaxy A22 5G','Samsung Galaxy F42 5G']
+},
+{
+  id:'gl_sam_a31_a32_4g', title:'گلس مشترک سامسونگ A31 / A32 4G',
+  size:6.4, w:73.6, l:158.9, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+  note:'A31 و A32 4G هم‌سایز (۱۵۸.۹×۷۳.۶). فقط گلس مشترک است.',
+  models:['Samsung Galaxy A31','Samsung Galaxy A32 4G']
+},
+{
+  id:'gl_sam_a72_a80_a90', title:'گلس مشترک سامسونگ A72 / A80 / A90',
+  size:6.7, w:76.5, l:165.0, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+  note:'A72 (۱۶۵.۰×۷۷.۴)، A80 (۱۶۵.۲×۷۶.۵)، A90 (۱۶۵.۰×۷۶.۵). حداکثر اختلاف ۰.۹mm. فقط گلس مشترک است.',
+  models:['Samsung Galaxy A72','Samsung Galaxy A80','Samsung Galaxy A90']
+},
+{
+  id:'gl_sam_a70_a70s', title:'گلس مشترک سامسونگ A70 / A70s',
+  size:6.7, w:76.0, l:163.6, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+  note:'A70 و A70s هم‌سایز (۱۶۳.۶×۷۶.۰). فقط گلس مشترک است.',
+  models:['Samsung Galaxy A70','Samsung Galaxy A70s']
+},
+{
+  id:'gl_sam_a16_a17_a26_m16', title:'خانواده گلس مشترک سامسونگ A16 / A17 / A26 / M16 / F16',
+  size:6.7, w:77.9, l:164.2, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+  note:'A16 4G/5G، A17، A26، M16 و F16 همگی گلس یکسانی دارند (۱۶۴.۲×۷۷.۹). فقط گلس مشترک است.',
+  models:['Samsung Galaxy A16 4G','Samsung Galaxy A16 5G','Samsung Galaxy A17 5G','Samsung Galaxy A18 5G','Samsung Galaxy A26 5G','Samsung Galaxy M16 5G','Samsung Galaxy M17 5G','Samsung Galaxy F16 5G']
+},
+{
+  id:'gl_sam_s24fe_a36_a56', title:'گلس مشترک سامسونگ S24 FE / A36 5G / A56 5G',
+  size:6.7, w:77.5, l:162.0, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['Open Pore'],
+  note:'S24 FE (۱۶۲.۰×۷۷.۳)، A36 5G (۱۶۱.۴×۷۸.۰)، A56 5G (۱۶۲.۲×۷۷.۵). حداکثر اختلاف ۰.۹mm. فقط گلس مشترک است.',
+  models:['Samsung Galaxy S24 FE','Samsung Galaxy A36 5G','Samsung Galaxy A56 5G']
+},
+
+// ─── شیائومی ───
+{
+  id:'gl_pocom6_redmi12', title:'گلس مشترک شیائومی Poco M6 4G / Poco M6 Pro 5G / Redmi 12 4G/5G',
+  size:6.79, w:76.3, l:168.6, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+  note:'Poco M6 4G، Poco M6 Pro 5G و Redmi 12 4G/5G همگی گلس یکسانی دارند (۱۶۸.۶×۷۶.۳). فقط گلس مشترک است.',
+  models:['Xiaomi Poco M6 4G','Xiaomi Poco M6 Pro 5G','Xiaomi Redmi 12 4G','Xiaomi Redmi 12 5G','Xiaomi Redmi 13 4G']
+},
+{
+  id:'gl_pococ75_pocom7_redmi14c', title:'گلس مشترک شیائومی Poco C75 / Poco M7 / Redmi 14C',
+  size:6.88, w:77.8, l:171.9, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+  note:'Poco C75، Poco M7 و Redmi 14C همگی گلس یکسانی دارند (۱۷۱.۹×۷۷.۸). فقط گلس مشترک است.',
+  models:['Xiaomi Poco C75','Xiaomi Poco M7','Xiaomi Redmi 14C','Xiaomi Redmi 14C 5G','Xiaomi Redmi A4 5G','Xiaomi Redmi 15C','Xiaomi Poco C85']
+},
+{
+  id:'gl_11i_f3_x4pro_note10pro', title:'گلس مشترک شیائومی 11i / Poco F3 / Poco X4 Pro 5G / Note 10 Pro',
+  size:6.67, w:76.3, l:164.0, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+  note:'Xiaomi 11i، Poco F3، Poco X4 Pro 5G و Redmi Note 10 Pro گلس یکسانی دارند (۱۶۴.۰×۷۶.۳). فقط گلس مشترک است.',
+  models:['Xiaomi 11i','Xiaomi Poco F3','Xiaomi Poco X4 Pro 5G','Xiaomi Redmi Note 10 Pro','Xiaomi Redmi Note 10 Pro Max','Xiaomi Redmi Note 11 Pro 4G','Xiaomi Redmi Note 11 Pro 5G','Xiaomi Redmi Note 11 Pro+ 5G','Xiaomi Redmi Note 12 Pro 4G','Xiaomi Poco F4','Xiaomi Poco X4 GT']
+},
+{
+  id:'gl_pocox5pro_sama71', title:'گلس مشترک شیائومی Poco X5 Pro 5G / سامسونگ A71',
+  size:6.67, w:76.0, l:163.6, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+  note:'Poco X5 Pro 5G و Samsung A71 گلس تقریباً یکسانی دارند (حدود ۱۶۳.۶×۷۶.۰). فقط گلس مشترک است.',
+  models:['Xiaomi Poco X5 Pro 5G','Samsung Galaxy A71 4G','Samsung Galaxy A71 5G','Xiaomi Poco X3 GT','Xiaomi Redmi Note 12 Pro 5G']
+},
+{
+  id:'gl_pocom3pro_realme6', title:'گلس مشترک شیائومی Poco M3 Pro 5G / ریلمی 6',
+  size:6.5, w:75.2, l:161.8, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+  note:'Poco M3 Pro 5G و Realme 6 گلس تقریباً یکسانی دارند (حدود ۱۶۱.۸×۷۵.۲). فقط گلس مشترک است.',
+  models:['Xiaomi Poco M3 Pro 5G','Xiaomi Redmi Note 10 5G','Realme 6']
+},
+{
+  id:'gl_12t_realme_gt2pro', title:'گلس مشترک شیائومی 12T / Poco F5 Pro / ریلمی GT2 Pro',
+  size:6.67, w:75.9, l:163.1, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:[],
+  note:'Xiaomi 12T، Poco F5 Pro و Realme GT2 Pro گلس یکسانی دارند (حدود ۱۶۳.۱×۷۵.۹). فقط گلس مشترک است.',
+  models:['Xiaomi 12T','Xiaomi 12T Pro','Xiaomi Poco F5 Pro','Realme GT2 Pro']
+},
+{
+  id:'gl_mi9_oppof9', title:'گلس مشترک شیائومی Mi 9 / Mi 9 Lite / Mi CC9 / OPPO F9',
+  size:6.39, w:74.7, l:157.5, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
+  note:'Mi 9، Mi 9 Lite، Mi CC9 و OPPO F9 گلس تقریباً یکسانی دارند (حدود ۱۵۷.۵×۷۴.۷). فقط گلس مشترک است.',
+  models:['Xiaomi Mi 9','Xiaomi Mi 9 Lite','Xiaomi Mi CC9','OPPO F9']
+},
+{
+  id:'gl_pocox7pro_thick', title:'گلس Poco X7 Pro (نیازمند چسب ضخیم)',
+  size:6.67, w:74.8, l:160.5, edge:'FLAT', edgeLabel:'📐 تخت', notch:'⚫ پانچ وسط', tags:['THICK GLUE'],
+  note:'Poco X7 Pro به دلیل لبه‌های خاص نیاز به گلس با چسب ضخیم (THICK GLUE) دارد و با مدل‌های دیگر این گروه کاملاً مشترک نیست.',
+  models:['Xiaomi Poco X7 Pro 5G']
+},
     {
       id:'gl_a05_m05_standalone', title:'گلس اختصاصی Samsung Galaxy A05 / M05 (۱۶۸.۸×۷۸.۲mm)',
       size:6.7, w:78.2, l:168.8, edge:'FLAT', edgeLabel:'📐 تخت', notch:'💧 ناچ قطره‌ای', tags:[],
@@ -2096,11 +2178,12 @@ function checkTokenBoundaryMatch(targetNorm, queryNorm) {
   const remainder = targetNorm.slice(idx + queryNorm.length);
   if (!remainder) return true;
 
-  if (/^(201\d|202\d)(4g|5g|nfc)?$/.test(remainder)) return true;
-  if (/^\d/.test(remainder)) return false;
+    if (/^(201\d|202\d)(4g|5g|nfc)?$/.test(remainder)) return true;
   if (/^(4g|5g|nfc|china|global|india|duos)+$/.test(remainder)) return true;
+  if (/^\d/.test(remainder)) return false;
 
   return false;
+
 }
 // === پایان قسمت ۳-الف (کد قسمت ۳-ب را دقیقاً زیر این خط پیست کنید) ===
 // =========================================================================
@@ -2110,9 +2193,19 @@ function findAllMatches(rawQuery) {
   const qCore = normalizeCore(rawQuery);
   const detectedBrand = detectExplicitBrandInQuery(rawQuery);
 
-  // 🆕 اگر کاربر فقط نام برند رو تایپ کرده، مثل فیلتر برند رفتار کن
-  const stripped = normalizeCore(
-    cleanDigitsAndSpaces(rawQuery).replace(detectedBrand || '', '')
+const brandAliases = {
+  apple: /apple|iphone/gi,
+  samsung: /samsung|galaxy/gi,
+  xiaomi: /xiaomi|redmi|poco/gi,
+  huawei: /huawei|nova/gi,
+  honor: /honor/gi,
+  nokia: /nokia/gi,
+  realme: /realme|narzo/gi,
+  tecno: /tecno|spark|camon/gi,
+  infinix: /infinix/gi
+};
+const stripped = normalizeCore(
+    cleanDigitsAndSpaces(rawQuery).replace(brandAliases[detectedBrand] || detectedBrand || '', '')
   );
   if (detectedBrand && !stripped) {
     const brandSource = ALL_GLASS.filter(g =>
@@ -2129,7 +2222,6 @@ function findAllMatches(rawQuery) {
     };
   }
 
-  const qCore = normalizeCore(rawQuery);
   const glassSource = filterByBrand(ALL_GLASS);
   const partsSource = filterByBrand(ALL_PARTS);
 

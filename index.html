@@ -17513,6 +17513,20 @@ body.apk-print-mode #apk-print-toolbar {
 })();
 </script>
 
+<script>
+  // ثبت سرویس‌ورکر با نام جدید برای دور زدن کش قدیمی
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('./sw_v2.js').then(function(reg) {
+        // چک کردن مداوم برای آپدیت
+        reg.update();
+        console.log('[SW] Registered successfully with new name');
+      }).catch(function(err) {
+        console.log('[SW] Registration failed: ', err);
+      });
+    });
+  }
+</script>
 
 </body>
 </html>

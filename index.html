@@ -1724,6 +1724,81 @@ body.dark-mode select#cust-sort-order option {
 }
 
 </style>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🖨️ فیکس نهایی چاپ — جلوگیری از صفحات سفید اضافی              */
+/* ═══════════════════════════════════════════════════════════════ */
+@media print {
+  @page {
+    size: 148mm 210mm !important;
+    margin: 0 !important;
+  }
+  
+  /* 🔑 کلید حل مشکل: display:none تمام عناصر غیر از print-section */
+  body > *:not(#print-section) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  body > #print-section {
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  #print-section,
+  #print-section * {
+    visibility: visible !important;
+  }
+  
+  /* قفل کردن ابعاد دقیق */
+  html, body {
+    width: 148mm !important;
+    height: 210mm !important;
+    max-height: 210mm !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #fff !important;
+  }
+  
+  #print-section {
+    width: 148mm !important;
+    height: 210mm !important;
+    max-height: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
+  }
+  
+  .print-page {
+    width: 148mm !important;
+    height: 210mm !important;
+    max-height: 210mm !important;
+    margin: 0 !important;
+    padding: 2mm 3mm !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  
+  /* حذف هرگونه فاصله اضافی */
+  .print-page * {
+    page-break-inside: avoid !important;
+  }
+  
+  /* پاک کردن padding-bottom که روی body هست و باعث صفحه اضافه می‌شه */
+  body {
+    padding-bottom: 0 !important;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -16556,6 +16631,709 @@ window.showCustomerList = function() {
 
   console.log('[fix-first-card-bug] Ready ✅');
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* 💳 ماژول دیجی‌پی (نسخه ۴ — با گرد کردن هوشمند اعداد)                        */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+(function setupDigiPayModule() {
+  if (window._digipayLoaded) return;
+  window._digipayLoaded = true;
+
+  // ─── تنظیمات پیش‌فرض ───
+  var dpSettings = { m1: 8, m2: 12, m3: 8, vat: 10 };
+  try {
+    var savedCfg = localStorage.getItem('db_digipay_settings');
+    if (savedCfg) dpSettings = Object.assign(dpSettings, JSON.parse(savedCfg));
+  } catch(e) {}
+
+  var digipayTxs = [];
+  
+  // 🔗 لینک شخصی دیجی‌پی شما
+  var DEFAULT_DP_LINK = 'https://app.mydigipay.com/hub?rt=offline-payment/static?trackingCode=ehg4LroCt5zpnGPvxhrD';
+  var dpMerchantLink = localStorage.getItem('db_digipay_merchant_link') || DEFAULT_DP_LINK;
+
+  // ─── ۱. محاسبه با گرد کردن هوشمند ───
+  function calcDP(baseNet, methodCode) {
+    if (baseNet <= 0) return { rate: 0, commission: 0, vat: 0, totalFee: 0, gross: 0, net: 0 };
+
+    var rate = 0;
+    if (methodCode === 'MONTHLY') rate = dpSettings.m1;
+    else if (methodCode === 'INSTALLMENT') rate = dpSettings.m2;
+    else if (methodCode === 'WALLET') rate = dpSettings.m3;
+
+    var vatRate = dpSettings.vat;
+    
+    // ۱. محاسبه مبلغ دقیق قبل از گرد کردن
+    var exactGross = baseNet / (1 - (rate / 100) * (1 + vatRate / 100));
+    
+    // ۲. تعیین واحد گرد کردن (اگر بالای ۵ میلیون بود، ۵۰ هزار تومان، در غیر این صورت ۱۰ هزار تومان)
+    var roundUnit = exactGross >= 5000000 ? 50000 : 10000;
+    var roundedGross = Math.ceil(exactGross / roundUnit) * roundUnit;
+    
+    if (roundedGross < exactGross) roundedGross += roundUnit; // جلوگیری از باگ اعشار
+
+    // ۳. محاسبه مجدد کارمزد بر اساس مبلغ گرد شده نهایی
+    var actualCommission = Math.round(roundedGross * rate / 100);
+    var actualVat = Math.round(actualCommission * vatRate / 100);
+    var actualTotalFee = actualCommission + actualVat;
+    var actualNet = roundedGross - actualTotalFee;
+
+    return {
+      rate: rate,
+      commission: actualCommission,
+      vat: actualVat,
+      totalFee: actualTotalFee,
+      gross: roundedGross, // مشتری این را پرداخت می‌کند
+      net: actualNet       // شما این را دریافت می‌کنید
+    };
+  }
+
+  function getNextSettlementDate() {
+    var todayStr = (typeof getTodayJalali === 'function') ? getTodayJalali() : '1404/01/01';
+    var parts = todayStr.split('/');
+    var y = Number(parts[0]), m = Number(parts[1]) + 1;
+    if (m > 12) { m = 1; y++; }
+    return y + '/' + String(m).padStart(2, '0') + '/07';
+  }
+
+  // ─── ۲. ذخیره‌سازی ───
+  function loadDPTxs() {
+    if (typeof openAppDB !== 'function') return;
+    openAppDB().then(function(db) {
+      var req = db.transaction('store', 'readonly').objectStore('store').get('db_digipay_transactions');
+      req.onsuccess = function(e) {
+        if (e.target.result && Array.isArray(e.target.result)) digipayTxs = e.target.result;
+        renderDPTab();
+      };
+    });
+  }
+
+  function saveDPTxs() {
+    if (typeof openAppDB === 'function') {
+      openAppDB().then(function(db) {
+        db.transaction('store', 'readwrite').objectStore('store').put(digipayTxs, 'db_digipay_transactions');
+      });
+    }
+    if (typeof uploadToDrive === 'function') uploadToDrive(true);
+  }
+
+  // ─── ۳. تزریق UI ───
+  function injectPaymentUI() {
+    var selects = ['del-payment-method', 'pay-method-select', 'tx-pay-method', 'qs-pay-method'];
+    
+    selects.forEach(function(id) {
+      var sel = document.getElementById(id);
+      if (sel && !sel.querySelector('option[value="DIGIPAY"]')) {
+        var opt = document.createElement('option');
+        opt.value = 'DIGIPAY';
+        opt.innerHTML = '💳 پرداخت قسطی دیجی‌پی';
+        sel.appendChild(opt);
+        
+        sel.addEventListener('change', function() {
+          var box = document.getElementById('dp-ui-box-' + id);
+          if (box) box.style.display = (this.value === 'DIGIPAY') ? 'block' : 'none';
+          
+          if (this.value === 'DIGIPAY' && id === 'del-payment-method') {
+            var remInput = document.getElementById('del-payment-amount');
+            var amtInput = document.getElementById('dp-input-amount-' + id);
+            if (remInput && amtInput && !amtInput.value) {
+              amtInput.value = remInput.value;
+            }
+            updateDpUI(id);
+          }
+        });
+      }
+    });
+
+    var delModal = document.querySelector('#modal-signature .modal-content');
+    if (delModal && !document.getElementById('dp-ui-box-del-payment-method')) {
+      var box = document.createElement('div');
+      box.id = 'dp-ui-box-del-payment-method';
+      box.style.cssText = 'display:none; margin-top:15px; padding:12px; background:#f8fafc; border:1.5px dashed #6366f1; border-radius:12px;';
+      box.innerHTML = getDPUIHtml('del-payment-method');
+      var amtRow = document.getElementById('del-payment-amount').parentNode;
+      amtRow.parentNode.insertBefore(box, amtRow.nextSibling);
+    }
+
+    var recModal = document.querySelector('#modal-receive-payment .modal-content');
+    if (recModal && !document.getElementById('dp-ui-box-pay-method-select')) {
+      var box2 = document.createElement('div');
+      box2.id = 'dp-ui-box-pay-method-select';
+      box2.style.cssText = 'display:none; margin-top:15px; padding:12px; background:#f8fafc; border:1.5px dashed #6366f1; border-radius:12px;';
+      box2.innerHTML = getDPUIHtml('pay-method-select');
+      var sel2 = document.getElementById('pay-method-select');
+      if (sel2) sel2.parentNode.insertBefore(box2, sel2.nextSibling);
+    }
+  }
+
+  function getDPUIHtml(selectId) {
+    return `
+      <div style="font-weight:900;font-size:0.9rem;color:#4338ca;margin-bottom:8px;display:flex;justify-content:space-between;">
+        <span>💳 محاسبه‌گر دیجی‌پی</span>
+        <span style="font-size:0.7rem;color:#6366f1;background:#e0e7ff;padding:2px 6px;border-radius:4px;">گرد شده به ۱۰ هزار</span>
+      </div>
+      
+      <label class="field-label" style="color:#4338ca;margin-top:0;">۱. مبلغ کالا (دریافتی شما):</label>
+      <input type="text" id="dp-input-amount-${selectId}" oninput="formatAmountInput(this); updateDpUI('${selectId}')" style="font-weight:bold;border-color:#6366f1;background:#fff;" placeholder="مثلا ۷۰۰,۰۰۰">
+      
+      <label class="field-label" style="color:#4338ca;margin-top:12px;">۲. نوع پرداخت دیجی‌پی:</label>
+      <select id="dp-select-type-${selectId}" onchange="updateDpUI('${selectId}')" style="border-color:#6366f1;background:#fff;font-weight:bold;cursor:pointer;">
+        <option value="MONTHLY">اعتبار ماهانه (کمیسیون ${dpSettings.m1}٪)</option>
+        <option value="INSTALLMENT">اعتبار ۴ قسطه (کمیسیون ${dpSettings.m2}٪)</option>
+        <option value="WALLET">پرداخت از کیف پول (کمیسیون ${dpSettings.m3}٪)</option>
+      </select>
+
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-top:10px;font-size:0.85rem;line-height:1.9;">
+        
+        <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#64748b;"><span>مبلغ کالا:</span><b id="dp-lbl-base-${selectId}" style="color:#334155;">0 تومان</b></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#64748b;"><span>+ کارمزد دیجی‌پی (<span id="dp-lbl-rate-${selectId}">0</span>٪):</span><b id="dp-lbl-comm-${selectId}" style="color:#dc2626;">0 تومان</b></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#64748b;"><span>+ مالیات (۱۰٪):</span><b id="dp-lbl-vat-${selectId}" style="color:#dc2626;">0 تومان</b></div>
+        
+        <div style="border-top:1px dashed #cbd5e1;margin:8px 0;padding-top:8px;"></div>
+        <div style="display:flex;justify-content:space-between;background:#fef3c7;padding:8px;border-radius:8px;border:1.5px solid #fbbf24;margin-bottom:8px;">
+          <span style="color:#92400e;font-weight:900;">📤 مبلغ نهایی (پرداختی مشتری):</span>
+          <b id="dp-lbl-gross-${selectId}" style="color:#b45309;font-size:1.2rem;">0 تومان</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;background:#f0fdf4;padding:6px 8px;border-radius:6px;">
+          <span style="color:#166534;font-weight:bold;">💰 دریافتی شما:</span>
+          <b id="dp-lbl-net-${selectId}" style="color:#15803d;font-size:1rem;">0 تومان</b>
+        </div>
+        <div style="font-size:0.72rem;color:#64748b;margin-top:6px;text-align:center;">
+          📅 تسویه: <b style="color:#4338ca;">${getNextSettlementDate()}</b>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:6px;margin-top:12px;">
+        <button type="button" onclick="shareDPLink('${selectId}')" style="background:#22c55e;color:#fff;padding:10px;font-size:0.8rem;border-radius:8px;flex:1;margin:0;border:none;font-weight:bold;cursor:pointer;">📤 ارسال لینک</button>
+        <button type="button" onclick="copyDPText('${selectId}')" style="background:#0ea5e9;color:#fff;padding:10px;font-size:0.8rem;border-radius:8px;flex:1;margin:0;border:none;font-weight:bold;cursor:pointer;">📋 کپی متن</button>
+      </div>
+    `;
+  }
+
+  // ─── ۴. آپدیت UI ───
+  window.updateDpUI = function(selectId) {
+    var amtEl = document.getElementById('dp-input-amount-' + selectId);
+    var typeEl = document.getElementById('dp-select-type-' + selectId);
+    if (!amtEl || !typeEl) return;
+
+    var baseAmount = Number(amtEl.value.replace(/[^\d]/g, '')) || 0;
+    var method = typeEl.value;
+    var calc = calcDP(baseAmount, method);
+
+    document.getElementById('dp-lbl-base-' + selectId).innerText = formatToman(baseAmount);
+    document.getElementById('dp-lbl-rate-' + selectId).innerText = calc.rate;
+    document.getElementById('dp-lbl-comm-' + selectId).innerText = formatToman(calc.commission);
+    document.getElementById('dp-lbl-vat-' + selectId).innerText = formatToman(calc.vat);
+    document.getElementById('dp-lbl-gross-' + selectId).innerText = formatToman(calc.gross);
+    document.getElementById('dp-lbl-net-' + selectId).innerText = formatToman(calc.net);
+  };
+
+  // ─── ۵. متن پیام ───
+  function buildDPText(selectId) {
+    var amtEl = document.getElementById('dp-input-amount-' + selectId);
+    var typeEl = document.getElementById('dp-select-type-' + selectId);
+    var baseAmount = Number(amtEl.value.replace(/[^\d]/g, '')) || 0;
+    var method = typeEl.value;
+    var calc = calcDP(baseAmount, method);
+    
+    if (calc.gross <= 0) {
+        if (typeof showToast === 'function') showToast('لطفاً مبلغ را وارد کنید', 'warning');
+        return '';
+    }
+    
+    var typeName = method === 'MONTHLY' ? 'اعتبار ماهانه' : (method === 'INSTALLMENT' ? 'اعتبار ۴ قسطه' : 'کیف پول');
+    
+    var text = '✦ موبایل پرشیا ✦\n\n';
+    text += '💳 **پرداخت قسطی دیجی‌پی**\n\n';
+    text += '📊 نوع پرداخت: ' + typeName + '\n';
+    text += '📤 **مبلغ قابل پرداخت: ' + formatToman(calc.gross) + '**\n\n';
+    
+    if (dpMerchantLink) {
+      text += '🔗 لینک پرداخت اختصاصی دیجی‌پی:\n';
+      text += dpMerchantLink + '\n';
+    } else {
+      text += 'لطفاً از اپلیکیشن دیجی‌پی خود استفاده کنید.\n';
+    }
+    return text;
+  }
+
+  window.copyDPText = function(selectId) {
+    var text = buildDPText(selectId);
+    if (!text) return;
+    if (navigator.clipboard) navigator.clipboard.writeText(text);
+    showToast('📋 متن کپی شد', 'success');
+  };
+
+  window.shareDPLink = function(selectId) {
+    var text = buildDPText(selectId);
+    if (!text) return;
+    if (navigator.share) {
+      navigator.share({ title: 'لینک پرداخت دیجی‌پی', text: text }).catch(function(){});
+    } else {
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    }
+  };
+
+  // ─── ۶. ذخیره هنگام تحویل نهایی ───
+  var _baseConvertQuote = window.convertQuoteToDebt;
+  if (typeof _baseConvertQuote === 'function') {
+    window.convertQuoteToDebt = function(qId, deliverySignature, deliverySignatureDbId, newPayment, payMethod) {
+      if (payMethod === 'DIGIPAY') {
+        var amtEl = document.getElementById('dp-input-amount-del-payment-method');
+        var typeEl = document.getElementById('dp-select-type-del-payment-method');
+        if (amtEl && typeEl) {
+          var baseAmount = Number(amtEl.value.replace(/[^\d]/g, '')) || 0;
+          var method = typeEl.value;
+          var calc = calcDP(baseAmount, method);
+          
+          var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+          var c = q ? customers.find(function(x) { return x.id === q.customerId && !x.deleted; }) : null;
+          
+          digipayTxs.unshift({
+            id: Date.now(),
+            customerId: q ? q.customerId : null,
+            customerName: c ? c.name : 'نامشخص',
+            invoiceTitle: q ? (q.model || 'تحویل دستگاه') : 'تحویل',
+            invoiceDate: (typeof getTodayJalali === 'function') ? getTodayJalali() : '',
+            settlementDate: getNextSettlementDate(),
+            net: calc.net,       // دریافتی فروشنده
+            gross: calc.gross,   // پرداختی مشتری
+            method: method,
+            rate: calc.rate,
+            commission: calc.commission,
+            vat: calc.vat,
+            totalFee: calc.totalFee,
+            status: 'PENDING',
+            relatedQuoteId: qId,
+            createdAt: Date.now()
+          });
+          saveDPTxs();
+          
+          // اینجا مبلغی که از بدهی مشتری کم میشه همون مبلغ خالص (calc.net) هست
+          var payAmtInput = document.getElementById('del-payment-amount');
+          if (payAmtInput) {
+            payAmtInput.value = Number(calc.net).toLocaleString('en-US');
+          }
+        }
+      }
+      return _baseConvertQuote.apply(this, arguments);
+    };
+  }
+
+  // ─── ۷. تب دیجی‌پی ───
+  function injectDPTab() {
+    var moreBox = document.getElementById('more-menu-box');
+    if (moreBox && !moreBox.querySelector('[data-tab="digipay"]')) {
+      var item = document.createElement('div');
+      item.className = 'more-menu-item';
+      item.setAttribute('data-tab', 'digipay');
+      item.onclick = function() { openMoreTab('digipay'); };
+      item.innerHTML = '<div class="mm-icon">💳</div><span>دیجی‌پی</span>';
+      var glassItem = moreBox.querySelector('[data-tab="glass-ref"]');
+      if (glassItem) moreBox.insertBefore(item, glassItem);
+      else moreBox.appendChild(item);
+    }
+
+    if (!document.getElementById('tab-content-digipay')) {
+      var sec = document.createElement('div');
+      sec.id = 'tab-content-digipay';
+      sec.style.display = 'none';
+      sec.innerHTML = '<div class="container"><div id="digipay-list-container"></div></div>';
+      var backupSec = document.getElementById('tab-content-backup');
+      if (backupSec) backupSec.parentNode.insertBefore(sec, backupSec);
+      else document.body.appendChild(sec);
+    }
+
+    if (!window._dpTabHooked) {
+      window._dpTabHooked = true;
+      var _baseOpenTab = window.openTab;
+      window.openTab = function(tabName) {
+        if (tabName === 'digipay') {
+          if (typeof closeMoreMenu === 'function') closeMoreMenu();
+          ['customers', 'deposits', 'orders', 'expenses', 'parts', 'reports', 'backup', 'glass-ref'].forEach(function(t) {
+            var el = document.getElementById('tab-content-' + t);
+            if (el) el.style.display = 'none';
+          });
+          var dpSec = document.getElementById('tab-content-digipay');
+          if (dpSec) dpSec.style.display = 'block';
+          document.querySelectorAll('.nav-tabs .nav-tab').forEach(function(b) { b.classList.remove('active'); });
+          var mb = document.getElementById('btn-tab-more');
+          if (mb) mb.classList.add('active');
+          renderDPTab();
+          window.scrollTo(0,0);
+          return;
+        }
+        var dpSec2 = document.getElementById('tab-content-digipay');
+        if (dpSec2) dpSec2.style.display = 'none';
+        if (typeof _baseOpenTab === 'function') _baseOpenTab(tabName);
+      };
+    }
+  }
+
+  // ─── ۸. رندر تب ───
+  function renderDPTab() {
+    var container = document.getElementById('digipay-list-container');
+    if (!container) return;
+
+    var activeTxs = digipayTxs.filter(function(t) { return !t.deleted; });
+    var totalNet = 0, pendingNet = 0, totalFees = 0, totalGross = 0;
+
+    activeTxs.forEach(function(t) {
+      totalFees += (t.totalFee || 0);
+      totalGross += (t.gross || 0);
+      if (t.status === 'PENDING') pendingNet += (t.net || 0);
+      totalNet += (t.net || 0);
+    });
+
+    var html = `
+      <div class="card" style="background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%);padding:12px;border:1.5px solid #a5b4fc;border-radius:16px;margin-bottom:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:#fff;border-radius:10px;padding:8px;text-align:center;"><div style="font-size:0.7rem;color:#64748b;">💰 کل دریافتی شما</div><div style="font-size:1rem;font-weight:900;color:#10b981;margin-top:2px;">${formatToman(totalNet)}</div></div>
+          <div style="background:#fff;border-radius:10px;padding:8px;text-align:center;"><div style="font-size:0.7rem;color:#64748b;">⏳ در انتظار تسویه</div><div style="font-size:1rem;font-weight:900;color:#f59e0b;margin-top:2px;">${formatToman(pendingNet)}</div></div>
+          <div style="background:#fff;border-radius:10px;padding:8px;text-align:center;"><div style="font-size:0.7rem;color:#64748b;">📤 کل پرداختی مشتریان</div><div style="font-size:1rem;font-weight:900;color:#6366f1;margin-top:2px;">${formatToman(totalGross)}</div></div>
+          <div style="background:#fff;border-radius:10px;padding:8px;text-align:center;"><div style="font-size:0.7rem;color:#64748b;">💸 کارمزد+مالیات</div><div style="font-size:1rem;font-weight:900;color:#dc2626;margin-top:2px;">${formatToman(totalFees)}</div></div>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;margin-bottom:10px;background:#f8fafc;">
+        <div style="font-size:0.8rem;color:#475569;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🔗 لینک: ${dpMerchantLink ? '✅ ثبت شده' : '❌ ثبت نشده'}</div>
+        <button type="button" onclick="openDPSettings()" style="background:#64748b;color:#fff;padding:6px 10px;font-size:0.75rem;border-radius:6px;width:auto;margin:0;cursor:pointer;flex-shrink:0;">⚙️ تنظیمات</button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+    `;
+
+    if (activeTxs.length === 0) {
+      html += '<div class="card" style="text-align:center;padding:40px 20px;color:#94a3b8;"><div style="font-size:3rem;margin-bottom:10px;">💳</div><div style="font-weight:900;">تراکنشی ثبت نشده</div><div style="font-size:0.8rem;margin-top:6px;">با انتخاب «پرداخت دیجی‌پی» در مودال تحویل، تراکنش اینجا ثبت می‌شود.</div></div>';
+    } else {
+      activeTxs.sort(function(a,b) { return b.id - a.id; }).forEach(function(t) {
+        var isSettled = t.status === 'SETTLED';
+        var bg = isSettled ? '#f0fdf4' : '#fffbeb';
+        var border = isSettled ? '#86efac' : '#fde68a';
+        var typeLabel = t.method === 'MONTHLY' ? 'اعتبار ماهانه' : (t.method === 'INSTALLMENT' ? '۴ قسطه' : 'کیف پول');
+
+        html += `
+          <div class="card" style="padding:12px;background:${bg};border:1px solid ${border};">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div style="flex:1;">
+                <div style="font-weight:800;font-size:0.9rem;color:#1e293b;">👤 ${esc(t.customerName)} <span style="font-size:0.75rem;color:#6366f1;">(${typeLabel})</span></div>
+                <div style="font-size:0.75rem;color:#64748b;margin-top:2px;">📄 ${esc(t.invoiceTitle)}</div>
+                <div style="font-size:0.75rem;color:#64748b;margin-top:4px;">📅 فاکتور: ${esc(t.invoiceDate)} | تسویه: ${esc(t.settlementDate)}</div>
+                <div style="font-size:0.75rem;color:#475569;margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+                  <span style="background:#eff6ff;padding:2px 6px;border-radius:4px;color:#1e40af;">📤 مشتری: ${formatToman(t.gross)}</span>
+                  <span style="background:#fef2f2;padding:2px 6px;border-radius:4px;color:#b91c1c;">💸 کارمزد: ${formatToman(t.totalFee)}</span>
+                  <span style="background:#f0fdf4;padding:2px 6px;border-radius:4px;color:#166534;">💰 دریافتی شما: ${formatToman(t.net)}</span>
+                </div>
+              </div>
+              <div style="text-align:left;">
+                <span class="badge ${isSettled ? 'badge-green' : 'badge-orange'}" style="font-size:0.7rem;">${isSettled ? '✓ تسویه' : '⏳ منتظر'}</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:10px;border-top:1px dashed #cbd5e1;padding-top:8px;">
+              ${!isSettled ? `<button type="button" onclick="markDPSettled(${t.id})" style="background:#10b981;color:#fff;padding:6px;font-size:0.75rem;border-radius:6px;flex:1;margin:0;border:none;cursor:pointer;">✓ تسویه شد</button>` : ''}
+              <button type="button" onclick="shareDPTx(${t.id})" style="background:#22c55e;color:#fff;padding:6px 10px;font-size:0.75rem;border-radius:6px;width:auto;margin:0;border:none;cursor:pointer;">📤 لینک</button>
+              <button type="button" onclick="deleteDPTx(${t.id})" style="background:#fee2e2;color:#dc2626;padding:6px 10px;font-size:0.75rem;border-radius:6px;width:auto;margin:0;border:none;cursor:pointer;">🗑️</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  // ─── ۹. مدیریت ───
+  window.markDPSettled = function(id) {
+    var tx = digipayTxs.find(function(x) { return x.id === id; });
+    if (!tx) return;
+    tx.status = 'SETTLED';
+    saveDPTxs();
+    renderDPTab();
+    showToast('✅ تسویه ثبت شد — ' + formatToman(tx.net) + ' به شما رسید', 'success');
+  };
+
+  window.deleteDPTx = function(id) {
+    if (!confirm('این تراکنش حذف شود؟')) return;
+    var tx = digipayTxs.find(function(x) { return x.id === id; });
+    if (tx) { tx.deleted = true; saveDPTxs(); renderDPTab(); showToast('🗑️ حذف شد', 'info'); }
+  };
+
+  window.shareDPTx = function(id) {
+    var tx = digipayTxs.find(function(x) { return x.id === id; });
+    if (!tx) return;
+    
+    var text = '✦ موبایل پرشیا ✦\n\n';
+    text += '💳 **پرداخت قسطی دیجی‌پی**\n\n';
+    text += 'مشتری گرامی ' + tx.customerName + '،\n';
+    text += '📤 **مبلغ قابل پرداخت: ' + formatToman(tx.gross) + '**\n\n';
+    if (dpMerchantLink) {
+      text += '🔗 لینک پرداخت اختصاصی دیجی‌پی:\n';
+      text += dpMerchantLink;
+    }
+
+    if (navigator.share) navigator.share({ title: 'پرداخت دیجی‌پی', text: text }).catch(function(){});
+    else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  };
+
+  // ─── ۱۰. تنظیمات ───
+  window.openDPSettings = function() {
+    var old = document.getElementById('dp-settings-modal');
+    if (old) old.remove();
+
+    var html = `
+      <div class="modal-overlay" id="dp-settings-modal" style="z-index:9999999;display:flex;">
+        <div class="modal-content" style="max-width:400px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;">
+            <h3 style="font-size:1rem;color:#1e293b;">⚙️ تنظیمات دیجی‌پی</h3>
+            <button type="button" onclick="document.getElementById('dp-settings-modal').remove()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">✕</button>
+          </div>
+          <label class="field-label">لینک شخصی دیجی‌پی:</label>
+          <input type="url" id="dp-cfg-link" value="${dpMerchantLink}" placeholder="https://..." style="direction:ltr;text-align:left;font-size:0.75rem;">
+          <label class="field-label">کمیسیون اعتبار ماهانه (%):</label>
+          <input type="number" id="dp-cfg-m1" value="${dpSettings.m1}">
+          <label class="field-label">کمیسیون ۴ قسطه (%):</label>
+          <input type="number" id="dp-cfg-m2" value="${dpSettings.m2}">
+          <label class="field-label">کمیسیون کیف پول (%):</label>
+          <input type="number" id="dp-cfg-m3" value="${dpSettings.m3}">
+          <div class="row" style="margin-top:14px;">
+            <button type="button" onclick="saveDPSettings()" style="background:var(--success);flex:1.4;padding:11px;font-weight:800;cursor:pointer;">💾 ذخیره</button>
+            <button type="button" onclick="document.getElementById('dp-settings-modal').remove()" style="background:#cbd5e1;color:#1e293b;flex:1;padding:11px;cursor:pointer;">انصراف</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+  };
+
+  window.saveDPSettings = function() {
+    dpMerchantLink = document.getElementById('dp-cfg-link').value.trim();
+    dpSettings.m1 = Number(document.getElementById('dp-cfg-m1').value) || 8;
+    dpSettings.m2 = Number(document.getElementById('dp-cfg-m2').value) || 12;
+    dpSettings.m3 = Number(document.getElementById('dp-cfg-m3').value) || 8;
+    
+    localStorage.setItem('db_digipay_merchant_link', dpMerchantLink);
+    localStorage.setItem('db_digipay_settings', JSON.stringify(dpSettings));
+    
+    document.getElementById('dp-settings-modal').remove();
+    showToast('✅ تنظیمات ذخیره شد', 'success');
+    renderDPTab();
+    
+    ['del-payment-method', 'pay-method-select'].forEach(function(id) {
+       var typeSel = document.getElementById('dp-select-type-' + id);
+       if (typeSel) {
+           typeSel.options[0].text = 'اعتبار ماهانه (کمیسیون ' + dpSettings.m1 + '٪)';
+           typeSel.options[1].text = 'اعتبار ۴ قسطه (کمیسیون ' + dpSettings.m2 + '٪)';
+           typeSel.options[2].text = 'پرداخت از کیف پول (کمیسیون ' + dpSettings.m3 + '٪)';
+       }
+    });
+  };
+
+  // ─── شروع ───
+  function init() {
+    injectPaymentUI();
+    injectDPTab();
+    loadDPTxs();
+    console.log('[digipay v4] Loaded ✅ — با گرد کردن هوشمند اعداد');
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else setTimeout(init, 800);
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* 🖨️ فیکس چاپ در APK — استفاده از PDF به جای window.print()                  */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+(function fixApkPrint() {
+  'use strict';
+  
+  // آیا در APK هستیم؟
+  var isCapacitor = window.Capacitor && 
+                    window.Capacitor.isNativePlatform && 
+                    window.Capacitor.isNativePlatform();
+  
+  if (!isCapacitor) {
+    console.log('[fix-apk-print] Not in APK — using native browser print ✅');
+    return;
+  }
+  
+  console.log('[fix-apk-print] APK detected — using PDF generation ✅');
+  
+  var isGenerating = false;
+  
+  // جایگزینی window.print با نسخه PDF
+  window.print = async function() {
+    if (isGenerating) {
+      if (typeof showToast === 'function') showToast('در حال ساخت PDF...', 'info');
+      return;
+    }
+    isGenerating = true;
+    
+    // نمایش انیمیشن پرینتر
+    var modal = document.getElementById('printer-modal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('printing');
+    }
+    if (navigator.vibrate) navigator.vibrate([60, 40, 60, 40, 80, 50, 100]);
+    
+    if (typeof showToast === 'function') showToast('⏳ در حال ساخت فایل PDF...', 'info');
+    
+    try {
+      // لود html2pdf اگر نبود
+      if (typeof html2pdf === 'undefined') {
+        if (typeof showToast === 'function') showToast('📥 دریافت کتابخانه PDF...', 'info');
+        await new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+          s.onload = resolve;
+          s.onerror = function() { reject(new Error('خطا در دریافت کتابخانه PDF — اینترنت رو چک کنید')); };
+          document.head.appendChild(s);
+          setTimeout(function() { reject(new Error('زمان بارگذاری تمام شد')); }, 15000);
+        });
+      }
+      
+      var element = document.getElementById('print-section');
+      if (!element) throw new Error('بخش چاپ یافت نشد');
+      
+      // موقتاً نمایش بده تا PDF بگیره
+      var origDisplay = element.style.display;
+      element.style.display = 'block';
+      
+      // صبر کن تا رندر شود
+      await new Promise(function(r) { setTimeout(r, 300); });
+      
+      // تنظیمات PDF
+      var opt = {
+        margin: 0,
+        filename: 'فاکتور_' + (new Date().getTime()) + '.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          width: 559,   // 148mm * 3.78
+          height: 794,  // 210mm * 3.78
+          windowWidth: 559,
+          windowHeight: 794
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: [148, 210], 
+          orientation: 'portrait',
+          compress: true
+        },
+        pagebreak: { mode: 'avoid-all' }
+      };
+      
+      // ساخت PDF
+      var worker = html2pdf().set(opt).from(element);
+      var pdfBlob = await worker.outputPdf('blob');
+      
+      // برگردوندن display
+      element.style.display = origDisplay;
+      
+      // بستن انیمیشن
+      if (modal) {
+        modal.classList.remove('printing');
+        modal.style.display = 'none';
+      }
+      
+      // ذخیره و اشتراک‌گذاری
+      await shareOrSavePdf(pdfBlob, opt.filename);
+      
+    } catch(err) {
+      console.error('[apk-print]', err);
+      if (modal) {
+        modal.classList.remove('printing');
+        modal.style.display = 'none';
+      }
+      if (typeof showToast === 'function') {
+        showToast('❌ خطا: ' + err.message, 'error');
+      }
+    } finally {
+      isGenerating = false;
+    }
+  };
+  
+  // تابع اشتراک‌گذاری PDF
+  async function shareOrSavePdf(blob, filename) {
+    // ۱. تلاش با Web Share API (کاربر می‌تونه پرینت کنه، ذخیره کنه یا بفرسته)
+    if (navigator.share && navigator.canShare) {
+      try {
+        var file = new File([blob], filename, { type: 'application/pdf' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'فاکتور موبایل پرشیا',
+            text: 'فاکتور شما آماده است'
+          });
+          if (typeof showToast === 'function') showToast('✅ فاکتور آماده شد', 'success');
+          return;
+        }
+      } catch(shareErr) {
+        // اگر کاربر لغو کرد، به دانلود برو
+        if (shareErr.name === 'AbortError') {
+          console.log('[apk-print] User cancelled share');
+          return;
+        }
+        console.warn('[apk-print] Share failed, trying download:', shareErr);
+      }
+    }
+    
+    // ۲. تلاش با Capacitor Share plugin (اگر نصب شده باشه)
+    if (window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+      try {
+        var reader = new FileReader();
+        var base64 = await new Promise(function(resolve, reject) {
+          reader.onload = function() { resolve(reader.result.split(',')[1]); };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        
+        // نیاز به Filesystem برای ذخیره داریم
+        if (window.Capacitor.Plugins.Filesystem) {
+          var saved = await window.Capacitor.Plugins.Filesystem.writeFile({
+            path: filename,
+            data: base64,
+            directory: 'CACHE'
+          });
+          
+          await window.Capacitor.Plugins.Share.share({
+            title: 'فاکتور موبایل پرشیا',
+            url: saved.uri
+          });
+          if (typeof showToast === 'function') showToast('✅ فاکتور آماده شد', 'success');
+          return;
+        }
+      } catch(capErr) {
+        console.warn('[apk-print] Capacitor share failed:', capErr);
+      }
+    }
+    
+    // ۳. Fallback: دانلود با anchor
+    try {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+      if (typeof showToast === 'function') showToast('📄 فایل PDF در پوشه Downloads ذخیره شد', 'success');
+    } catch(dlErr) {
+      console.error('[apk-print] Download failed:', dlErr);
+      if (typeof showToast === 'function') showToast('❌ امکان ذخیره فایل نبود', 'error');
+    }
+  }
+  
+  console.log('[fix-apk-print] Override ready ✅');
+})();
+
 </script>
 <!-- ✨ افکت نهایی و مینیمال برای دکمه افزودن پرونده (3D Press & Subtle Shine) -->
 <style>

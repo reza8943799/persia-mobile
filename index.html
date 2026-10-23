@@ -17514,15 +17514,14 @@ body.apk-print-mode #apk-print-toolbar {
 </script>
 
 <script>
-  // ثبت سرویس‌ورکر با نام جدید برای دور زدن کش قدیمی
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      navigator.serviceWorker.register('./sw_v2.js').then(function(reg) {
-        // چک کردن مداوم برای آپدیت
+      // برگشتیم به اسم اصلی sw.js
+      navigator.serviceWorker.register('./sw.js').then(function(reg) {
         reg.update();
-        console.log('[SW] Registered successfully with new name');
+        console.log('✅ سرویس‌ورکر با موفقیت ثبت شد');
       }).catch(function(err) {
-        console.log('[SW] Registration failed: ', err);
+        console.error('❌ خطا در ثبت سرویس‌ورکر:', err);
       });
     });
   }

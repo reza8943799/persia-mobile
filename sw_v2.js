@@ -1,4 +1,4 @@
-var CACHE_NAME = 'persia-cache-v8-nuke'; // نام جدید برای نابودی کش قبلی
+var CACHE_NAME = 'persia-cache-v9-killswitch'; 
 
 var urlsToCache = [
   './',
@@ -30,7 +30,7 @@ self.addEventListener('activate', function(event) {
     caches.keys().then(function(names) {
       return Promise.all(
         names.filter(function(n) { return n !== CACHE_NAME; })
-             .map(function(n) { return caches.delete(n); }) // پاک کردن کش‌های قدیمی
+             .map(function(n) { return caches.delete(n); })
       );
     }).then(function() { return self.clients.claim(); })
   );
@@ -39,7 +39,7 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event) {
   if (event.request.url.includes('script.google.com') || event.request.url.includes('qrserver.com')) return;
 
-  // 🔑 تغییرات اصلی: همه فایل‌های HTML همیشه آنلاین چک میشن
+  // 🔑 استراتژی Network-First برای صفحات HTML (همیشه اول آنلاین چک میشه)
   if (event.request.mode === 'navigate' || (event.request.method === 'GET' && event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'))) {
     event.respondWith(
       fetch(event.request).then(function(response) {
@@ -53,7 +53,7 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // بقیه فایل‌ها: اول کش، بعد شبکه
+  // Cache-First برای بقیه فایل‌ها (عکس، فونت و...)
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true }).then(function(response) {
       return response || fetch(event.request).then(function(res) {

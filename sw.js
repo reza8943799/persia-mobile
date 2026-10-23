@@ -1,4 +1,5 @@
-var CACHE_NAME = 'persia-cache-v6'; 
+// ⚠️ اسم کش رو به v7 تغییر دادم تا حتماً کش قدیمی بمیره
+var CACHE_NAME = 'persia-cache-v7-final'; 
 
 var urlsToCache = [
   './',
@@ -39,32 +40,30 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  var url = new URL(event.request.url);
-  
-  // درخواست‌های API آنلاین رو کش نکن
-  if (url.hostname.includes('script.google.com') || url.hostname.includes('qrserver.com')) {
+  // درخواست‌های API رو دست نزن
+  if (event.request.url.includes('script.google.com') || event.request.url.includes('qrserver.com')) {
     return;
   }
 
-  // 🔑 راه‌حل اصلی: فایل‌های HTML همیشه اول از اینترنت لود شوند
+  // 🔑 راه‌حل اصلی: صفحات HTML همیشه اول از شبکه لود بشن
   if (event.request.mode === 'navigate' || (event.request.method === 'GET' && event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'))) {
     event.respondWith(
-      fetch(event.request).then(function(res) {
-        // اگر آنلاین بودیم، نسخه جدید رو دانلود و کش کن
-        var resClone = res.clone();
+      fetch(event.request).then(function(response) {
+        // اگه آنلاین بودیم، نسخه جدید رو بگیر و کش کن
+        var resClone = response.clone();
         caches.open(CACHE_NAME).then(function(cache) {
           cache.put(event.request, resClone);
         });
-        return res;
+        return response;
       }).catch(function() {
-        // اگر آفلاین بودیم، از کش بخون
+        // اگه آفلاین بودیم، از کش بخون
         return caches.match(event.request);
       })
     );
     return;
   }
 
-  // بقیه فایل‌ها (عکس، فونت، اسکریپت‌ها) سریع از کش لود میشن
+  // بقیه فایل‌ها (عکس، فونت، اسکریپت‌ها): اول از کش، بعد شبکه
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true }).then(function(response) {
       return response || fetch(event.request).then(function(res) {
@@ -76,10 +75,11 @@ self.addEventListener('fetch', function(event) {
         }
         return res;
       }).catch(function() {
-        if (url.pathname.endsWith('glass-reference.html')) {
+        // اگه آفلاین بودیم و توی کش هم نبود
+        if (event.request.url.includes('glass-reference.html')) {
           return caches.match('./glass-reference.html');
         }
-        return caches.match('./index.html'); // صفحه پشتیبان
+        return caches.match('./index.html');
       });
     })
   );

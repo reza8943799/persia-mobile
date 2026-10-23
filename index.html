@@ -17384,13 +17384,18 @@ window.showCustomerList = function() {
 <!-- کتابخانه تبدیل فاکتور به تصویر برای چاپ در APK بدون نیاز به کامپیوتر -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
 
+<!-- کتابخانه تبدیل فاکتور به تصویر باکیفیت -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
 <style>
-/* استایل پیش‌نمایش فاکتور A5 در محیط موبایل و APK */
-body.apk-print-mode > *:not(#print-section):not(#apk-print-toolbar) {
+/* ═══════════════════════════════════════════════════════════════════ */
+/* 🖨️ اعمال دقیق استایل‌های فاکتور A5 در صفحه پیش‌نمایش و چاپ موبایل  */
+/* ═══════════════════════════════════════════════════════════════════ */
+body.apk-print-mode > *:not(#print-section):not(#apk-print-toolbar):not(#apk-img-modal) {
   display: none !important;
 }
 body.apk-print-mode {
-  background: #334155 !important;
+  background: #1e293b !important;
   padding-top: 64px !important;
   padding-bottom: 30px !important;
   overflow-y: auto !important;
@@ -17400,47 +17405,227 @@ body.apk-print-mode #print-section {
   display: block !important;
   visibility: visible !important;
   position: relative !important;
-  width: 148mm !important;
-  max-width: 96vw !important;
-  min-height: 200mm !important;
-  height: auto !important;
+  width: 100% !important;
+  max-width: 148mm !important;
   margin: 0 auto !important;
   background: #ffffff !important;
   color: #000000 !important;
-  box-shadow: 0 10px 35px rgba(0,0,0,0.45) !important;
-  border-radius: 8px !important;
-  padding: 3mm !important;
-  overflow: visible !important;
+  font-family: Tahoma, Arial, sans-serif !important;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.5) !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
 }
 body.apk-print-mode #print-section * {
   visibility: visible !important;
 }
+
+/* شبیه‌سازی کامل استایل‌های @media print روی صفحه گوشی */
 body.apk-print-mode .print-page {
   width: 100% !important;
-  height: auto !important;
-  max-height: none !important;
+  min-height: 209mm !important;
+  box-sizing: border-box !important;
+  padding: 2mm 3mm !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 2mm !important;
+  background: #fff !important;
 }
 body.apk-print-mode .print-half {
+  flex: 1 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  padding: 3mm 4mm !important;
   border: 1.5px solid #333 !important;
   border-radius: 4px !important;
-  padding: 3mm !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
   background: #fff !important;
-  color: #000 !important;
 }
 body.apk-print-mode .print-half.split {
-  display: flex !important;
   flex-direction: row !important;
   padding: 0 !important;
+  gap: 0 !important;
 }
-body.apk-print-mode .workshop-col { flex: 2 !important; padding: 3mm !important; }
-body.apk-print-mode .notes-col { flex: 1 !important; padding: 3mm !important; border-right: 1px dashed #333 !important; }
-body.apk-print-mode .r-table { width: 100% !important; border-collapse: collapse !important; font-size: 7.5pt !important; margin-top: 2mm !important; }
-body.apk-print-mode .r-table td, body.apk-print-mode .r-table th { border: 1px solid #666 !important; padding: 1mm !important; }
-body.apk-print-mode .r-header { text-align: center !important; border-bottom: 1px solid #444 !important; padding-bottom: 1.5mm !important; margin-bottom: 2mm !important; position: relative !important; }
-body.apk-print-mode .r-qr-box img { width: 42px !important; height: 42px !important; }
+body.apk-print-mode .workshop-col {
+  flex: 2 !important;
+  padding: 3mm 3.5mm !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body.apk-print-mode .notes-col {
+  flex: 1 !important;
+  padding: 3mm 2.5mm !important;
+  border-right: 1px dashed #333 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #fdfdfd !important;
+}
+body.apk-print-mode .r-watermark {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) rotate(-30deg) !important;
+  font-size: 48pt !important;
+  font-weight: 900 !important;
+  letter-spacing: 10px !important;
+  text-transform: uppercase !important;
+  color: rgba(0, 0, 0, 0.04) !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  font-family: Arial, sans-serif !important;
+}
+body.apk-print-mode .cut-line-mid {
+  height: 5mm !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 6.5pt !important;
+  color: #666 !important;
+}
+body.apk-print-mode .r-header {
+  text-align: center !important;
+  margin-bottom: 1.5mm !important;
+  border-bottom: 1px solid #444 !important;
+  padding-bottom: 1mm !important;
+  position: relative !important;
+}
+body.apk-print-mode .r-title {
+  font-size: 9.5pt !important;
+  font-weight: bold !important;
+  line-height: 1.2 !important;
+  color: #000 !important;
+}
+body.apk-print-mode .r-badge {
+  font-size: 6.5pt !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  font-weight: bold !important;
+  border: 1px solid #333 !important;
+  padding: 1px 4px !important;
+  border-radius: 2px !important;
+  color: #000 !important;
+}
+body.apk-print-mode .r-qr-box {
+  position: absolute !important;
+  left: 2mm !important;
+  top: 1mm !important;
+  text-align: center !important;
+}
+body.apk-print-mode .r-qr-box img,
+body.apk-print-mode .r-qr-box svg {
+  width: 36px !important;
+  height: 36px !important;
+  border: 1px solid #333 !important;
+  border-radius: 3px !important;
+  display: block !important;
+}
+body.apk-print-mode .r-qr-caption {
+  font-size: 4.5pt !important;
+  color: #333 !important;
+}
+body.apk-print-mode .r-meta {
+  font-size: 7pt !important;
+  line-height: 1.45 !important;
+  color: #000 !important;
+}
+body.apk-print-mode .r-meta table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+body.apk-print-mode .r-meta td {
+  padding: 0.4mm 0 !important;
+  vertical-align: top !important;
+  color: #000 !important;
+}
+body.apk-print-mode .r-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 7pt !important;
+  margin-top: 1mm !important;
+}
+body.apk-print-mode .r-table td,
+body.apk-print-mode .r-table th {
+  padding: 0.9mm 1mm !important;
+  border: 1px solid #888 !important;
+  color: #000 !important;
+}
+body.apk-print-mode .r-table th {
+  background: #eee !important;
+  font-weight: bold !important;
+}
+body.apk-print-mode .r-totals {
+  margin-top: 1.2mm !important;
+  font-size: 7.2pt !important;
+  line-height: 1.6 !important;
+  color: #000 !important;
+}
+body.apk-print-mode .r-totals > div {
+  display: flex !important;
+  justify-content: space-between !important;
+}
+body.apk-print-mode .r-total-final {
+  border-top: 1px solid #333 !important;
+  margin-top: 0.8mm !important;
+  padding-top: 0.8mm !important;
+  font-weight: bold !important;
+  font-size: 8.2pt !important;
+}
+body.apk-print-mode .r-law {
+  font-size: 5.5pt !important;
+  line-height: 1.35 !important;
+  text-align: justify !important;
+  margin-top: 1.2mm !important;
+  padding: 1mm 1.5mm !important;
+  background: #fafafa !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 2px !important;
+  color: #111 !important;
+}
+body.apk-print-mode .r-sign {
+  display: flex !important;
+  justify-content: space-between !important;
+  font-size: 6.5pt !important;
+  margin-top: auto !important;
+  padding-top: 1.5mm !important;
+  gap: 2mm !important;
+  color: #000 !important;
+}
+body.apk-print-mode .r-sign > div { flex: 1 !important; }
+body.apk-print-mode .r-sign .line { border-bottom: 1px dotted #333 !important; height: 6mm !important; }
+body.apk-print-mode .r-tech {
+  font-size: 6.5pt !important;
+  line-height: 1.55 !important;
+  background: #fafafa !important;
+  padding: 1.5mm !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 2px !important;
+  margin-top: 1mm !important;
+  color: #000 !important;
+}
+body.apk-print-mode .r-notes-title {
+  font-size: 7pt !important;
+  font-weight: bold !important;
+  margin-bottom: 1mm !important;
+  border-bottom: 1px solid #666 !important;
+  padding-bottom: 0.6mm !important;
+  text-align: center !important;
+  color: #000 !important;
+}
+body.apk-print-mode .r-notes-lines {
+  flex: 1 !important;
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 5mm, #ccc 5mm, #ccc 5.05mm) !important;
+  min-height: 20mm !important;
+}
+body.apk-print-mode .r-tech-sign {
+  margin-top: 1.5mm !important;
+  font-size: 6pt !important;
+  color: #000 !important;
+}
+body.apk-print-mode .r-tech-sign .line {
+  border-bottom: 1px dotted #333 !important;
+  height: 6mm !important;
+}
 
 #apk-print-toolbar {
   display: none;
@@ -17460,15 +17645,28 @@ body.apk-print-mode #apk-print-toolbar {
   display: flex !important;
 }
 @media print {
-  #apk-print-toolbar { display: none !important; }
+  #apk-print-toolbar, #apk-img-modal { display: none !important; }
 }
 </style>
 
 <!-- نوار ابزار بالای پیش‌نمایش فاکتور -->
 <div id="apk-print-toolbar">
   <button type="button" onclick="closeApkPrintMode()" style="width:auto;margin:0;padding:8px 12px;background:#ef4444;border-radius:8px;font-size:0.78rem;">⬅ بازگشت</button>
-  <button type="button" id="btn-share-print-img" onclick="shareOrPrintInvoiceImage()" style="flex:1;margin:0;padding:8px 10px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);border-radius:8px;font-size:0.8rem;font-weight:900;">📤 ارسال به پرینتر / اشتراک فاکتور</button>
-  <button type="button" onclick="triggerSystemPrint()" style="width:auto;margin:0;padding:8px 12px;background:#10b981;border-radius:8px;font-size:0.78rem;">🖨️ چاپ وب</button>
+  <button type="button" id="btn-share-print-img" onclick="shareOrPrintInvoiceImage()" style="flex:1;margin:0;padding:8px 10px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);border-radius:8px;font-size:0.8rem;font-weight:900;">📤 ساخت تصویر فاکتور / ارسال به پرینتر</button>
+</div>
+
+<!-- پنجره نمایش و دانلود تصویر فاکتور (در صورتی که WebView گوشی اشتراک مستقیم را مسدود کند) -->
+<div id="apk-img-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.92);z-index:999999999;flex-direction:column;align-items:center;justify-content:center;padding:14px;">
+  <div style="color:#fff;font-weight:bold;font-size:0.85rem;margin-bottom:8px;text-align:center;">
+    ✅ تصویر فاکتور آماده شد! دکمه دانلود را بزنید یا انگشتتان را روی تصویر نگه دارید:
+  </div>
+  <div style="max-height:75vh;overflow-y:auto;background:#fff;border-radius:8px;padding:4px;">
+    <img id="apk-rendered-invoice-img" src="" style="max-width:92vw;height:auto;display:block;" alt="Invoice">
+  </div>
+  <div style="display:flex;gap:8px;width:100%;max-width:400px;margin-top:10px;">
+    <a id="apk-download-invoice-link" href="" download="Factor_PersiaMobile.png" style="flex:1;background:#10b981;color:#fff;text-align:center;padding:10px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:0.85rem;">⬇️ دانلود تصویر فاکتور</a>
+    <button type="button" onclick="document.getElementById('apk-img-modal').style.display='none'" style="flex:1;margin:0;background:#64748b;color:#fff;padding:10px;border-radius:8px;font-size:0.85rem;">بستن</button>
+  </div>
 </div>
 
 <script>
@@ -17476,69 +17674,99 @@ body.apk-print-mode #apk-print-toolbar {
   var _nativeWindowPrint = window.print.bind(window);
   var _savedPrintHTML = '';
 
-  // بستن هرگونه انیمیشن پرینتر گیرکرده
   function hidePrinterOverlay() {
     var overlays = document.querySelectorAll('.printer-overlay, #printer-overlay');
     overlays.forEach(function(el) { el.style.display = 'none'; });
   }
 
+  // تبدیل عکس QR آنلاین به Base64 برای جلوگیری از قفل شدن html2canvas
+  function inlineExternalImages(container) {
+    var imgs = container.querySelectorAll('img');
+    var promises = [];
+    imgs.forEach(function(img) {
+      var src = img.getAttribute('src') || '';
+      if (src.indexOf('http') === 0 && src.indexOf('data:') !== 0) {
+        img.crossOrigin = 'anonymous';
+        var p = fetch(src, { mode: 'cors' })
+          .then(function(r) { return r.blob(); })
+          .then(function(blob) {
+            return new Promise(function(resolve) {
+              var reader = new FileReader();
+              reader.onloadend = function() { img.src = reader.result; resolve(); };
+              reader.readAsDataURL(blob);
+            });
+          })
+          .catch(function() {
+            img.style.display = 'none';
+          });
+        promises.push(p);
+      }
+    });
+    return Promise.all(promises);
+  }
+
   window.closeApkPrintMode = function() {
     document.body.classList.remove('apk-print-mode');
+    document.getElementById('apk-img-modal').style.display = 'none';
     hidePrinterOverlay();
   };
 
-  window.triggerSystemPrint = function() {
-    hidePrinterOverlay();
-    _nativeWindowPrint();
-  };
-
-  // تبدیل فاکتور A5 به عکس استاندارد و ارسال مستقیم به منوی Print / Share گوشی
   window.shareOrPrintInvoiceImage = function() {
     var printSec = document.getElementById('print-section');
     var btn = document.getElementById('btn-share-print-img');
     if (!printSec || typeof html2canvas === 'undefined') {
-      alert('لطفاً ۲ ثانیه صبر کنید یا اینترنت را برای بارگذاری اولیه ابزار تصویر وصل کنید.');
+      alert('لطفاً اینترنت را برای بارگذاری اولیه ابزار تصویر وصل کنید.');
       return;
     }
+
     var origText = btn.innerText;
     btn.innerText = '⏳ در حال ساخت فاکتور...';
     btn.disabled = true;
 
-    html2canvas(printSec, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff'
+    inlineExternalImages(printSec).then(function() {
+      return html2canvas(printSec, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff'
+      });
     }).then(function(canvas) {
       btn.innerText = origText;
       btn.disabled = false;
 
-      canvas.toBlob(function(blob) {
-        if (!blob) return;
-        var file = new File([blob], 'Factor_PersiaMobile_' + Date.now() + '.png', { type: 'image/png' });
+      var dataUrl = canvas.toDataURL('image/png');
 
-        // باز کردن منوی Share بومی اندروید (شامل گزینه Print / پرینتر)
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({
-            title: 'فاکتور موبایل پرشیا',
-            files: [file]
-          }).catch(function() {});
-        } else {
-          // دانلود مستقیم تصویر در گالری/دانلودها اگر Share فایل پشتیبانی نشد
-          var a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = file.name;
-          a.click();
+      canvas.toBlob(function(blob) {
+        if (blob && navigator.canShare) {
+          var file = new File([blob], 'Factor_' + Date.now() + '.png', { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            navigator.share({
+              title: 'فاکتور موبایل پرشیا',
+              files: [file]
+            }).catch(function() {
+              showFallbackImageModal(dataUrl);
+            });
+            return;
+          }
         }
+        showFallbackImageModal(dataUrl);
       }, 'image/png');
-    }).catch(function() {
+    }).catch(function(err) {
       btn.innerText = origText;
       btn.disabled = false;
-      alert('خطا در ساخت تصویر فاکتور');
+      alert('خطا در ساخت تصویر: ' + (err && err.message ? err.message : ''));
     });
   };
 
-  // جایگزینی هوشمند window.print
+  function showFallbackImageModal(dataUrl) {
+    var modal = document.getElementById('apk-img-modal');
+    var img = document.getElementById('apk-rendered-invoice-img');
+    var link = document.getElementById('apk-download-invoice-link');
+    if (img) img.src = dataUrl;
+    if (link) link.href = dataUrl;
+    if (modal) modal.style.display = 'flex';
+  }
+
   window.print = function() {
     hidePrinterOverlay();
     var printSec = document.getElementById('print-section');
@@ -17546,19 +17774,18 @@ body.apk-print-mode #apk-print-toolbar {
       _savedPrintHTML = printSec.innerHTML;
     }
 
-    // باز کردن حالت پیش‌نمایش فاکتور
     document.body.classList.add('apk-print-mode');
     setTimeout(function() {
       hidePrinterOverlay();
       if (printSec && _savedPrintHTML) {
         printSec.innerHTML = _savedPrintHTML;
       }
-      // در مرورگر و PWA پنجره چاپ هم باز می‌شود
       try { _nativeWindowPrint(); } catch(e) {}
-    }, 300);
+    }, 250);
   };
 })();
 </script>
+
 
 </body>
 </html>

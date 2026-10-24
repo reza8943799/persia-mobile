@@ -17576,103 +17576,150 @@ body.apk-print-mode #apk-print-toolbar {
   if (t) t.style.removeProperty('display'); // به‌جای 'none'
 };
 
-  window.sharePrintAsImage = async function() {
-    var element = document.getElementById('print-section');
-    if (!element) return showToast('بخش چاپ پیدا نشد', 'error');
+window.sharePrintAsImage = async function() {
+  var element = document.getElementById('print-section');
+  if (!element) return showToast('بخش چاپ پیدا نشد', 'error');
 
-    try {
-      if (typeof html2canvas === 'undefined') {
-        showToast('⏳ در حال بارگذاری کتابخانه...', 'info');
-        await new Promise(function(resolve, reject) {
-          var s = document.createElement('script');
-          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-          s.onload = resolve;
-          s.onerror = function() { reject(new Error('CDN blocked')); };
-          document.head.appendChild(s);
-        });
-      }
+  try {
+    showToast('⏳ در حال آماده‌سازی فاکتور...', 'info');
 
-      showToast('⏳ در حال ساخت عکس فاکتور...', 'info');
-      await new Promise(function(r) { setTimeout(r, 50); });
-
-      var canvas = await html2canvas(element, {
-  scale: 2, // 👈 از 3 به 2 تغییر کرد (جلوگیری از سفید شدن در اندروید)
-  useCORS: true,
-  allowTaint: true,
-  backgroundColor: '#ffffff',
-  logging: false
-  // 👈 پارامترهای width و height و windowWidth حذف شدند چون باعث باگ می‌شدند
-});
-
-      var blob = await new Promise(function(resolve) {
-        canvas.toBlob(function(b) { resolve(b); }, 'image/jpeg', 0.95);
-      });
-      if (!blob) throw new Error('ساخت عکس ناموفق');
-
-      var today = new Date();
-      var filename = 'Invoice_' +
-        today.getFullYear() + '-' +
-        String(today.getMonth() + 1).padStart(2, '0') + '-' +
-        String(today.getDate()).padStart(2, '0') + '_' +
-        String(today.getHours()).padStart(2, '0') + '-' +
-        String(today.getMinutes()).padStart(2, '0') + '.jpg';
-
-      // ─── مسیر ۱: Capacitor Share + Filesystem
-      var Cap = window.Capacitor && window.Capacitor.Plugins;
-      if (Cap && Cap.Share && Cap.Filesystem) {
-        try {
-          var base64 = await new Promise(function(resolve) {
-            var reader = new FileReader();
-            reader.onloadend = function() { resolve(reader.result); };
-            reader.readAsDataURL(blob);
-          });
-          var base64Data = base64.split(',')[1];
-          var writeRes = await Cap.Filesystem.writeFile({
-            path: filename,
-            data: base64Data,
-            directory: 'CACHE'
-          });
-          await Cap.Share.share({
-            title: 'فاکتور موبایل پرشیا',
-            text: 'فاکتور شما آماده است — ذخیره یا چاپ کنید',
-            url: writeRes.uri,
-            dialogTitle: 'ذخیره یا چاپ فاکتور'
-          });
-          showToast('✅ منوی اشتراک باز شد', 'success');
-          return;
-        } catch (e) {
-          if (e && (e.message || '').toLowerCase().indexOf('cancel') !== -1) return;
-          console.warn('[Share-Capacitor]', e);
+    // ۱. تبدیل عکس QR به Base64 تا خطای امنیتی CORS پیش نیاد
+    var images = element.querySelectorAll('img');
+    for (var i = 0; i < images.length; i++) {
+        var img = images[i];
+        if (!img.src.startsWith('data:')) {
+            try {
+                var res = await fetch(img.src, { mode: 'cors' });
+                var blob = await res.blob();
+                var base64 = await new Promise(function(resolve) {
+                    var reader = new FileReader();
+                    reader.onloadend = function() { resolve(reader.result); };
+                    reader.readAsDataURL(blob);
+                });
+                img.src = base64;
+            } catch(e) {
+                console.warn('CORS failed for image:', img.src);
+                // اگه لود نشد، مخفیش می‌کنیم تا عکس اصلی رو خراب نکنه
+                img.style.display = 'none'; 
+            }
         }
-      }
-
-      // ─── مسیر ۲: navigator.share
-      if (navigator.share && navigator.canShare) {
-        try {
-          var file = new File([blob], filename, { type: 'image/jpeg' });
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: 'فاکتور موبایل پرشیا',
-              text: 'فاکتور شما آماده است'
-            });
-            showToast('✅ فاکتور ارسال شد', 'success');
-            return;
-          }
-        } catch (e) {
-          if (e && e.name === 'AbortError') return;
-          console.warn('[Share-File]', e);
-        }
-      }
-
-      // ─── مسیر ۳: مودال نمایش عکس
-      showImageSaveModal(blob, filename);
-
-    } catch (err) {
-      console.error('[sharePrintAsImage]', err);
-      showToast('⚠️ خطا در ساخت عکس: ' + (err.message || 'نامشخص'), 'error');
     }
-  };
+
+    // ۲. آماده‌سازی کتابخانه
+    if (typeof html2canvas === 'undefined') {
+      await new Promise(function(resolve, reject) {
+        var s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        s.onload = resolve;
+        s.onerror = function() { reject(new Error('CDN blocked')); };
+        document.head.appendChild(s);
+      });
+    }
+
+    showToast('⏳ در حال ساخت عکس...', 'info');
+    await new Promise(function(r) { setTimeout(r, 50); });
+
+    // ۳. عکس‌برداری (مخفی کردن موقت واترمارک برای جلوگیری از باگ چرخش)
+    var watermark = element.querySelector('.r-watermark');
+    if (watermark) watermark.style.display = 'none';
+
+    var canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false, // 👈 حتماً باید false باشه
+      backgroundColor: '#ffffff',
+      logging: false
+    });
+
+    if (watermark) watermark.style.display = 'block';
+
+    // ۴. تبدیل به عکس (با روش جایگزین برای WebView اندروید)
+    var blob = await new Promise(function(resolve, reject) {
+        try {
+            canvas.toBlob(function(b) {
+                if (b) {
+                    resolve(b);
+                } else {
+                    // روش جایگزین برای گوشی‌هایی که toBlob رو ساپورت نمی‌کنن
+                    var dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                    var byteString = atob(dataUrl.split(',')[1]);
+                    var ab = new ArrayBuffer(byteString.length);
+                    var ia = new Uint8Array(ab);
+                    for (var j = 0; j < byteString.length; j++) {
+                        ia[j] = byteString.charCodeAt(j);
+                    }
+                    resolve(new Blob([ab], { type: 'image/jpeg' }));
+                }
+            }, 'image/jpeg', 0.95);
+        } catch(e) { reject(e); }
+    });
+
+    if (!blob) throw new Error('خروجی خالی است');
+
+    var today = new Date();
+    var filename = 'Invoice_' +
+      today.getFullYear() + '-' +
+      String(today.getMonth() + 1).padStart(2, '0') + '-' +
+      String(today.getDate()).padStart(2, '0') + '_' +
+      String(today.getHours()).padStart(2, '0') + '-' +
+      String(today.getMinutes()).padStart(2, '0') + '.jpg';
+
+    // ─── مسیر ۱: Capacitor Share + Filesystem
+    var Cap = window.Capacitor && window.Capacitor.Plugins;
+    if (Cap && Cap.Share && Cap.Filesystem) {
+      try {
+        var base64 = await new Promise(function(resolve) {
+          var reader = new FileReader();
+          reader.onloadend = function() { resolve(reader.result); };
+          reader.readAsDataURL(blob);
+        });
+        var base64Data = base64.split(',')[1];
+        var writeRes = await Cap.Filesystem.writeFile({
+          path: filename,
+          data: base64Data,
+          directory: 'CACHE'
+        });
+        await Cap.Share.share({
+          title: 'فاکتور موبایل پرشیا',
+          text: 'فاکتور شما آماده است — ذخیره یا چاپ کنید',
+          url: writeRes.uri,
+          dialogTitle: 'ذخیره یا چاپ فاکتور'
+        });
+        showToast('✅ منوی اشتراک باز شد', 'success');
+        return;
+      } catch (e) {
+        if (e && (e.message || '').toLowerCase().indexOf('cancel') !== -1) return;
+        console.warn('[Share-Capacitor]', e);
+      }
+    }
+
+    // ─── مسیر ۲: navigator.share
+    if (navigator.share && navigator.canShare) {
+      try {
+        var file = new File([blob], filename, { type: 'image/jpeg' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'فاکتور موبایل پرشیا',
+            text: 'فاکتور شما آماده است'
+          });
+          showToast('✅ فاکتور ارسال شد', 'success');
+          return;
+        }
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+        console.warn('[Share-File]', e);
+      }
+    }
+
+    // ─── مسیر ۳: مودال نمایش عکس
+    showImageSaveModal(blob, filename);
+
+  } catch (err) {
+    console.error('[sharePrintAsImage]', err);
+    showToast('⚠️ خطا: ' + (err.message || 'نامشخص'), 'error');
+  }
+};
 
   function showImageSaveModal(blob, filename) {
     var old = document.getElementById('image-save-modal');

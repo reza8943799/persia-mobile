@@ -17237,8 +17237,8 @@ body.apk-print-mode #print-section * {
 body.apk-print-mode .print-page {
   width: 100% !important;
   height: auto !important;
-  min-height: 0 !important;
-  padding: 8px 10px !important;
+  min-height: 840px !important; /* 👈 نسبت A5 رو برگردوندیم تا کاغذ کش نیاد */
+  padding: 15px !important;
   background: #fff !important;
   display: block !important;
   overflow: visible !important;
@@ -17276,11 +17276,12 @@ body.apk-print-mode .notes-col {
 body.apk-print-mode .r-header {
   display: block !important;
   text-align: center !important;
-  padding-bottom: 6px !important;
+  padding: 0 60px 8px 60px !important; /* 👈 این پدینگ اجازه نمیده متن بره زیر QR */
   margin-bottom: 8px !important;
   border-bottom: 1px solid #444 !important;
   position: relative !important;
-  min-height: 42px !important;
+  min-height: 45px !important;
+}
 }
 body.apk-print-mode .r-title {
   display: block !important;
@@ -17341,8 +17342,21 @@ body.apk-print-mode .r-meta table {
   display: table !important;
   width: 100% !important;
   border-collapse: collapse !important;
-  table-layout: fixed !important;
+  table-layout: fixed !important; /* 👈 این خیلی مهمه، ستون‌ها رو منظم نگه می‌داره */
   margin: 0 !important;
+}
+body.apk-print-mode .r-meta td {
+  display: table-cell !important;
+  padding: 6px 10px !important; /* 👈 فاصله ایمن از لبه‌ها */
+  vertical-align: top !important;
+  color: #000 !important;
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+  border: none !important;
+  height: auto !important;
 }
 body.apk-print-mode .r-meta tr { display: table-row !important; }
 body.apk-print-mode .r-meta td {
@@ -17582,16 +17596,13 @@ body.apk-print-mode #apk-print-toolbar {
       await new Promise(function(r) { setTimeout(r, 50); });
 
       var canvas = await html2canvas(element, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        width: element.scrollWidth,
-        height: element.scrollHeight,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight
-      });
+  scale: 2, // 👈 از 3 به 2 تغییر کرد (جلوگیری از سفید شدن در اندروید)
+  useCORS: true,
+  allowTaint: true,
+  backgroundColor: '#ffffff',
+  logging: false
+  // 👈 پارامترهای width و height و windowWidth حذف شدند چون باعث باگ می‌شدند
+});
 
       var blob = await new Promise(function(resolve) {
         canvas.toBlob(function(b) { resolve(b); }, 'image/jpeg', 0.95);

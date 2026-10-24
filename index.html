@@ -17571,160 +17571,109 @@ body.apk-print-mode #apk-print-toolbar {
   };
 
   window.closeApkPrint = function() {
-  document.body.classList.remove('apk-print-mode');
-  var t = document.getElementById('apk-print-toolbar');
-  if (t) t.style.removeProperty('display'); // به‌جای 'none'
-};
+    document.body.classList.remove('apk-print-mode');
+    var t = document.getElementById('apk-print-toolbar');
+    if (t) t.style.display = 'none';
+  };
 
-window.sharePrintAsImage = async function() {
-  var element = document.getElementById('print-section');
-  if (!element) return showToast('بخش چاپ پیدا نشد', 'error');
+  window.sharePrintAsImage = async function() {
+    var element = document.getElementById('print-section');
+    if (!element) return showToast('بخش چاپ پیدا نشد', 'error');
 
-  try {
-    showToast('⏳ در حال آماده‌سازی فاکتور...', 'info');
+    try {
+      showToast('⏳ در حال آماده‌سازی...', 'info');
 
-    // ۱. تبدیل عکس QR به Base64 تا خطای امنیتی CORS پیش نیاد
-    var images = element.querySelectorAll('img');
-    for (var i = 0; i < images.length; i++) {
-        var img = images[i];
-        if (!img.src.startsWith('data:')) {
-            try {
-                var res = await fetch(img.src, { mode: 'cors' });
-                var blob = await res.blob();
-                var base64 = await new Promise(function(resolve) {
-                    var reader = new FileReader();
-                    reader.onloadend = function() { resolve(reader.result); };
-                    reader.readAsDataURL(blob);
-                });
-                img.src = base64;
-            } catch(e) {
-                console.warn('CORS failed for image:', img.src);
-                // اگه لود نشد، مخفیش می‌کنیم تا عکس اصلی رو خراب نکنه
-                img.style.display = 'none'; 
-            }
-        }
-    }
+      // ۱. تبدیل QR به Base64 (جلوگیری از خطای CORS)
+      var images = element.querySelectorAll('img');
+      for (var i = 0; i < images.length; i++) {
+          var img = images[i];
+          if (!img.src.startsWith('data:')) {
+              try {
+                  var res = await fetch(img.src, { mode: 'cors' });
+                  var blob = await res.blob();
+                  var b64 = await new Promise(function(resolve) {
+                      var reader = new FileReader();
+                      reader.onloadend = function() { resolve(reader.result); };
+                      reader.readAsDataURL(blob);
+                  });
+                  img.src = b64;
+              } catch(e) {
+                  img.style.display = 'none';
+              }
+          }
+      }
 
-    // ۲. آماده‌سازی کتابخانه
-    if (typeof html2canvas === 'undefined') {
-      await new Promise(function(resolve, reject) {
-        var s = document.createElement('script');
-        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-        s.onload = resolve;
-        s.onerror = function() { reject(new Error('CDN blocked')); };
-        document.head.appendChild(s);
+      // ۲. لود html2canvas
+      if (typeof html2canvas === 'undefined') {
+        await new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+          s.onload = resolve;
+          s.onerror = function() { reject(new Error('CDN blocked')); };
+          document.head.appendChild(s);
+        });
+      }
+
+      showToast('⏳ در حال ساخت عکس...', 'info');
+      await new Promise(function(r) { setTimeout(r, 100); });
+
+      // ۳. مخفی کردن واترمارک برای جلوگیری از باگ
+      var watermark = element.querySelector('.r-watermark');
+      if (watermark) watermark.style.display = 'none';
+
+      var canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
       });
-    }
 
-    showToast('⏳ در حال ساخت عکس...', 'info');
-    await new Promise(function(r) { setTimeout(r, 50); });
+      if (watermark) watermark.style.display = 'block';
 
-    // ۳. عکس‌برداری (مخفی کردن موقت واترمارک برای جلوگیری از باگ چرخش)
-    var watermark = element.querySelector('.r-watermark');
-    if (watermark) watermark.style.display = 'none';
+      // ۴. استخراج مستقیم دیتا (بدون Blob که توی اندروید خراب میشه)
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.90);
+      
+      if (!dataUrl || dataUrl === 'data:,' || dataUrl.length < 1000) {
+          throw new Error('عکس تولید شده خالی است. لطفاً دوباره تلاش کنید.');
+      }
 
-    var canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: false, // 👈 حتماً باید false باشه
-      backgroundColor: '#ffffff',
-      logging: false
-    });
+      var filename = 'Persia_Invoice_' + Date.now() + '.jpg';
 
-    if (watermark) watermark.style.display = 'block';
-
-    // ۴. تبدیل به عکس (با روش جایگزین برای WebView اندروید)
-    var blob = await new Promise(function(resolve, reject) {
+      // ─── مسیر ۱: Capacitor Share (اگر نصب باشه)
+      var Cap = window.Capacitor && window.Capacitor.Plugins;
+      if (Cap && Cap.Share && Cap.Filesystem) {
         try {
-            canvas.toBlob(function(b) {
-                if (b) {
-                    resolve(b);
-                } else {
-                    // روش جایگزین برای گوشی‌هایی که toBlob رو ساپورت نمی‌کنن
-                    var dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                    var byteString = atob(dataUrl.split(',')[1]);
-                    var ab = new ArrayBuffer(byteString.length);
-                    var ia = new Uint8Array(ab);
-                    for (var j = 0; j < byteString.length; j++) {
-                        ia[j] = byteString.charCodeAt(j);
-                    }
-                    resolve(new Blob([ab], { type: 'image/jpeg' }));
-                }
-            }, 'image/jpeg', 0.95);
-        } catch(e) { reject(e); }
-    });
-
-    if (!blob) throw new Error('خروجی خالی است');
-
-    var today = new Date();
-    var filename = 'Invoice_' +
-      today.getFullYear() + '-' +
-      String(today.getMonth() + 1).padStart(2, '0') + '-' +
-      String(today.getDate()).padStart(2, '0') + '_' +
-      String(today.getHours()).padStart(2, '0') + '-' +
-      String(today.getMinutes()).padStart(2, '0') + '.jpg';
-
-    // ─── مسیر ۱: Capacitor Share + Filesystem
-    var Cap = window.Capacitor && window.Capacitor.Plugins;
-    if (Cap && Cap.Share && Cap.Filesystem) {
-      try {
-        var base64 = await new Promise(function(resolve) {
-          var reader = new FileReader();
-          reader.onloadend = function() { resolve(reader.result); };
-          reader.readAsDataURL(blob);
-        });
-        var base64Data = base64.split(',')[1];
-        var writeRes = await Cap.Filesystem.writeFile({
-          path: filename,
-          data: base64Data,
-          directory: 'CACHE'
-        });
-        await Cap.Share.share({
-          title: 'فاکتور موبایل پرشیا',
-          text: 'فاکتور شما آماده است — ذخیره یا چاپ کنید',
-          url: writeRes.uri,
-          dialogTitle: 'ذخیره یا چاپ فاکتور'
-        });
-        showToast('✅ منوی اشتراک باز شد', 'success');
-        return;
-      } catch (e) {
-        if (e && (e.message || '').toLowerCase().indexOf('cancel') !== -1) return;
-        console.warn('[Share-Capacitor]', e);
-      }
-    }
-
-    // ─── مسیر ۲: navigator.share
-    if (navigator.share && navigator.canShare) {
-      try {
-        var file = new File([blob], filename, { type: 'image/jpeg' });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'فاکتور موبایل پرشیا',
-            text: 'فاکتور شما آماده است'
+          var base64Data = dataUrl.split(',')[1];
+          var writeRes = await Cap.Filesystem.writeFile({
+            path: filename,
+            data: base64Data,
+            directory: 'CACHE'
           });
-          showToast('✅ فاکتور ارسال شد', 'success');
+          await Cap.Share.share({
+            title: 'فاکتور موبایل پرشیا',
+            text: 'فاکتور شما آماده است',
+            url: writeRes.uri
+          });
+          showToast('✅ منوی اشتراک باز شد', 'success');
           return;
+        } catch (e) {
+          console.warn('Capacitor share failed:', e);
         }
-      } catch (e) {
-        if (e && e.name === 'AbortError') return;
-        console.warn('[Share-File]', e);
       }
+
+      // ─── مسیر ۲: مودال داخلی (با Data URL - تضمینی)
+      showImageSaveModal(dataUrl, filename);
+
+    } catch (err) {
+      console.error('[sharePrintAsImage]', err);
+      showToast('⚠️ خطا: ' + (err.message || 'نامشخص'), 'error');
     }
+  };
 
-    // ─── مسیر ۳: مودال نمایش عکس
-    showImageSaveModal(blob, filename);
-
-  } catch (err) {
-    console.error('[sharePrintAsImage]', err);
-    showToast('⚠️ خطا: ' + (err.message || 'نامشخص'), 'error');
-  }
-};
-
-  function showImageSaveModal(blob, filename) {
+  function showImageSaveModal(dataUrl, filename) {
     var old = document.getElementById('image-save-modal');
     if (old) old.remove();
-    var url = URL.createObjectURL(blob);
+    
     var html =
       '<div id="image-save-modal" style="position:fixed;inset:0;background:rgba(15,23,42,0.92);z-index:99999999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;overflow-y:auto;">' +
         '<div style="background:#fff;border-radius:16px;padding:12px;max-width:100%;width:100%;max-height:94vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 50px rgba(0,0,0,0.5);">' +
@@ -17736,7 +17685,7 @@ window.sharePrintAsImage = async function() {
             '👇 <b>روی عکس زیر انگشتت رو نگه دار</b> و بزن «ذخیره تصویر»<br>یا دکمه سبز پایین رو بزن' +
           '</div>' +
           '<div style="background:#e2e8f0;border-radius:8px;padding:6px;display:flex;justify-content:center;overflow:auto;max-height:55vh;">' +
-            '<img id="image-save-preview" src="' + url + '" style="max-width:100%;height:auto;display:block;border-radius:4px;box-shadow:0 4px 15px rgba(0,0,0,0.15);">' +
+            '<img id="image-save-preview" src="' + dataUrl + '" style="max-width:100%;height:auto;display:block;border-radius:4px;box-shadow:0 4px 15px rgba(0,0,0,0.15);">' +
           '</div>' +
           '<div style="display:flex;gap:6px;">' +
             '<button type="button" onclick="downloadImageFromModal()" style="flex:1.4;background:linear-gradient(135deg,#10b981 0%,#047857 100%);color:#fff;padding:12px;font-size:0.88rem;border-radius:10px;font-weight:900;border:none;cursor:pointer;">💾 ذخیره در Downloads</button>' +
@@ -17745,36 +17694,34 @@ window.sharePrintAsImage = async function() {
         '</div>' +
       '</div>';
     document.body.insertAdjacentHTML('beforeend', html);
-    window._currentImageBlob = blob;
+    window._currentImageDataUrl = dataUrl;
     window._currentImageName = filename;
-    window._currentImageUrl = url;
   }
 
   window.closeImageSaveModal = function() {
     var m = document.getElementById('image-save-modal');
     if (m) m.remove();
-    if (window._currentImageUrl) {
-      URL.revokeObjectURL(window._currentImageUrl);
-      window._currentImageUrl = null;
-    }
+    window._currentImageDataUrl = null;
   };
 
   window.downloadImageFromModal = function() {
-    if (!window._currentImageBlob) return;
+    if (!window._currentImageDataUrl) return;
     var a = document.createElement('a');
-    a.href = window._currentImageUrl;
+    a.href = window._currentImageDataUrl;
     a.download = window._currentImageName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    showToast('✅ عکس در Downloads ذخیره شد', 'success');
+    showToast('✅ عکس ذخیره شد', 'success');
   };
 
   window.copyImageToClipboard = async function() {
-    if (!window._currentImageBlob) return;
+    if (!window._currentImageDataUrl) return;
     try {
+      var res = await fetch(window._currentImageDataUrl);
+      var blob = await res.blob();
       await navigator.clipboard.write([
-        new ClipboardItem({ 'image/jpeg': window._currentImageBlob })
+        new ClipboardItem({ 'image/jpeg': blob })
       ]);
       showToast('✅ عکس در کلیپ‌بورد کپی شد', 'success');
     } catch (e) {

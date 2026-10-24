@@ -17282,7 +17282,6 @@ body.apk-print-mode .r-header {
   position: relative !important;
   min-height: 45px !important;
 }
-}
 body.apk-print-mode .r-title {
   display: block !important;
   font-size: 15px !important;
@@ -17548,113 +17547,173 @@ body.apk-print-mode #apk-print-toolbar {
 }
 </style>
 
+
 <script>
-window.sharePrintAsImage = async function() {
-  var element = document.getElementById('print-section');
-  if (!element) return showToast('بخش چاپ پیدا نشد', 'error');
+   <script>
+(function apkPrintMode() {
+  var isAPK = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+  if (!isAPK) return; // در PWA از پرینت مرورگر استفاده می‌شود
 
-  try {
-    showToast('⏳ در حال آماده‌سازی...', 'info');
-
-    // ۱. تبدیل QR به Base64 (حل قطعی مشکل مسموم شدن بوم در اندروید)
-    var images = element.querySelectorAll('img');
-    for (var i = 0; i < images.length; i++) {
-        var img = images[i];
-        if (!img.src.startsWith('data:')) {
-            try {
-                var tempImg = new Image();
-                tempImg.crossOrigin = "anonymous";
-                tempImg.src = img.src;
-                
-                await new Promise(function(resolve, reject) {
-                    tempImg.onload = resolve;
-                    tempImg.onerror = function() { reject(new Error("Load failed")); };
-                });
-                
-                var cvs = document.createElement('canvas');
-                cvs.width = tempImg.naturalWidth || 300;
-                cvs.height = tempImg.naturalHeight || 300;
-                var ctx = cvs.getContext('2d');
-                ctx.drawImage(tempImg, 0, 0);
-                
-                // جایگزینی آدرس عکس با نسخه امن
-                img.src = cvs.toDataURL('image/jpeg'); 
-            } catch(e) {
-                console.warn('QR Code failed to load, hiding it to prevent blank canvas');
-                img.style.setProperty('display', 'none', 'important');
-                img.removeAttribute('src'); // حذف کامل تا ارور نده
-            }
-        }
+  // اورراید کردن window.print تا ابتدا حالت پیش‌نمایش باز شود
+  window.print = function() {
+    document.body.classList.add('apk-print-mode');
+    var toolbar = document.getElementById('apk-print-toolbar');
+    if (!toolbar) {
+      toolbar = document.createElement('div');
+      toolbar.id = 'apk-print-toolbar';
+      toolbar.innerHTML =
+        '<button onclick="closeApkPrint()" style="background:#64748b;">⬅ بازگشت</button>' +
+        '<button onclick="sharePrintAsPDF()" style="background:#10b981;">📄 ذخیره / اشتراک PDF</button>' +
+        '<div style="flex:1;text-align:center;font-size:0.68rem;line-height:1.3;color:#cbd5e1;">' +
+          'پیش‌نمایش فاکتور<br>سپس دکمه سبز را بزنید' +
+        '</div>';
+      document.body.appendChild(toolbar);
     }
+    window.scrollTo(0, 0);
+  };
 
-    // ۲. لود html2canvas
-    if (typeof html2canvas === 'undefined') {
-      await new Promise(function(resolve, reject) {
-        var s = document.createElement('script');
-        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-        s.onload = resolve;
-        s.onerror = function() { reject(new Error('CDN blocked')); };
-        document.head.appendChild(s);
-      });
-    }
+  window.closeApkPrint = function() {
+    document.body.classList.remove('apk-print-mode');
+    var t = document.getElementById('apk-print-toolbar');
+    if (t) t.style.display = 'none';
+  };
 
-    showToast('⏳ در حال ساخت عکس...', 'info');
-    await new Promise(function(r) { setTimeout(r, 150); });
+  window.sharePrintAsPDF = async function() {
+    var element = document.getElementById('print-section');
+    if (!element) return showToast('بخش چاپ پیدا نشد', 'error');
 
-    // ۳. مخفی کردن واترمارک با اولویت بالا
-    var watermark = element.querySelector('.r-watermark');
-    if (watermark) watermark.style.setProperty('display', 'none', 'important');
+    try {
+      showToast('⏳ در حال آماده‌سازی PDF...', 'info');
 
-    var canvas = await html2canvas(element, {
-      scale: 1.5, // 👈 کم کردن مقیاس برای جلوگیری از کمبود حافظه گوشی
-      useCORS: true,
-      allowTaint: false, // 👈 باید حتماً false باشه تا اجازه استخراج بده
-      backgroundColor: '#ffffff',
-      logging: false
-    });
-
-    if (watermark) watermark.style.removeProperty('display');
-
-    // ۴. استخراج عکس
-    var dataUrl = canvas.toDataURL('image/jpeg', 0.90);
-    
-    // ۵. چک کردن اینکه واقعا عکس ساخته شده
-    if (!dataUrl || dataUrl === 'data:,' || dataUrl.length < 5000) {
-        throw new Error('عکس خالی تولید شد. (احتمالاً تصویر QR لود نشده است)');
-    }
-
-    var filename = 'Persia_Invoice_' + Date.now() + '.jpg';
-
-    // ─── مسیر Capacitor Share
-    var Cap = window.Capacitor && window.Capacitor.Plugins;
-    if (Cap && Cap.Share && Cap.Filesystem) {
-      try {
-        var base64Data = dataUrl.split(',')[1];
-        var writeRes = await Cap.Filesystem.writeFile({
-          path: filename,
-          data: base64Data,
-          directory: 'CACHE'
-        });
-        await Cap.Share.share({
-          title: 'فاکتور موبایل پرشیا',
-          text: 'فاکتور شما آماده است',
-          url: writeRes.uri
-        });
-        showToast('✅ منوی اشتراک باز شد', 'success');
-        return;
-      } catch (e) {
-        console.warn('Capacitor share failed:', e);
+      // ۱. تبدیل QR Code به Base64 (حل قطعی مشکل خطای امنیتی بوم)
+      var images = element.querySelectorAll('img');
+      for (var i = 0; i < images.length; i++) {
+          var img = images[i];
+          if (!img.src.startsWith('data:')) {
+              try {
+                  var res = await fetch(img.src, { mode: 'cors' });
+                  var blob = await res.blob();
+                  var b64 = await new Promise(function(resolve) {
+                      var reader = new FileReader();
+                      reader.onloadend = function() { resolve(reader.result); };
+                      reader.readAsDataURL(blob);
+                  });
+                  img.src = b64;
+              } catch(e) {
+                  console.warn('QR Load Failed', e);
+                  img.style.display = 'none'; // اگه لود نشد، مخفیش کن تا کل فاکتور خراب نشه
+              }
+          }
       }
+
+      // ۲. لود کتابخانه‌های لازم
+      if (typeof html2canvas === 'undefined') {
+        await new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+          s.onload = resolve;
+          s.onerror = function() { reject(new Error('CDN blocked')); };
+          document.head.appendChild(s);
+        });
+      }
+      if (typeof window.jspdf === 'undefined') {
+        await new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          s.onload = resolve;
+          s.onerror = function() { reject(new Error('CDN blocked')); };
+          document.head.appendChild(s);
+        });
+      }
+
+      showToast('⏳ در حال ساخت فایل...', 'info');
+      await new Promise(function(r) { setTimeout(r, 150); });
+
+      // ۳. مخفی کردن واترمارک برای جلوگیری از باگ چرخش
+      var watermark = element.querySelector('.r-watermark');
+      if (watermark) watermark.style.setProperty('display', 'none', 'important');
+
+      var canvas = await html2canvas(element, {
+        scale: 2, // مقیاس مناسب برای جلوگیری از کمبود حافظه
+        useCORS: true,
+        allowTaint: false, // باید false باشه تا اجازه استخراج بده
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+
+      if (watermark) watermark.style.removeProperty('display');
+
+      // ۴. ساخت PDF (استاندارد A5)
+      var pdf = new window.jspdf.jsPDF('p', 'mm', 'a5');
+      var imgData = canvas.toDataURL('image/jpeg', 0.95);
+      
+      var pdfWidth = pdf.internal.pageSize.getWidth();
+      var pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+      var pdfBlob = pdf.output('blob');
+      var filename = 'Persia_Invoice_' + Date.now() + '.pdf';
+      var file = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+      // ۵. تلاش برای استفاده از Capacitor Share (اندروید)
+      var Cap = window.Capacitor && window.Capacitor.Plugins;
+      if (Cap && Cap.Filesystem && Cap.Share) {
+        try {
+          var base64Data = pdf.output('datauristring').split(',')[1];
+          var writeRes = await Cap.Filesystem.writeFile({
+            path: filename,
+            data: base64Data,
+            directory: 'CACHE'
+          });
+          await Cap.Share.share({
+            title: 'فاکتور موبایل پرشیا',
+            text: 'فاکتور شما به صورت PDF آماده است',
+            url: writeRes.uri
+          });
+          showToast('✅ منوی ذخیره باز شد', 'success');
+          return;
+        } catch(e) {
+          console.warn('Capacitor Share failed:', e);
+        }
+      }
+
+      // ۶. تلاش برای استفاده از Web Share API (PWA)
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+         try {
+           await navigator.share({
+             files: [file],
+             title: 'فاکتور موبایل پرشیا',
+             text: 'فاکتور شما به صورت PDF آماده است'
+           });
+           showToast('✅ فایل ارسال شد', 'success');
+           return;
+         } catch(e) {
+           console.warn('Web Share failed:', e);
+         }
+      }
+
+      // ۷. دانلود مستقیم (فالبک نهایی در صورت نبود اشتراک‌گذاری)
+      var url = URL.createObjectURL(pdfBlob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+      showToast('✅ فایل PDF دانلود شد', 'success');
+
+    } catch (err) {
+      console.error('[sharePrintAsPDF]', err);
+      showToast('⚠️ خطا: ' + (err.message || 'نامشخص'), 'error');
     }
+  };
 
-    // ─── مسیر مودال داخلی
-    showImageSaveModal(dataUrl, filename);
-
-  } catch (err) {
-    console.error('[sharePrintAsImage]', err);
-    showToast('⚠️ ' + (err.message || 'خطای نامشخص'), 'error');
-  }
-};
+  console.log('[apk-print-mode] Ready ✅');
+})();
+</script> 
+    
 </script>
 
 <script>

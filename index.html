@@ -2089,6 +2089,7 @@ body.dark-mode .expand-indicator {
 <option value="OVERDUE_DUE">⚠️ وعده تسویه گذشته</option>
 <option value="CREDIT">🟢 بستانکاران / تسویه</option>
 <option value="COLLAB">🤝 فقط همکاران</option>
+<option value="SUPPLIER">🏪 فقط تامین‌کنندگان</option>
 </select>
 
 </div>
@@ -2132,6 +2133,10 @@ body.dark-mode .expand-indicator {
 <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
 <input type="checkbox" id="new-is-collab" style="width:18px;height:18px;margin:0;">
 <label for="new-is-collab" style="font-size:.85rem;font-weight:bold;color:#c2410c;cursor:pointer;">🤝 این مخاطب همکار / تعمیرکار واسط است</label>
+</div>
+<div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+<input type="checkbox" id="new-is-supplier" style="width:18px;height:18px;margin:0;">
+<label for="new-is-supplier" style="font-size:.85rem;font-weight:bold;color:#7c2d12;cursor:pointer;">🏪 این مخاطب تامین‌کننده قطعات است</label>
 </div>
 <textarea id="new-notes" placeholder="آدرس یا مشخصات تکمیلی (اختیاری)" style="margin-top:8px;"></textarea>
 <button type="button" onclick="addCustomer()" style="margin-top:10px;">➕ افزودن پرونده</button>
@@ -2467,37 +2472,60 @@ body.dark-mode .expand-indicator {
 </div>
 </div>
 
-<!-- تب: فروش سریع -->
-<div id="cust-sec-quick" style="display:none;">
-<div class="card" style="border:1.5px solid #10b981;background:#f0fdf4;">
-<div style="font-weight:800;font-size:1rem;color:#047857;margin-bottom:6px;">🛒 فروش سریع کالا / خدمات</div>
-<div style="font-size:0.8rem;color:#15803d;margin-bottom:12px;">مخصوص فروش VPN، گلس، کابل و... بدون نیاز به تشکیل پرونده تعمیر.</div>
+<!-- ═══════════ 🏪 بخش تامین‌کننده ═══════════ -->
+<div class="cust-sub-nav" id="supplier-sub-nav" style="display:none;">
+  <button type="button" class="cust-sub-tab active" id="btn-sup-tab-purchases" onclick="switchSupplierTab('purchases')">📜 سوابق خرید (<span id="count-supplier-purchases">0</span>)</button>
+  <button type="button" class="cust-sub-tab" id="btn-sup-tab-new" onclick="switchSupplierTab('new')">📥 ثبت خرید جدید</button>
+</div>
 
-<label class="field-label" style="color:#047857;">عنوان کالا یا خدمات:</label>
-<input type="text" id="qs-title" placeholder="مثال: اکانت VPN سه‌ماهه، گلس A54" style="border-color:#6ee7b7;">
+<div id="sup-sec-purchases" style="display:none;">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:800;">📜 سوابق خرید از این تامین‌کننده</span>
+      <button type="button" onclick="switchSupplierTab('new')" style="width:auto;padding:6px 12px;font-size:.8rem;background:#0284c7;border-radius:6px;margin:0;">➕ خرید جدید</button>
+    </div>
+    <div id="supplier-purchases-list"></div>
+  </div>
+</div>
 
-<div style="margin-top:10px;">
-<input type="text" id="qs-part-search" placeholder="🔍 جستجو در انبار (جهت کسر موجودی)..." oninput="searchPartsForQuickSale(this.value)" style="border-color:#86efac;background:#fff;">
-<div id="qs-part-search-results" class="part-search-results"></div>
-</div>
-<input type="hidden" id="qs-part-id" value="">
-<input type="hidden" id="qs-buy-price" value="0">
-
-<div class="action-row">
-<div style="flex:1.5;">
-<label class="field-label">مبلغ فروش (تومان):</label>
-<input type="text" id="qs-amount" placeholder="مبلغ نهایی" oninput="formatAmountInput(this)" style="font-weight:bold;font-size:1.05rem;border-color:#10b981;">
-</div>
-<div style="flex:1;">
-<label class="field-label">نحوه پرداخت:</label>
-<select id="qs-pay-method" style="font-weight:bold;border-color:#10b981;">
-<option value="POS">💳 پوز</option>
-<option value="CARD">📲 کارت</option>
-<option value="CASH">💵 نقد</option>
-<option value="NONE">❌ نسیه (عدم پرداخت)</option>
-</select>
-</div>
-</div>
+<div id="sup-sec-new" style="display:none;">
+  <div class="card" style="border:2px solid #0284c7;">
+    <div style="font-weight:900;font-size:1rem;color:#0284c7;margin-bottom:8px;">📥 ثبت فاکتور خرید</div>
+    
+    <label class="field-label">تاریخ خرید:</label>
+    <input type="text" id="sup-purchase-date" placeholder="1405/08/04">
+    
+    <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px;margin-top:10px;">
+      <div style="font-weight:900;font-size:0.9rem;color:#166534;margin-bottom:8px;">📦 اقلام خریداری شده:</div>
+      <div id="sup-purchase-items"></div>
+      <button type="button" onclick="addSupplierPurchaseRow()" style="background:#10b981;color:#fff;padding:9px;font-size:0.85rem;margin-top:8px;border-radius:8px;width:100%;">➕ افزودن ردیف</button>
+    </div>
+    
+    <div id="sup-purchase-total" style="margin-top:12px;padding:10px;background:#f0fdf4;border-radius:8px;text-align:center;font-weight:900;font-size:1rem;color:#059669;">جمع خرید: 0 تومان</div>
+    
+    <label class="field-label" style="margin-top:12px;">💵 پرداختی نقدی (تومان):</label>
+    <input type="text" id="sup-purchase-paid" placeholder="0" oninput="formatAmountInput(this);updateSupplierPurchaseTotals();" style="border-color:#10b981;">
+    <div style="font-size:0.78rem;color:#64748b;margin-top:4px;">اگه صفر باشه، کل مبلغ به عنوان بدهی به تامین‌کننده ثبت می‌شه.</div>
+    
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button type="button" onclick="fillFullPaymentSupplierPurchase()" style="width:auto;padding:6px 10px;font-size:0.75rem;background:#10b981;">پرداخت کامل</button>
+      <button type="button" onclick="fillZeroPaymentSupplierPurchase()" style="width:auto;padding:6px 10px;font-size:0.75rem;background:#f59e0b;">همه بدهی</button>
+    </div>
+    
+    <label class="field-label">روش پرداخت:</label>
+    <select id="sup-purchase-pay-method" style="border-color:#10b981;font-weight:bold;">
+      <option value="CASH">💵 نقدی</option>
+      <option value="POS">💳 کارت‌خوان</option>
+      <option value="CARD">📲 کارت‌به‌کارت</option>
+    </select>
+    
+    <label class="field-label">یادداشت:</label>
+    <input type="text" id="sup-purchase-notes" placeholder="اختیاری">
+    
+    <div id="sup-purchase-summary" style="margin-top:10px;padding:10px;background:#fffbeb;border-radius:8px;font-size:0.85rem;line-height:1.7;"></div>
+    
+    <button type="button" onclick="saveSupplierPurchase()" style="margin-top:12px;background:linear-gradient(135deg,#0284c7 0%,#0369a1 100%);padding:13px;font-size:0.95rem;font-weight:900;">✓ ثبت فاکتور خرید</button>
+  </div>
 </div>
 
 <button type="button" onclick="saveQuickSale()" style="background:var(--success);margin-top:16px;padding:12px;font-size:0.95rem;font-weight:800;">✓ ثبت فروش و دریافت وجه</button>
@@ -2852,6 +2880,10 @@ body.dark-mode .expand-indicator {
 <input type="checkbox" id="edit-cust-is-collab" style="width:18px;height:18px;margin:0;">
 <label for="edit-cust-is-collab" style="font-size:.83rem;font-weight:bold;color:#c2410c;cursor:pointer;">🤝 این مخاطب همکار / تعمیرکار واسط است</label>
 </div>
+<div style="display:flex;align-items:center;gap:8px;margin-top:10px;background:#fef3c7;padding:8px;border-radius:8px;border:1px solid #fde68a;">
+<input type="checkbox" id="edit-cust-is-supplier" style="width:18px;height:18px;margin:0;">
+<label for="edit-cust-is-supplier" style="font-size:.83rem;font-weight:bold;color:#7c2d12;cursor:pointer;">🏪 این مخاطب تامین‌کننده قطعات است</label>
+</div>
 <label class="field-label">آدرس و یادداشت‌ها:</label>
 <textarea id="edit-cust-notes" placeholder="آدرس یا مشخصات تکمیلی"></textarea>
 <div class="row" style="margin-top:14px;">
@@ -3013,13 +3045,26 @@ body.dark-mode .expand-indicator {
 </div>
 
 <div class="modal-overlay" id="modal-quote-edit">
-<div class="modal-content" style="max-width:480px;">
+<div class="modal-content" style="max-width:560px;">
 <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;">
-<h3 style="font-size:1rem;color:#1e293b;">✏️ ویرایش فاکتور در حال تعمیر</h3>
-<button type="button" onclick="closeEditQuoteModal()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">✕</button>
+<h3 style="font-size:1rem;color:#1e293b;">✏️ ویرایش کامل فاکتور</h3>
+<button type="button" onclick="closeEditQuoteModal()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;box-shadow:none;">✕</button>
 </div>
 <input type="hidden" id="eq-quote-id" value="">
 
+<!-- ۱. وضعیت دستگاه -->
+<label class="field-label" style="color:#0284c7;">📊 وضعیت دستگاه:</label>
+<select id="eq-status" style="border-color:#93c5fd;font-weight:bold;background:#eff6ff;">
+<option value="QUEUE">در نوبت بررسی</option>
+<option value="WAIT_APPROVAL">⏳ منتظر تایید هزینه</option>
+<option value="BENCH">روی میز کار</option>
+<option value="WAIT_PART">منتظر قطعه</option>
+<option value="OUTSOURCE">دست همکار</option>
+<option value="READY">آماده تحویل</option>
+<option value="UNREPAIRABLE">غیرقابل تعمیر</option>
+</select>
+
+<!-- ۲. برند و مدل -->
 <label class="field-label">📱 برند دستگاه:</label>
 <div id="eq-brand-chips" class="brand-chips-container"></div>
 <input type="hidden" id="eq-brand" value="">
@@ -3030,20 +3075,91 @@ body.dark-mode .expand-indicator {
   <div id="eq-model-suggestions" class="model-suggestions" style="display:none;"></div>
 </div>
 
-<label class="field-label">رنگ دستگاه:</label>
-<input type="text" id="eq-color" placeholder="مشکی، سفید، آبی..." style="background:#fef9c3;border-color:#fde047;">
+<div class="row">
+<div style="flex:1;">
+<label class="field-label">رنگ:</label>
+<input type="text" id="eq-color" placeholder="مشکی، سفید..." style="background:#fef9c3;border-color:#fde047;">
+</div>
+<div style="flex:1;">
+<label class="field-label">IMEI / سریال:</label>
+<input type="text" id="eq-imei" placeholder="اختیاری">
+</div>
+</div>
+
+<!-- ۳. نوع تعامل کاری -->
+<label class="field-label" style="color:#c2410c;">🤝 نوع تعامل کاری:</label>
+<select id="eq-work-type" onchange="toggleEqCollab()" style="border-color:#fb923c;font-weight:bold;background:#fff7ed;">
+<option value="NORMAL">مشتری عادی</option>
+<option value="INSOURCE">کار دریافتی از همکار</option>
+<option value="OUTSOURCE">کار ارجاعی به همکار</option>
+</select>
+
+<div id="eq-collab-box" style="display:none;background:#fff7ed;border:1px dashed #ea580c;border-radius:8px;padding:10px;margin-top:6px;">
+<div class="row">
+<input type="text" id="eq-collab-name" placeholder="نام همکار" style="flex:1.2;">
+<input type="text" id="eq-collab-cost" placeholder="هزینه همکار (تومان)" oninput="formatAmountInput(this)" style="flex:1;">
+</div>
+</div>
+
+<!-- ۴. ایراد و نشانه -->
+<label class="field-label">🔍 ایراد اعلامی مشتری:</label>
+<textarea id="eq-problem" placeholder="ایراد دستگاه" style="min-height:50px;font-family:inherit;"></textarea>
 
 <label class="field-label" style="color:#7c3aed;">🔍 نشانه‌های خاص:</label>
-<textarea id="eq-marker" placeholder="نشانه‌های ظاهری برای تشخیص" style="border-color:#c4b5fd;background:#f5f3ff;min-height:60px;font-family:inherit;"></textarea>
+<textarea id="eq-marker" placeholder="نشانه‌های ظاهری" style="border-color:#c4b5fd;background:#f5f3ff;min-height:50px;font-family:inherit;"></textarea>
 
-<label class="field-label">ایراد / توضیحات:</label>
-<textarea id="eq-problem" placeholder="ایراد دستگاه" style="min-height:60px;font-family:inherit;"></textarea>
+<!-- ۵. قفل -->
+<label class="field-label" style="color:#1e40af;">🔒 قفل دستگاه:</label>
+<div class="row">
+<select id="eq-lock-type" onchange="toggleEqLock()" style="flex:1;">
+<option value="NONE">بدون رمز</option>
+<option value="PIN">پین / پسورد</option>
+<option value="PATTERN">پترن</option>
+</select>
+<input type="text" id="eq-lock-val" placeholder="رمز یا پترن" style="flex:1;">
+</div>
 
-<label class="field-label" style="color:#b45309;">مبلغ کل فاکتور (تومان):</label>
-<input type="text" id="eq-amount" placeholder="مبلغ کل" oninput="formatAmountInput(this)" style="font-weight:bold;font-size:1.05rem;">
+<!-- ۶. چک‌لیست شروط -->
+<label class="field-label">⚠️ شروط و وضعیت ظاهری:</label>
+<div class="check-grid">
+<label class="check-item"><input type="checkbox" id="eq-chk-dead"> مرگ برد / خاموش</label>
+<label class="check-item"><input type="checkbox" id="eq-chk-water"> آب‌خورده</label>
+<label class="check-item"><input type="checkbox" id="eq-chk-lcdrisk"> ریسک LCD</label>
+<label class="check-item"><input type="checkbox" id="eq-chk-scratch"> خط و خش</label>
+<label class="check-item"><input type="checkbox" id="eq-chk-opened"> قبلاً بازشده</label>
+<label class="check-item"><input type="checkbox" id="eq-chk-sim"> سیم/رم همراه</label>
+</div>
 
-<label class="field-label" style="color:#059669;">بیعانه نقدی در مغازه (تومان):</label>
-<input type="text" id="eq-deposit" placeholder="مبلغ بیعانه نقدی" oninput="formatAmountInput(this)" style="border-color:#10b981;">
+<!-- ۷. اقلام فاکتور (قلب ماجرا!) -->
+<div style="background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:12px;margin-top:14px;">
+<div style="font-weight:900;font-size:0.95rem;color:#166534;margin-bottom:8px;">📦 اقلام فاکتور (قطعات و اجرت‌ها):</div>
+
+<div id="eq-items-container"></div>
+<button type="button" onclick="addEqItemRow('',0,null,0);updateEqTotals();" style="background:#10b981;color:#fff;padding:9px;font-size:0.85rem;margin-top:8px;border-radius:8px;width:100%;">➕ افزودن ردیف دستی</button>
+
+<div style="border-top:1px dashed #86efac;margin-top:12px;padding-top:10px;">
+<div style="font-weight:800;font-size:0.85rem;color:#15803d;margin-bottom:6px;">🔍 افزودن قطعه از انبار (کسری موجودی خودکار):</div>
+<input type="text" id="eq-part-search" placeholder="🔍 نام قطعه را تایپ کنید..." oninput="searchPartsForEditQuote(this.value)" style="border-color:#86efac;background:#fff;margin-top:0;">
+<div id="eq-part-search-results" class="part-search-results" style="display:none;"></div>
+</div>
+
+<div id="eq-total-info" style="margin-top:12px;padding:10px;background:#fff;border-radius:8px;text-align:center;font-weight:900;font-size:0.95rem;color:#059669;">جمع: 0 تومان</div>
+</div>
+
+<!-- ۸. مالی -->
+<label class="field-label" style="margin-top:12px;">💵 مبلغ کل فاکتور (خودکار محاسبه می‌شود):</label>
+<input type="text" id="eq-amount" placeholder="0" oninput="formatAmountInput(this)" style="font-weight:bold;font-size:1.05rem;background:#f0fdf4;" readonly>
+
+<div class="row">
+<div style="flex:1;">
+<label class="field-label" style="color:#059669;">بیعانه نقدی:</label>
+<input type="text" id="eq-deposit" placeholder="0" oninput="formatAmountInput(this);updateEqTotals();" style="border-color:#10b981;">
+</div>
+<div style="flex:1;">
+<label class="field-label" style="color:#b45309;">بیعانه درخواستی آنلاین:</label>
+<input type="text" id="eq-requested-deposit" placeholder="0" oninput="formatAmountInput(this)" style="border-color:#fde68a;background:#fffbeb;">
+</div>
+</div>
 
 <div class="row">
 <div style="flex:1;">
@@ -3059,9 +3175,21 @@ body.dark-mode .expand-indicator {
 <label class="field-label">متعلقات همراه:</label>
 <input type="text" id="eq-acc" placeholder="کاور، جعبه، شارژر...">
 
-<div class="row" style="margin-top:14px;">
-<button type="button" onclick="saveQuoteEdits()" style="background:var(--success);flex:1.4;padding:11px;font-weight:800;">✓ ذخیره تغییرات</button>
-<button type="button" onclick="closeEditQuoteModal()" style="background:#cbd5e1;color:#1e293b;flex:1;">انصراف</button>
+<!-- ۹. داخلی -->
+<div style="background:#fdf2f8;border:1px dashed #f9a8d4;border-radius:10px;padding:10px;margin-top:12px;">
+<div style="font-weight:800;font-size:0.82rem;color:#be185d;margin-bottom:6px;">🔒 گزارش داخلی (مشتری نمی‌بیند)</div>
+<label class="field-label" style="color:#be185d;margin-top:0;">تشخیص فنی:</label>
+<textarea id="eq-internal-diagnosis" placeholder="تشخیص داخلی..." style="min-height:45px;font-family:inherit;font-size:0.82rem;"></textarea>
+<label class="field-label" style="color:#be185d;">یادداشت محرمانه:</label>
+<textarea id="eq-internal-notes" placeholder="نکات محرمانه..." style="min-height:45px;font-family:inherit;font-size:0.82rem;"></textarea>
+<label class="field-label" style="color:#be185d;">خلاصه QC:</label>
+<input type="text" id="eq-qc-summary" placeholder="مثال: تست کامل سالم">
+</div>
+
+<!-- ۱۰. دکمه‌ها -->
+<div class="row" style="margin-top:16px;">
+<button type="button" onclick="saveQuoteEdits()" style="background:var(--success);flex:1.4;padding:13px;font-weight:800;font-size:0.92rem;">✓ ذخیره تغییرات</button>
+<button type="button" onclick="closeEditQuoteModal()" style="background:#cbd5e1;color:#1e293b;flex:1;padding:13px;">انصراف</button>
 </div>
 </div>
 </div>
@@ -4101,6 +4229,7 @@ function saveAll() {
     store.put(quotes, 'db_quotes');
     store.put(parts, 'db_parts');
     store.put(expenses, 'db_expenses');
+   store.put(window.supplierPurchases || [], 'db_supplier_purchases');
     return new Promise(function(resolve) { tx.oncomplete = resolve; });
   });
   
@@ -4838,13 +4967,15 @@ function addCustomer() {
   var phone = toEnglishDigits((document.getElementById('new-phone').value || '').trim());
   var nCode = toEnglishDigits((document.getElementById('new-national-code').value || '').trim());
   var isCollab = document.getElementById('new-is-collab').checked;
+  var isSupplier = document.getElementById('new-is-supplier').checked;
   var notes = (document.getElementById('new-notes').value || '').trim();
   if (!name) return showToast('نام را وارد کنید', 'warning');
   var newId = Date.now();
-  customers.push({ id: newId, name: name, phone: phone, nationalCode: nCode, notes: notes, isCollab: isCollab, deleted: false, updatedAt: Date.now() });
+  customers.push({ id: newId, name: name, phone: phone, nationalCode: nCode, notes: notes, isCollab: isCollab, isSupplier: isSupplier, deleted: false, updatedAt: Date.now() });
   saveAll(); uploadToDrive(true);
   document.getElementById('new-name').value = ''; document.getElementById('new-phone').value = '';
   document.getElementById('new-national-code').value = ''; document.getElementById('new-is-collab').checked = false;
+  document.getElementById('new-is-supplier').checked = false;
   document.getElementById('new-notes').value = '';
   openCustomer(newId);
 }
@@ -4927,6 +5058,7 @@ function openEditCustomerModal() {
   document.getElementById('edit-cust-phone').value = c.phone || '';
   document.getElementById('edit-cust-national-code').value = c.nationalCode || '';
   document.getElementById('edit-cust-is-collab').checked = Boolean(c.isCollab);
+  document.getElementById('edit-cust-is-supplier').checked = Boolean(c.isSupplier);
   document.getElementById('edit-cust-notes').value = c.notes || '';
   document.getElementById('modal-edit-customer').style.display = 'flex';
 }
@@ -4940,9 +5072,10 @@ function saveCustomerEdits() {
   var newPhone = toEnglishDigits((document.getElementById('edit-cust-phone').value || '').trim());
   var newNCode = toEnglishDigits((document.getElementById('edit-cust-national-code').value || '').trim());
   var newIsCollab = document.getElementById('edit-cust-is-collab').checked;
+  var newIsSupplier = document.getElementById('edit-cust-is-supplier').checked;
   var newNotes = (document.getElementById('edit-cust-notes').value || '').trim();
   if (!newName) return showToast('نام مخاطب نمی‌تواند خالی باشد', 'warning');
-  c.name = newName; c.phone = newPhone; c.nationalCode = newNCode; c.isCollab = newIsCollab; c.notes = newNotes; c.updatedAt = Date.now();
+  c.name = newName; c.phone = newPhone; c.nationalCode = newNCode; c.isCollab = newIsCollab; c.isSupplier = newIsSupplier; c.notes = newNotes; c.updatedAt = Date.now();
   saveAll(); uploadToDrive(true);
   var callLink = c.phone ? ' <a href="tel:' + cleanNumber(c.phone) + '" style="text-decoration:none;background:#e0f2fe;color:#0284c7;padding:2px 8px;border-radius:6px;font-weight:bold;">📞 تماس</a>' : '';
   document.getElementById('cust-name-title').innerHTML = esc(c.name) + (c.isCollab ? ' 🤝 (همکار)' : '');
@@ -5069,6 +5202,7 @@ if (filterMode === 'DUE_SOON') return customerHasDueSoon(c.id);
 if (filterMode === 'OVERDUE_DUE') return customerHasOverdueDue(c.id);
 if (filterMode === 'CREDIT') return bal <= 0;
 if (filterMode === 'COLLAB') return c.isCollab === true;
+if (filterMode === 'SUPPLIER') return c.isSupplier === true;
 return true;
   });
   
@@ -5102,6 +5236,7 @@ if (filtered.length === 0) {
     var badgeClass = bal > 0 ? 'badge-red' : (bal < 0 ? 'badge-green' : '');
     var badgeText = bal > 0 ? ('بدهکار: ' + formatToman(bal)) : (bal < 0 ? ('بستانکار: ' + formatToman(Math.abs(bal))) : 'تسویه');
     var collabTag = cust.isCollab ? '<span class="badge badge-collab" style="margin-right:6px;">🤝 همکار</span>' : '';
+    var supplierTag = cust.isSupplier ? '<span class="badge" style="margin-right:6px;background:#fed7aa;color:#7c2d12;border:1px solid #fdba74;">🏪 تامین‌کننده</span>' : '';
     var tierTag = '<span class="badge ' + loyalty.tagClass + '" style="margin-right:6px;">' + loyalty.tier + ' (' + loyalty.custCode + ')</span>';
     var dueAlertTag = hasOverdueDue ? '<span class="badge badge-red" style="margin-right:6px;">⚠️ موعد تسویه گذشته</span>' : '';
 var dueSoonTag = (!hasOverdueDue && customerHasDueSoon(cust.id)) ? '<span class="badge" style="margin-right:6px;background:#fed7aa;color:#9a3412;border:1px solid #fdba74;">🟠 موعد نزدیک</span>' : '';
@@ -5110,25 +5245,56 @@ var dueSoonTag = (!hasOverdueDue && customerHasDueSoon(cust.id)) ? '<span class=
     var div = document.createElement('div');
     div.className = 'card'; div.style.padding = '12px'; div.style.marginBottom = '8px'; div.style.cursor = 'pointer';
     div.onclick = () => openCustomer(cust.id);
-    div.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><div class="cust-avatar" style="background:' + avatarBg + ';">' + avatarChar + '</div><div style="flex:1;"><div style="font-weight:bold;font-size:.95rem;">' + esc(cust.name) + collabTag + tierTag + dueAlertTag + dueSoonTag + '</div><div style="font-size:.8rem;color:#64748b;margin-top:2px;">' + esc(cust.phone || '') + ' ' + callBtn + ' • کد اشتراک: ' + esc(loyalty.custCode) + '</div><div style="margin-top:4px;"><span class="badge ' + badgeClass + '">' + badgeText + '</span></div></div></div>';
+    div.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><div class="cust-avatar" style="background:' + avatarBg + ';">' + avatarChar + '</div><div style="flex:1;"><div style="font-weight:bold;font-size:.95rem;">' + esc(cust.name) + collabTag + supplierTag + tierTag + dueAlertTag + dueSoonTag + '</div><div style="font-size:.8rem;color:#64748b;margin-top:2px;">' + esc(cust.phone || '') + ' ' + callBtn + ' • کد اشتراک: ' + esc(loyalty.custCode) + '</div><div style="margin-top:4px;"><span class="badge ' + badgeClass + '">' + badgeText + '</span></div></div></div>';
         listEl.appendChild(div);
   });
   applyStagger(listEl);
 }
 
 function openCustomer(id) {
-  activeCustomerId = id; var c = customers.find(x => x.id === id && !x.deleted); if (!c) return;
+  activeCustomerId = id; 
+  var c = customers.find(x => x.id === id && !x.deleted); 
+  if (!c) return;
+  
   var callLink = c.phone ? ' <a href="tel:' + cleanNumber(c.phone) + '" style="text-decoration:none;background:#e0f2fe;color:#0284c7;padding:2px 8px;border-radius:6px;font-weight:bold;">📞 تماس</a>' : '';
-  document.getElementById('cust-name-title').innerHTML = esc(c.name) + (c.isCollab ? ' 🤝 (همکار)' : '');
+  document.getElementById('cust-name-title').innerHTML = esc(c.name) + (c.isCollab ? ' 🤝 (همکار)' : '') + (c.isSupplier ? ' 🏪 (تامین‌کننده)' : '');
   document.getElementById('cust-phone-title').innerHTML = c.phone ? ('تماس: ' + esc(c.phone) + callLink) : '';
   var notesEl = document.getElementById('cust-notes-display');
   if (notesEl) { if (c.notes) { notesEl.style.display = 'block'; notesEl.innerText = c.notes; } else { notesEl.style.display = 'none'; } }
   var btnSummary = document.getElementById('btn-collab-summary-print');
   if (btnSummary) btnSummary.style.display = c.isCollab ? 'inline-block' : 'none';
-  resetInvoiceForm(); renderCustomerLoyaltyBanner();
+  
+  resetInvoiceForm(); 
+  renderCustomerLoyaltyBanner();
   document.getElementById('view-customers').style.display = 'none';
   document.getElementById('view-details').style.display = 'block';
-  renderQuotes(); renderTransactions(); switchCustTab('quotes');
+
+  // ⭐ تغییرات جدید برای تامین‌کننده ⭐
+  var isSupplier = c.isSupplier === true;
+  var custNav = document.querySelector('.cust-sub-nav');
+  var supNav = document.getElementById('supplier-sub-nav');
+  var custSecs = ['cust-sec-quotes', 'cust-sec-new', 'cust-sec-history', 'cust-sec-quick'];
+  var supSecs = ['sup-sec-purchases', 'sup-sec-new'];
+
+  if (isSupplier) {
+    // حالت تامین‌کننده
+    if (custNav) custNav.style.display = 'none';
+    custSecs.forEach(function(s) { var el = document.getElementById(s); if (el) el.style.display = 'none'; });
+    if (supNav) supNav.style.display = 'flex';
+    supSecs.forEach(function(s) { var el = document.getElementById(s); if (el) el.style.display = 'none'; });
+    
+    switchSupplierTab('purchases');
+    renderSupplierBalance();
+  } else {
+    // حالت مشتری عادی
+    if (custNav) custNav.style.display = 'flex';
+    if (supNav) supNav.style.display = 'none';
+    supSecs.forEach(function(s) { var el = document.getElementById(s); if (el) el.style.display = 'none'; });
+    
+    renderQuotes(); 
+    renderTransactions(); 
+    switchCustTab('quotes');
+  }
 }
 
 function showCustomerList() {
@@ -5629,77 +5795,301 @@ function closeTimelineModal() {
 
 function openEditQuoteModal(qId, event) {
   if (event) event.stopPropagation();
-  var q = quotes.find(x => x.id === qId && !x.deleted);
+  var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
   if (!q) return showToast('فاکتور یافت نشد', 'error');
+  
   document.getElementById('eq-quote-id').value = qId;
-
-  // 👇 برند
+  
+  // برند
   currentEqBrand = q.brand || '';
   document.getElementById('eq-brand').value = currentEqBrand;
-  renderBrandChips('eq-brand-chips', currentEqBrand, selectEqBrand);
-
+  if (typeof renderBrandChips === 'function') {
+    var selectFn = (typeof selectEqBrand === 'function') ? selectEqBrand : function(){};
+    renderBrandChips('eq-brand-chips', currentEqBrand, selectFn);
+  }
+  
+  // پایه
   document.getElementById('eq-model').value = q.model || '';
   document.getElementById('eq-color').value = q.color || '';
   document.getElementById('eq-marker').value = q.marker || '';
   document.getElementById('eq-problem').value = q.problem || '';
-  document.getElementById('eq-amount').value = q.amount ? Number(q.amount).toLocaleString('en-US') : '';
-  var cashDep = Number(q.cashDeposit != null ? q.cashDeposit : (q.deposit || 0));
-  document.getElementById('eq-deposit').value = cashDep ? Number(cashDep).toLocaleString('en-US') : '';
+  document.getElementById('eq-imei').value = q.imei || '';
+  document.getElementById('eq-acc').value = q.acc || '';
+  
+  // نوع تعامل
+  document.getElementById('eq-work-type').value = q.workType || 'NORMAL';
+  document.getElementById('eq-collab-name').value = q.collabName || '';
+  document.getElementById('eq-collab-cost').value = q.collabCost ? Number(q.collabCost).toLocaleString('en-US') : '';
+  toggleEqCollab();
+  
+  // قفل
+  document.getElementById('eq-lock-type').value = q.lockType || 'NONE';
+  document.getElementById('eq-lock-val').value = q.lockVal || (q.patternPath || '');
+  toggleEqLock();
+  
+  // چک‌باکس‌ها
+  document.getElementById('eq-chk-dead').checked = q.isDead || false;
+  document.getElementById('eq-chk-water').checked = q.isWater || false;
+  document.getElementById('eq-chk-lcdrisk').checked = q.isLcdRisk || false;
+  document.getElementById('eq-chk-scratch').checked = q.isScratch || false;
+  document.getElementById('eq-chk-opened').checked = q.isOpened || false;
+  document.getElementById('eq-chk-sim').checked = q.hasSim || false;
+  
+  // وضعیت
+  document.getElementById('eq-status').value = q.deviceStatus || 'QUEUE';
+  
+  // اقلام (قلب ماجرا!)
+  renderEditItems(q);
+  
+  // مالی
+  document.getElementById('eq-deposit').value = Number(q.cashDeposit != null ? q.cashDeposit : (q.deposit || 0)).toLocaleString('en-US');
+  document.getElementById('eq-requested-deposit').value = q.requestedDeposit ? Number(q.requestedDeposit).toLocaleString('en-US') : '';
   document.getElementById('eq-due-date').value = q.dueDate || '';
   document.getElementById('eq-warranty').value = q.warranty || '48 ساعت مهلت تست';
-  document.getElementById('eq-acc').value = q.acc || '';
+  
+  // داخلی
+  document.getElementById('eq-internal-diagnosis').value = q.internalDiagnosis || '';
+  document.getElementById('eq-internal-notes').value = q.internalNotes || '';
+  document.getElementById('eq-qc-summary').value = q.qcSummary || '';
+  
+  // ذخیره نسخه اصلی اقلام برای محاسبه تغییرات موجودی
+  window._editQuoteOriginalItems = JSON.parse(JSON.stringify(q.items || []));
+  
   document.getElementById('modal-quote-edit').style.display = 'flex';
+  updateEqTotals();
 }
 
-function closeEditQuoteModal() { document.getElementById('modal-quote-edit').style.display = 'none'; }
+function closeEditQuoteModal() {
+  document.getElementById('modal-quote-edit').style.display = 'none';
+}
 
+// ═══════════════ مدیریت اقلام ═══════════════
+function renderEditItems(q) {
+  var container = document.getElementById('eq-items-container');
+  container.innerHTML = '';
+  var items = (q.items && q.items.length > 0) ? q.items : [{ title: q.title || q.problem || 'تعمیرات گوشی', amount: q.amount || 0, partId: null, buyPrice: 0 }];
+  items.forEach(function(it) {
+    addEqItemRow(it.title || '', it.amount || 0, it.partId || null, it.buyPrice || 0);
+  });
+}
+
+function addEqItemRow(title, amount, partId, buyPrice) {
+  var container = document.getElementById('eq-items-container');
+  var row = document.createElement('div');
+  row.className = 'invoice-row';
+  row.style.marginBottom = '6px';
+  if (partId) row.setAttribute('data-part-id', partId);
+  if (buyPrice) row.setAttribute('data-buy-price', buyPrice);
+  var tag = partId ? '<span style="font-size:0.65rem;background:#10b981;color:#fff;padding:2px 6px;border-radius:4px;margin-left:4px;">📦 انبار</span>' : '';
+  row.innerHTML =
+    '<div style="display:flex;gap:4px;align-items:center;">' +
+      '<input type="text" class="eq-item-title" value="' + esc(title) + '" placeholder="شرح" style="flex:2;margin-top:0;font-size:.82rem;">' +
+      '<input type="text" class="eq-item-amount" value="' + (amount ? Number(amount).toLocaleString('en-US') : '') + '" placeholder="مبلغ" oninput="formatAmountInput(this);updateEqTotals();" style="flex:1.3;margin-top:0;font-size:.82rem;">' +
+      '<button type="button" onclick="this.closest(\'.invoice-row\').remove();updateEqTotals();" style="width:34px;padding:6px;background:#fee2e2;color:#dc2626;border-radius:6px;margin-top:0;flex-shrink:0;">✕</button>' +
+    '</div>' + tag;
+  container.appendChild(row);
+}
+
+function getEqItemsFromForm() {
+  var rows = document.querySelectorAll('#eq-items-container .invoice-row');
+  var items = [];
+  rows.forEach(function(r) {
+    var t = (r.querySelector('.eq-item-title').value || '').trim();
+    var a = Number(cleanNumber(r.querySelector('.eq-item-amount').value)) || 0;
+    var pId = r.getAttribute('data-part-id') || null;
+    var bp = Number(r.getAttribute('data-buy-price')) || 0;
+    if (t || a > 0) items.push({ title: t || 'کار متفرقه', amount: a, partId: pId ? Number(pId) : null, buyPrice: bp });
+  });
+  return items;
+}
+
+function updateEqTotals() {
+  var items = getEqItemsFromForm();
+  var rawAmount = 0;
+  items.forEach(function(it) { rawAmount += Number(it.amount || 0); });
+  var dep = Number(cleanNumber(document.getElementById('eq-deposit').value)) || 0;
+  var remain = Math.max(0, rawAmount - dep);
+  var amtEl = document.getElementById('eq-amount');
+  if (amtEl) amtEl.value = Number(rawAmount).toLocaleString('en-US');
+  var infoEl = document.getElementById('eq-total-info');
+  if (infoEl) {
+    infoEl.innerHTML = 'جمع: <span style="color:#059669;">' + formatToman(rawAmount) + '</span> | مانده: <span style="color:#dc2626;">' + formatToman(remain) + '</span>';
+  }
+}
+
+// ═══════════════ جستجوی قطعه ═══════════════
+function searchPartsForEditQuote(keyword) {
+  var box = document.getElementById('eq-part-search-results');
+  var q = (keyword || '').trim().toLowerCase();
+  if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  var available = parts.filter(function(p) { return !p.deleted && (p.model || '').toLowerCase().indexOf(q) !== -1; });
+  if (available.length === 0) {
+    box.innerHTML = '<div style="padding:10px;color:#94a3b8;font-size:.8rem;text-align:center;">قطعه‌ای یافت نشد</div>';
+    box.style.display = 'block';
+    return;
+  }
+  var html = '';
+  available.forEach(function(item) {
+    var inStock = (Number(item.qty) || 0) > 0;
+    html += '<div class="part-search-item" onclick="selectPartForEditQuote(' + item.id + ')">' +
+      '<div><b>' + esc(item.model) + '</b> ' + (item.quality ? '<span style="color:#64748b;">(' + esc(item.quality) + ')</span>' : '') +
+      '<div style="font-size:.75rem;color:' + (inStock ? '#10b981' : '#ef4444') + ';">موجودی: ' + (item.qty || 0) + '</div></div>' +
+      '<div style="font-weight:bold;color:var(--primary);">' + formatToman(item.sellPrice || item.buyPrice) + '</div></div>';
+  });
+  box.innerHTML = html;
+  box.style.display = 'block';
+}
+
+function selectPartForEditQuote(partId) {
+  var item = parts.find(function(p) { return p.id === partId && !p.deleted; });
+  if (!item) return;
+  if ((Number(item.qty) || 0) <= 0) {
+    if (!confirm('موجودی این قطعه صفر است. ادامه می‌دهید؟')) return;
+  }
+  addEqItemRow('قطعه: ' + item.model + (item.quality ? ' (' + item.quality + ')' : ''), item.sellPrice || item.buyPrice || 0, item.id, item.buyPrice || 0);
+  document.getElementById('eq-part-search').value = '';
+  document.getElementById('eq-part-search-results').style.display = 'none';
+  updateEqTotals();
+  if (navigator.vibrate) navigator.vibrate(30);
+  showToast('✅ قطعه از انبار اضافه شد', 'success');
+}
+
+function toggleEqCollab() {
+  var t = document.getElementById('eq-work-type').value;
+  document.getElementById('eq-collab-box').style.display = (t === 'OUTSOURCE' || t === 'INSOURCE') ? 'block' : 'none';
+}
+
+function toggleEqLock() {
+  var t = document.getElementById('eq-lock-type').value;
+  document.getElementById('eq-lock-val').style.display = (t === 'NONE') ? 'none' : 'block';
+}
+
+// ═══════════════ ذخیره ═══════════════
 function saveQuoteEdits() {
   var qId = Number(document.getElementById('eq-quote-id').value);
-  var q = quotes.find(x => x.id === qId && !x.deleted); if (!q) return showToast('فاکتور یافت نشد', 'error');
-  var newBrand = (document.getElementById('eq-brand').value || '').trim();
-var newModel = (document.getElementById('eq-model').value || '').trim();
-  var newProblem = (document.getElementById('eq-problem').value || '').trim();
-  var newColor = (document.getElementById('eq-color').value || '').trim();
-var newMarker = (document.getElementById('eq-marker').value || '').trim();
-  var newAmount = Number(cleanNumber(document.getElementById('eq-amount').value)) || 0;
-  var newDeposit = Number(cleanNumber(document.getElementById('eq-deposit').value)) || 0;
-  var newDueDate = toEnglishDigits((document.getElementById('eq-due-date').value || '').trim());
-  var newWarranty = (document.getElementById('eq-warranty').value || '').trim();
-  var newAcc = (document.getElementById('eq-acc').value || '').trim();
-  if (!newModel) return showToast('مدل دستگاه را وارد کنید', 'warning');
-  if (newAmount <= 0) return showToast('مبلغ فاکتور باید بیشتر از صفر باشد', 'warning');
-  var onlineDep = Number(q.onlineDeposit || 0);
-  q.brand = newBrand;
-q.model = newModel; q.color = newColor; q.marker = newMarker; q.problem = newProblem; q.amount = newAmount;
-  q.cashDeposit = newDeposit; q.deposit = newDeposit + onlineDep;
-  q.dueDate = newDueDate; q.warranty = newWarranty; q.acc = newAcc; q.updatedAt = Date.now();
-  addTimelineEvent(q, 'EDIT', '✏️', 'ویرایش فاکتور', '');
+  var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+  if (!q) return showToast('فاکتور یافت نشد', 'error');
   
-  var existingCashPay = transactions.find(t => !t.deleted && t.customerId === q.customerId && t.intakeCode === q.intakeCode && t.type === 'PAY' && t.title && t.title.indexOf('بیعانه نقدی مغازه') !== -1);
-  if (newDeposit > 0) {
-    if (existingCashPay) { existingCashPay.amount = newDeposit; existingCashPay.payMethod = q.payMethod || 'POS'; existingCashPay.updatedAt = Date.now(); }
-    else {
+  var newModel = (document.getElementById('eq-model').value || '').trim();
+  if (!newModel) return showToast('مدل دستگاه را وارد کنید', 'warning');
+  
+  var newItems = getEqItemsFromForm();
+  if (newItems.length === 0) return showToast('حداقل یک ردیف لازم است', 'warning');
+  
+  // ─── ۱. محاسبه تغییرات موجودی
+  var oldItems = window._editQuoteOriginalItems || [];
+  restorePartsStock(oldItems);      // برگرداندن قطعات قدیمی به انبار
+  deductPartsStock(newItems);       // کسر قطعات جدید از انبار
+  
+  // ─── ۲. محاسبه مبلغ
+  var rawAmount = 0;
+  var laborSum = 0;
+  newItems.forEach(function(it) {
+    rawAmount += Number(it.amount || 0);
+    if (!it.partId) laborSum += Number(it.amount || 0);
+  });
+  
+  var discountPercent = q.loyaltyDiscountPercent || 0;
+  var discountAmt = Math.round(laborSum * discountPercent / 100);
+  var finalAmount = Math.max(0, rawAmount - discountAmt);
+  
+  // ─── ۳. آپدیت فیلدها
+  var oldStatus = q.deviceStatus || 'QUEUE';
+  var newStatus = document.getElementById('eq-status').value;
+  
+  q.brand = (document.getElementById('eq-brand').value || '').trim();
+  q.model = newModel;
+  q.color = (document.getElementById('eq-color').value || '').trim();
+  q.marker = (document.getElementById('eq-marker').value || '').trim();
+  q.problem = (document.getElementById('eq-problem').value || '').trim();
+  q.imei = (document.getElementById('eq-imei').value || '').trim();
+  q.acc = (document.getElementById('eq-acc').value || '').trim();
+  
+  q.workType = document.getElementById('eq-work-type').value;
+  q.collabName = (document.getElementById('eq-collab-name').value || '').trim();
+  q.collabCost = Number(cleanNumber(document.getElementById('eq-collab-cost').value)) || 0;
+  
+  q.lockType = document.getElementById('eq-lock-type').value;
+  q.lockVal = (document.getElementById('eq-lock-val').value || '').trim();
+  if (q.lockType === 'PATTERN') q.patternPath = q.lockVal;
+  
+  q.isDead = document.getElementById('eq-chk-dead').checked;
+  q.isWater = document.getElementById('eq-chk-water').checked;
+  q.isLcdRisk = document.getElementById('eq-chk-lcdrisk').checked;
+  q.isScratch = document.getElementById('eq-chk-scratch').checked;
+  q.isOpened = document.getElementById('eq-chk-opened').checked;
+  q.hasSim = document.getElementById('eq-chk-sim').checked;
+  
+  q.deviceStatus = newStatus;
+  
+  q.items = newItems;
+  q.rawAmount = rawAmount;
+  q.amount = finalAmount;
+  q.loyaltyDiscountAmount = discountAmt;
+  
+  q.cashDeposit = Number(cleanNumber(document.getElementById('eq-deposit').value)) || 0;
+  q.deposit = q.cashDeposit + Number(q.onlineDeposit || 0);
+  q.requestedDeposit = Number(cleanNumber(document.getElementById('eq-requested-deposit').value)) || 0;
+  q.dueDate = toEnglishDigits((document.getElementById('eq-due-date').value || '').trim());
+  q.warranty = (document.getElementById('eq-warranty').value || '').trim();
+  
+  q.internalDiagnosis = (document.getElementById('eq-internal-diagnosis').value || '').trim();
+  q.internalNotes = (document.getElementById('eq-internal-notes').value || '').trim();
+  q.qcSummary = (document.getElementById('eq-qc-summary').value || '').trim();
+  
+  q.updatedAt = Date.now();
+  
+  if (oldStatus !== newStatus) {
+    addTimelineEvent(q, 'STATUS', '🔄', 'تغییر وضعیت', (statusLabels[oldStatus] || oldStatus) + ' → ' + (statusLabels[newStatus] || newStatus));
+  }
+  addTimelineEvent(q, 'EDIT', '✏️', 'ویرایش کامل فاکتور', '');
+  
+  // ─── ۴. آپدیت بیعانه نقدی
+  var existingCashPay = transactions.find(function(t) {
+    return !t.deleted && t.customerId === q.customerId && t.intakeCode === q.intakeCode && t.type === 'PAY' && t.title && t.title.indexOf('بیعانه نقدی مغازه') !== -1;
+  });
+  
+  if (q.cashDeposit > 0) {
+    if (existingCashPay) {
+      existingCashPay.amount = q.cashDeposit;
+      existingCashPay.payMethod = q.payMethod || 'POS';
+      existingCashPay.updatedAt = Date.now();
+    } else {
       transactions.unshift({
         id: Date.now() + 1, customerId: q.customerId, intakeCode: q.intakeCode, trackCode: q.trackCode,
-        title: 'بیعانه نقدی مغازه (قبض ' + q.intakeCode + ')', amount: newDeposit, payMethod: q.payMethod || 'POS', type: 'PAY', date: getTodayJalali(), deleted: false, updatedAt: Date.now()
+        title: 'بیعانه نقدی مغازه (قبض ' + q.intakeCode + ')',
+        amount: q.cashDeposit, payMethod: q.payMethod || 'POS', type: 'PAY',
+        date: getTodayJalali(), deleted: false, updatedAt: Date.now()
       });
       q.depositPayRecorded = true;
     }
-  } else if (existingCashPay && newDeposit === 0) {
-    existingCashPay.deleted = true; existingCashPay.updatedAt = Date.now(); q.depositPayRecorded = false;
+  } else if (existingCashPay && q.cashDeposit === 0) {
+    existingCashPay.deleted = true;
+    existingCashPay.updatedAt = Date.now();
+    q.depositPayRecorded = false;
   }
-  saveAll(); uploadToDrive(true); closeEditQuoteModal();
-  renderCustomerLoyaltyBanner(); renderQuotes(); renderTransactions(); renderWorkshopBoard(); renderDepositsStream();
-  // 🎓 یادگیری خودکار مدل جدید در ویرایش هم
-if (newBrand && newModel && newBrand !== 'سایر') {
-  var wasLearnedEdit = learnBrandModel(newBrand, newModel);
-  if (wasLearnedEdit) {
-    setTimeout(function() {
-      showToast('✅ ' + newModel + ' به لیست ' + newBrand + ' اضافه شد', 'success');
-    }, 1200);
+  
+  // ─── ۵. ذخیره و رندر
+  saveAll();
+  uploadToDrive(true);
+  closeEditQuoteModal();
+  renderCustomerLoyaltyBanner();
+  renderQuotes();
+  renderTransactions();
+  renderWorkshopBoard();
+  renderDepositsStream();
+  renderParts();
+  
+  // 🎓 یادگیری خودکار مدل جدید
+  var newBrand = q.brand;
+  if (newBrand && newModel && newBrand !== 'سایر' && typeof learnBrandModel === 'function') {
+    var wasLearned = learnBrandModel(newBrand, newModel);
+    if (wasLearned) {
+      setTimeout(function() { showToast('✅ ' + newModel + ' به لیست ' + newBrand + ' اضافه شد', 'success'); }, 1200);
+    }
   }
-}
-showToast('✅ فاکتور با موفقیت ویرایش شد', 'success');
+  
+  showToast('✅ فاکتور با موفقیت ویرایش شد', 'success');
 }
 
 function convertQuoteToDebt(qId, deliverySignature, deliverySignatureDbId, newPayment, payMethod) {
@@ -5773,9 +6163,19 @@ function deleteTransaction(txId) {
 function renderTransactions() {
   var bal = getBalance(activeCustomerId);
   var balEl = document.getElementById('cust-balance');
-  if (bal > 0) { balEl.innerText = 'مانده بدهی: ' + formatToman(bal); balEl.style.color = 'var(--danger)'; }
-  else if (bal < 0) { balEl.innerText = 'بستانکار: ' + formatToman(Math.abs(bal)); balEl.style.color = 'var(--success)'; }
-  else { balEl.innerText = 'تسویه کامل (0 تومان)'; balEl.style.color = '#64748b'; }
+  var activeCust = customers.find(function(x) { return x.id === activeCustomerId && !x.deleted; });
+  var isSupplier = activeCust && activeCust.isSupplier;
+  
+  if (bal > 0) {
+    balEl.innerText = (isSupplier ? '🔴 بدهی شما به تامین‌کننده: ' : 'مانده بدهی: ') + formatToman(bal);
+    balEl.style.color = 'var(--danger)';
+  } else if (bal < 0) {
+    balEl.innerText = (isSupplier ? '🟢 طلب شما از تامین‌کننده: ' : 'بستانکار: ') + formatToman(Math.abs(bal));
+    balEl.style.color = 'var(--success)';
+  } else {
+    balEl.innerText = 'تسویه کامل (0 تومان)';
+    balEl.style.color = '#64748b';
+  }
   var listEl = document.getElementById('tx-list'); var countEl = document.getElementById('count-history-tx');
   listEl.innerHTML = '';
   var custTx = transactions.filter(t => t.customerId === activeCustomerId && !t.deleted);
@@ -7124,7 +7524,7 @@ if (d.paymentText) customPaymentText = d.paymentText;;
 openAppDB().then(db => {
   var tx = db.transaction('store', 'readonly');
   var store = tx.objectStore('store');
-  var pending = 5;
+  var pending = 6;
   
   function checkDone() {
   pending--;
@@ -7162,6 +7562,7 @@ openAppDB().then(db => {
   loadOrMigrate('db_quotes', function(d) { quotes = d; });
   loadOrMigrate('db_parts', function(d) { parts = d; });
   loadOrMigrate('db_expenses', function(d) { expenses = d; });
+  loadOrMigrate('db_supplier_purchases', function(d) { window.supplierPurchases = d || []; });
 })
 .catch(function() { setTimeout(function() { hideLoader(); }, 150); });
 
@@ -17553,551 +17954,380 @@ body.apk-print-mode #apk-print-toolbar {
   }
 </script>
 
-<style>
-/* ═══════════════════════════════════════════════════════════════════ */
-/* 🚀 استودیو بومی ساخت PDF و تصویر فاکتور A5 + ذخیره در حافظه گوشی    */
-/* ═══════════════════════════════════════════════════════════════════ */
-.printer-overlay, #printer-overlay, #apk-print-toolbar {
-  display: none !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-#persia-print-studio {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: #0f172a;
-  z-index: 99999998;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  overflow-y: auto;
-  padding: 68px 10px 24px 10px;
-  direction: rtl;
-}
-#persia-print-studio.open {
-  display: flex !important;
-}
-#persia-print-studio.fullscreen-shot {
-  padding: 0 !important;
-  background: #ffffff !important;
-}
-#persia-print-studio.fullscreen-shot #pps-toolbar,
-#persia-print-studio.fullscreen-shot #pps-hint {
-  display: none !important;
-}
-#persia-print-studio.fullscreen-shot #pps-preview-wrap {
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  max-width: 100vw !important;
-  width: 100vw !important;
-}
-#pps-toolbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 58px;
-  background: rgba(15, 23, 42, 0.96);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.12);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 8px;
-  gap: 6px;
-  z-index: 10;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-}
-.pps-btn {
-  border: none !important;
-  border-radius: 10px !important;
-  padding: 9px 10px !important;
-  font-size: 0.76rem !important;
-  font-weight: 900 !important;
-  color: #fff !important;
-  cursor: pointer !important;
-  margin: 0 !important;
-  width: auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 4px !important;
-  white-space: nowrap !important;
-}
-#pps-preview-wrap {
-  width: 100%;
-  max-width: 520px;
-  background: #fff;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-}
-#pps-preview-img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-#pps-hint {
-  color: #93c5fd;
-  font-size: 0.75rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 8px;
-  line-height: 1.5;
-}
-#path-info-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(15,23,42,0.88);
-  z-index: 99999999;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  direction: rtl;
-}
-#path-info-modal.open {
-  display: flex !important;
-}
-</style>
-
-<!-- ۱. پنجره پیش‌نمایش و دکمه‌های ذخیره فاکتور -->
-<div id="persia-print-studio" onclick="if(this.classList.contains('fullscreen-shot')) this.classList.remove('fullscreen-shot');">
-  <div id="pps-toolbar" onclick="event.stopPropagation();">
-    <button type="button" class="pps-btn" onclick="closePersiaPrintStudio()" style="background:#ef4444;">⬅ بازگشت</button>
-    <button type="button" class="pps-btn" id="pps-btn-pdf" onclick="exportPersiaInvoice('PDF')" style="flex:1.2;background:linear-gradient(135deg,#10b981 0%,#047857 100%);">📄 ذخیره PDF</button>
-    <button type="button" class="pps-btn" id="pps-btn-png" onclick="exportPersiaInvoice('PNG')" style="flex:1.2;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);">🖼️ ذخیره عکس</button>
-    <button type="button" class="pps-btn" onclick="enableFullscreenShot()" style="background:#2563eb;" title="تمام‌صفحه برای اسکرین‌شات">📱</button>
-  </div>
-
-  <div id="pps-hint">
-    💡 روی <b>«ذخیره PDF»</b> یا <b>«ذخیره عکس»</b> بزنید تا فاکتور در پوشه <b>Documents</b> گوشی ذخیره و آماده پرینت شود.
-  </div>
-
-  <div id="pps-preview-wrap" onclick="if(document.getElementById('persia-print-studio').classList.contains('fullscreen-shot')) { document.getElementById('persia-print-studio').classList.remove('fullscreen-shot'); event.stopPropagation(); }">
-    <img id="pps-preview-img" src="" alt="در حال ساخت پیش‌نمایش فاکتور...">
-  </div>
-</div>
-
-<!-- ۲. پنجره نمایش مسیر ذخیره فایل در گوشی -->
-<div id="path-info-modal">
-  <div style="background:#fff;border-radius:16px;padding:20px;max-width:400px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
-    <div style="text-align:center;margin-bottom:16px;">
-      <div style="font-size:3rem;margin-bottom:8px;">✅</div>
-      <div style="font-weight:900;font-size:1.1rem;color:#10b981;">فاکتور در گوشی ذخیره شد</div>
-    </div>
-    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px;margin-bottom:16px;font-size:0.85rem;line-height:1.8;color:#166534;">
-      <div><b>📁 پوشه:</b> <span id="pim-folder-name">Documents</span></div>
-      <div style="margin-top:6px;"><b>📄 نام فایل:</b></div>
-      <div id="pim-file-name" style="background:#fff;padding:8px;border-radius:6px;margin-top:4px;direction:ltr;text-align:left;font-family:monospace;font-size:0.78rem;word-break:break-all;color:#0f172a;">Invoice.pdf</div>
-    </div>
-    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px;margin-bottom:16px;font-size:0.82rem;line-height:1.7;color:#92400e;">
-      <b>🔍 چطور فایل رو پیدا و پرینت کنم؟</b><br>
-      به برنامه «Files» یا «مدیریت فایل» گوشی برو و پوشه بالا رو باز کن؛ فایل فاکتور اونجا آماده پرینت است.
-    </div>
-    <button type="button" onclick="document.getElementById('path-info-modal').classList.remove('open')" style="width:100%;background:linear-gradient(135deg,#10b981 0%,#047857 100%);color:#fff;padding:14px;border:none;border-radius:10px;font-size:1rem;font-weight:900;cursor:pointer;">باشه، ممنون</button>
-  </div>
-</div>
-
 <script>
-(function() {
-  var _nativePrint = window.print ? window.print.bind(window) : function(){};
-  var _lastCanvas = null;
-  var _lastCode = 'Factor';
-
-  function hideOldPrinterOverlays() {
-    var els = document.querySelectorAll('.printer-overlay, #printer-overlay, #apk-print-toolbar');
-    for (var i = 0; i < els.length; i++) {
-      els[i].style.display = 'none';
-    }
-    document.body.classList.remove('apk-print-mode');
-  }
-
-  window.closePersiaPrintStudio = function() {
-    var st = document.getElementById('persia-print-studio');
-    if (st) st.classList.remove('open', 'fullscreen-shot');
-    hideOldPrinterOverlays();
-  };
-
-  window.enableFullscreenShot = function() {
-    var st = document.getElementById('persia-print-studio');
-    if (st) {
-      st.classList.add('fullscreen-shot');
-      if (typeof showToast === 'function') showToast('📸 الان اسکرین‌شات بگیرید (برای بازگشت، روی صفحه بزنید)', 'info');
-    }
-  };
-
-  function showPathInfoModal(folderLabel, filename) {
-    var fEl = document.getElementById('pim-folder-name');
-    var nEl = document.getElementById('pim-file-name');
-    var modal = document.getElementById('path-info-modal');
-    if (fEl) fEl.innerText = folderLabel;
-    if (nEl) nEl.innerText = filename;
-    if (modal) modal.classList.add('open');
-  }
-
-  function roundRect(ctx, x, y, w, h, r, fill, stroke, strokeColor, lineWidth) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
-    if (stroke) {
-      ctx.strokeStyle = strokeColor || '#333';
-      ctx.lineWidth = lineWidth || 2;
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  function drawWrappedRTL(ctx, text, xRight, yStart, maxWidth, lineHeight, maxLines) {
-    var words = String(text || '').replace(/\r/g, '').split(/\s+/);
-    var line = '';
-    var y = yStart;
-    var linesCount = 0;
-    ctx.save();
-    ctx.direction = 'rtl';
-    ctx.textAlign = 'right';
-    for (var n = 0; n < words.length; n++) {
-      var testLine = line + (line ? ' ' : '') + words[n];
-      if (ctx.measureText(testLine).width > maxWidth && line !== '') {
-        ctx.fillText(line, xRight, y);
-        line = words[n];
-        y += lineHeight;
-        linesCount++;
-        if (maxLines && linesCount >= maxLines - 1) break;
-      } else {
-        line = testLine;
+// ═══════════════════════════════════════════════════════════════
+// 🔧 دکمه میانبر «افزودن قطعه از انبار» روی کارت‌های WAIT_PART
+// ═══════════════════════════════════════════════════════════════
+(function setupQuickAddPartButton() {
+  
+  function injectQuickAddButtons() {
+    var cards = document.querySelectorAll('#workshop-cards-container .workshop-card');
+    cards.forEach(function(card) {
+      var idMatch = card.id.match(/ws-card-(\d+)/);
+      if (!idMatch) return;
+      var qId = Number(idMatch[1]);
+      var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+      if (!q) return;
+      
+      var st = q.deviceStatus || 'QUEUE';
+      // فقط برای WAIT_PART
+      if (st !== 'WAIT_PART') {
+        var oldBtn = card.querySelector('.btn-quick-add-part');
+        if (oldBtn) oldBtn.remove();
+        return;
       }
-    }
-    if (line) {
-      ctx.fillText(line, xRight, y);
-      y += lineHeight;
-    }
-    ctx.restore();
-    return y;
-  }
-
-  function loadSafeImage(url) {
-    return new Promise(function(resolve) {
-      if (!url) return resolve(null);
-      var img = new Image();
-      img.crossOrigin = 'anonymous';
-      var timer = setTimeout(function() { resolve(null); }, 1800);
-      img.onload = function() { clearTimeout(timer); resolve(img); };
-      img.onerror = function() { clearTimeout(timer); resolve(null); };
-      img.src = url;
+      
+      var actionRow = card.querySelector('.action-row');
+      if (!actionRow) return;
+      if (actionRow.querySelector('.btn-quick-add-part')) return;
+      
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-quick-add-part';
+      btn.style.cssText = 'background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);padding:9px;font-size:.82rem;margin:0;flex:1;border-radius:8px;color:#fff;font-weight:bold;border:none;cursor:pointer;min-width:100px;';
+      btn.innerHTML = '📦 افزودن قطعه';
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        // باز کردن مودال ویرایش که حالا کامل شده
+        openEditQuoteModal(qId);
+        // اسکرول به بخش قطعات
+        setTimeout(function() {
+          var itemsBox = document.getElementById('eq-items-container');
+          if (itemsBox) itemsBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          var search = document.getElementById('eq-part-search');
+          if (search) search.focus();
+        }, 400);
+      });
+      
+      // قبل از دکمه اول اضافه کن
+      var firstBtn = actionRow.querySelector('button');
+      if (firstBtn) {
+        actionRow.insertBefore(btn, firstBtn);
+      } else {
+        actionRow.appendChild(btn);
+      }
     });
   }
+  
+  // هر بار که کارت‌ها رندر میشن، دکمه‌ها رو تزریق کن
+  var _baseRender = renderWorkshopBoard;
+  renderWorkshopBoard = function() {
+    _baseRender();
+    setTimeout(injectQuickAddButtons, 200);
+  };
+  
+  // اجرای اولیه
+  setTimeout(injectQuickAddButtons, 1500);
+  
+  console.log('[quick-add-part] Ready ✅');
+})();
+</script>
 
-  function capturePrintSectionData() {
-    var sec = document.getElementById('print-section');
-    if (!sec) return null;
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🏪 پچ قطعی: مدیریت محیط تامین‌کننده و رفع باگ دکمه‌ها
+// ═══════════════════════════════════════════════════════════════
+(function fixSupplierUI() {
+  if (!window.supplierPurchases) window.supplierPurchases = [];
 
-    var custPart = sec.querySelector('#print-customer-part');
-    var shopWork = sec.querySelector('#print-shop-workshop');
+  // ۱. تعریف توابع به صورت گلوبال (تا دکمه‌های HTML بتونن صداشون بزنن)
+  window.switchSupplierTab = function(tab) {
+    var purchases = document.getElementById('sup-sec-purchases');
+    var newTab = document.getElementById('sup-sec-new');
+    var btnP = document.getElementById('btn-sup-tab-purchases');
+    var btnN = document.getElementById('btn-sup-tab-new');
+    if (!purchases || !newTab) return;
+    
+    if (tab === 'purchases') {
+      purchases.style.display = 'block';
+      newTab.style.display = 'none';
+      if (btnP) btnP.classList.add('active');
+      if (btnN) btnN.classList.remove('active');
+      window.renderSupplierPurchases();
+    } else {
+      purchases.style.display = 'none';
+      newTab.style.display = 'block';
+      if (btnP) btnP.classList.remove('active');
+      if (btnN) btnN.classList.add('active');
+      window.resetSupplierPurchaseForm();
+    }
+  };
 
-    if (custPart && custPart.innerHTML.trim().length > 10) {
-      var titleEl = custPart.querySelector('.r-title');
-      var title = titleEl ? titleEl.innerText.trim() : 'تعمیرات تخصصی موبایل پرشیا';
-      var headerSub = '';
-      var hDivs = custPart.querySelectorAll('.r-header div');
-      for (var i = 0; i < hDivs.length; i++) {
-        var d = hDivs[i];
-        if (!d.classList.contains('r-title') && !d.classList.contains('r-badge') && !d.classList.contains('r-qr-box') && !d.classList.contains('r-qr-caption')) {
-          var t = (d.innerText || '').trim();
-          if (t && t.indexOf('قبض') !== -1) headerSub = t;
-        }
+  window.renderSupplierPurchases = function() {
+    var container = document.getElementById('supplier-purchases-list');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    var list = (window.supplierPurchases || []).filter(function(p) {
+      return !p.deleted && p.supplierId === activeCustomerId;
+    });
+    
+    var countEl = document.getElementById('count-supplier-purchases');
+    if (countEl) countEl.innerText = list.length;
+    
+    if (list.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:24px;color:#94a3b8;"><div style="font-size:2.5rem;margin-bottom:8px;">📭</div><div style="font-weight:bold;">هنوز خریدی ثبت نشده</div></div>';
+      return;
+    }
+    
+    list.sort(function(a,b) { return b.id - a.id; });
+    
+    list.forEach(function(p) {
+      var remain = Math.max(0, p.totalAmount - p.paidAmount);
+      var card = document.createElement('div');
+      card.style.cssText = 'padding:10px;margin-bottom:8px;background:' + (remain > 0 ? '#fffbeb' : '#f0fdf4') + ';border:1px solid ' + (remain > 0 ? '#fde68a' : '#86efac') + ';border-radius:10px;';
+      
+      var itemsHtml = '';
+      (p.items || []).forEach(function(it) {
+        itemsHtml += '<div style="font-size:0.78rem;color:#475569;">• ' + esc(it.title) + ' × ' + it.qty + ' — ' + formatToman(it.totalAmount) + '</div>';
+      });
+      
+      card.innerHTML = 
+        '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">' +
+          '<span style="font-weight:800;font-size:0.9rem;">📥 خرید ' + esc(p.date) + '</span>' +
+          '<span class="badge ' + (remain > 0 ? 'badge-orange' : 'badge-green') + '">' + (remain > 0 ? '⏳ بدهکار' : '✓ تسویه') + '</span>' +
+        '</div>' + itemsHtml +
+        '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #cbd5e1;font-size:0.85rem;">' +
+          '<div style="display:flex;justify-content:space-between;"><span>جمع:</span><b>' + formatToman(p.totalAmount) + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;"><span>پرداختی:</span><b style="color:#059669;">' + formatToman(p.paidAmount) + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;font-weight:900;"><span>مانده:</span><b style="color:' + (remain > 0 ? '#dc2626' : '#059669') + ';">' + formatToman(remain) + '</b></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:6px;margin-top:8px;">' +
+          (remain > 0 ? '<button type="button" onclick="window.openPaySupplierDebt(' + p.id + ')" style="background:#10b981;color:#fff;padding:8px;font-size:0.78rem;border-radius:6px;flex:1;border:none;cursor:pointer;">💵 پرداخت بدهی</button>' : '') +
+          '<button type="button" onclick="window.deleteSupplierPurchase(' + p.id + ')" style="background:#fee2e2;color:#dc2626;padding:8px;font-size:0.78rem;border-radius:6px;flex:1;border:none;cursor:pointer;">🗑️ حذف</button>' +
+        '</div>';
+      
+      container.appendChild(card);
+    });
+  };
+
+  window.resetSupplierPurchaseForm = function() {
+    var dateEl = document.getElementById('sup-purchase-date');
+    if (dateEl) dateEl.value = getTodayJalali();
+    var itemsEl = document.getElementById('sup-purchase-items');
+    if (itemsEl) itemsEl.innerHTML = '';
+    var paidEl = document.getElementById('sup-purchase-paid');
+    if (paidEl) paidEl.value = '';
+    var notesEl = document.getElementById('sup-purchase-notes');
+    if (notesEl) notesEl.value = '';
+    window.addSupplierPurchaseRow();
+  };
+
+  window.addSupplierPurchaseRow = function() {
+  var container = document.getElementById('sup-purchase-items');
+  if(!container) return;
+  var row = document.createElement('div');
+  row.className = 'invoice-row';
+  row.style.cssText = 'margin-bottom:10px;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;';
+  row.innerHTML = 
+    // ردیف اول: نام قطعه (کامل)
+    '<input type="text" class="sup-item-title" placeholder="📦 نام قطعه" style="width:100%;margin:0 0 6px 0;font-size:0.9rem;padding:11px;font-weight:bold;">' +
+    // ردیف دوم: تعداد + قیمت خرید + قیمت فروش (۳ ستون مساوی)
+    '<div style="display:grid;grid-template-columns:0.8fr 1fr 1fr;gap:6px;margin-bottom:6px;">' +
+      '<input type="text" class="sup-item-qty" placeholder="تعداد" value="1" oninput="formatAmountInput(this);window.updateSupplierPurchaseTotals();" style="margin-top:0;font-size:0.85rem;padding:10px;text-align:center;">' +
+      '<input type="text" class="sup-item-buy" placeholder="💰 خرید" oninput="formatAmountInput(this);window.updateSupplierPurchaseTotals();" style="margin-top:0;font-size:0.85rem;padding:10px;">' +
+      '<input type="text" class="sup-item-sell" placeholder="💵 فروش" oninput="formatAmountInput(this);window.updateSupplierPurchaseTotals();" style="margin-top:0;font-size:0.85rem;padding:10px;">' +
+    '</div>' +
+    // دکمه حذف در پایین (کامل)
+    '<button type="button" onclick="this.closest(\'.invoice-row\').remove();window.updateSupplierPurchaseTotals();" style="width:100%;padding:7px;background:#fee2e2;color:#dc2626;border-radius:6px;margin:0;font-size:0.8rem;border:none;cursor:pointer;font-weight:bold;">🗑️ حذف این ردیف</button>';
+  container.appendChild(row);
+  window.updateSupplierPurchaseTotals();
+};
+
+  window.getSupplierPurchaseItems = function() {
+    var rows = document.querySelectorAll('#sup-purchase-items .invoice-row');
+    var items = [];
+    rows.forEach(function(r) {
+      var title = (r.querySelector('.sup-item-title').value || '').trim();
+      var qty = Number(cleanNumber(r.querySelector('.sup-item-qty').value)) || 0;
+      var buyPrice = Number(cleanNumber(r.querySelector('.sup-item-buy').value)) || 0;
+      var sellPrice = Number(cleanNumber(r.querySelector('.sup-item-sell').value)) || 0;
+      if (title && qty > 0 && buyPrice > 0) {
+        items.push({ title: title, qty: qty, buyPrice: buyPrice, sellPrice: sellPrice, totalAmount: buyPrice * qty });
       }
+    });
+    return items;
+  };
 
-      var qrImgEl = custPart.querySelector('.r-qr-box img');
-      var qrSrc = qrImgEl ? qrImgEl.src : '';
+  window.updateSupplierPurchaseTotals = function() {
+    var items = window.getSupplierPurchaseItems();
+    var total = 0;
+    items.forEach(function(it) { total += it.totalAmount; });
+    var paidEl = document.getElementById('sup-purchase-paid');
+    var paid = Number(cleanNumber(paidEl ? paidEl.value : '')) || 0;
+    var remain = Math.max(0, total - paid);
+    var totalEl = document.getElementById('sup-purchase-total');
+    if (totalEl) totalEl.innerHTML = 'جمع خرید: <span style="color:#059669;">' + formatToman(total) + '</span>';
+    var sumEl = document.getElementById('sup-purchase-summary');
+    if (sumEl) sumEl.innerHTML = '<div style="display:flex;justify-content:space-between;"><span>جمع:</span><b>' + formatToman(total) + '</b></div><div style="display:flex;justify-content:space-between;"><span>پرداختی:</span><b style="color:#059669;">' + formatToman(paid) + '</b></div><div style="display:flex;justify-content:space-between;font-weight:900;"><span>مانده بدهی:</span><b style="color:' + (remain > 0 ? '#dc2626' : '#059669') + ';">' + formatToman(remain) + '</b></div>';
+  };
 
-      var metaLines = [];
-      var mRows = custPart.querySelectorAll('.r-meta tr');
-      for (var m = 0; m < mRows.length; m++) {
-        var tds = mRows[m].querySelectorAll('td');
-        var parts = [];
-        for (var k = 0; k < tds.length; k++) {
-          var txt = tds[k].innerText.trim();
-          if (txt) parts.push(txt);
-        }
-        if (parts.length > 0) metaLines.push(parts.join('   |   '));
+  window.fillFullPaymentSupplierPurchase = function() {
+    var total = 0;
+    window.getSupplierPurchaseItems().forEach(function(it) { total += it.totalAmount; });
+    var paidEl = document.getElementById('sup-purchase-paid');
+    if(paidEl) paidEl.value = Number(total).toLocaleString('en-US');
+    window.updateSupplierPurchaseTotals();
+  };
+
+  window.fillZeroPaymentSupplierPurchase = function() {
+    var paidEl = document.getElementById('sup-purchase-paid');
+    if(paidEl) paidEl.value = '';
+    window.updateSupplierPurchaseTotals();
+  };
+
+  window.saveSupplierPurchase = function() {
+    var items = window.getSupplierPurchaseItems();
+    if (items.length === 0) return showToast('حداقل یک ردیف کامل پر کن', 'warning');
+    
+    var date = toEnglishDigits((document.getElementById('sup-purchase-date').value || '').trim()) || getTodayJalali();
+    var total = 0;
+    items.forEach(function(it) { total += it.totalAmount; });
+    var paid = Number(cleanNumber(document.getElementById('sup-purchase-paid').value)) || 0;
+    if (paid > total) paid = total;
+    
+    var purchase = {
+      id: Date.now(), supplierId: activeCustomerId, date: date,
+      items: items, totalAmount: total, paidAmount: paid,
+      payMethod: document.getElementById('sup-purchase-pay-method').value || 'CASH',
+      notes: (document.getElementById('sup-purchase-notes').value || '').trim(),
+      deleted: false, updatedAt: Date.now()
+    };
+    
+    window.supplierPurchases.unshift(purchase);
+    
+    var supplierName = (customers.find(function(c) { return c.id === activeCustomerId; }) || {}).name || '';
+    items.forEach(function(it) {
+      var existingPart = parts.find(function(p) {
+        return !p.deleted && (p.model || '').toLowerCase().trim() === it.title.toLowerCase().trim();
+      });
+      if (existingPart) {
+        existingPart.qty = (Number(existingPart.qty) || 0) + it.qty;
+        if (it.buyPrice > 0) existingPart.buyPrice = it.buyPrice;
+        if (it.sellPrice > 0) existingPart.sellPrice = it.sellPrice;
+        existingPart.updatedAt = Date.now();
+      } else {
+        parts.unshift({
+          id: Date.now() + Math.random(), model: it.title, quality: '', shop: supplierName,
+          qty: it.qty, buyPrice: it.buyPrice, sellPrice: it.sellPrice, date: date, deleted: false, updatedAt: Date.now()
+        });
       }
-      if (metaLines.length === 0 && custPart.querySelector('.r-meta')) {
-        var rawM = custPart.querySelector('.r-meta').innerText.split('\n');
-        for (var rm = 0; rm < rawM.length; rm++) {
-          if (rawM[rm].trim()) metaLines.push(rawM[rm].trim());
-        }
-      }
+    });
+    
+    if (paid > 0) {
+      transactions.unshift({
+        id: Date.now() + 2, customerId: activeCustomerId,
+        title: 'پرداخت به تامین‌کننده (' + supplierName + ' - خرید ' + date + ')',
+        amount: paid, payMethod: purchase.payMethod, type: 'PAY', date: date, deleted: false, updatedAt: Date.now()
+      });
+    }
+    
+    saveAll();
+    if (typeof uploadToDrive === 'function') uploadToDrive(true);
+    showToast('✅ خرید ثبت شد و قطعات به انبار اضافه شدند', 'success');
+    
+    window.renderSupplierPurchases();
+    if (typeof renderParts === 'function') renderParts();
+    if (typeof renderReports === 'function') renderReports();
+    window.renderSupplierBalance();
+    window.switchSupplierTab('purchases');
+  };
 
-      var tableRows = [];
-      var tRows = custPart.querySelectorAll('.r-table tr');
-      for (var trIdx = 0; trIdx < tRows.length; trIdx++) {
-        var tr = tRows[trIdx];
-        if (trIdx === 0 && tr.querySelector('th')) continue;
-        var cells = tr.querySelectorAll('td, th');
-        if (cells.length === 1) tableRows.push({ full: cells[0].innerText.trim() });
-        else if (cells.length >= 2) tableRows.push({ col1: cells[0].innerText.trim(), col2: cells[1].innerText.trim() });
-      }
+  window.deleteSupplierPurchase = function(purchaseId) {
+    if (!confirm('این فاکتور خرید حذف شود؟\n(قطعات از انبار کم می‌شن)')) return;
+    var p = window.supplierPurchases.find(function(x) { return x.id === purchaseId && !x.deleted; });
+    if (!p) return;
+    (p.items || []).forEach(function(it) {
+      var part = parts.find(function(x) { return !x.deleted && (x.model || '').toLowerCase().trim() === it.title.toLowerCase().trim(); });
+      if (part) { part.qty = Math.max(0, (Number(part.qty) || 0) - it.qty); part.updatedAt = Date.now(); }
+    });
+    p.deleted = true;
+    p.updatedAt = Date.now();
+    saveAll();
+    if (typeof uploadToDrive === 'function') uploadToDrive(true);
+    window.renderSupplierPurchases();
+    if (typeof renderParts === 'function') renderParts();
+    window.renderSupplierBalance();
+    showToast('✅ حذف شد', 'success');
+  };
 
-      var totals = [];
-      var totDivs = custPart.querySelectorAll('.r-totals > div');
-      for (var tdIdx = 0; tdIdx < totDivs.length; tdIdx++) {
-        var div = totDivs[tdIdx];
-        var spans = div.querySelectorAll('span, b');
-        if (spans.length >= 2) {
-          totals.push({ label: spans[0].innerText.trim(), val: spans[spans.length - 1].innerText.trim(), isFinal: div.classList.contains('r-total-final') });
+  window.openPaySupplierDebt = function(purchaseId) {
+    var p = window.supplierPurchases.find(function(x) { return x.id === purchaseId && !x.deleted; });
+    if (!p) return;
+    var remain = Math.max(0, p.totalAmount - p.paidAmount);
+    var amount = prompt('مبلغ پرداختی به تامین‌کننده:', remain);
+    if (amount === null) return;
+    var amt = Number(cleanNumber(amount));
+    if (!amt || amt <= 0) return;
+    if (amt > remain) amt = remain;
+    p.paidAmount = (Number(p.paidAmount) || 0) + amt;
+    p.updatedAt = Date.now();
+    var supplierName = (customers.find(function(c) { return c.id === activeCustomerId; }) || {}).name || '';
+    transactions.unshift({
+      id: Date.now(), customerId: activeCustomerId,
+      title: 'تسویه بدهی به تامین‌کننده (' + supplierName + ' - خرید ' + p.date + ')',
+      amount: amt, payMethod: 'CASH', type: 'PAY', date: getTodayJalali(), deleted: false, updatedAt: Date.now()
+    });
+    saveAll();
+    if (typeof uploadToDrive === 'function') uploadToDrive(true);
+    showToast('✅ پرداخت ثبت شد', 'success');
+    window.renderSupplierPurchases();
+    window.renderSupplierBalance();
+  };
+
+  window.renderSupplierBalance = function() {
+    var balEl = document.getElementById('cust-balance');
+    if (!balEl) return;
+    var purchases = (window.supplierPurchases || []).filter(function(p) { return !p.deleted && p.supplierId === activeCustomerId; });
+    var totalDebt = 0;
+    purchases.forEach(function(p) { totalDebt += Math.max(0, p.totalAmount - p.paidAmount); });
+    if (totalDebt > 0) {
+      balEl.innerText = '🔴 بدهی شما به تامین‌کننده: ' + formatToman(totalDebt);
+      balEl.style.color = '#dc2626';
+    } else {
+      balEl.innerText = '🟢 تسویه کامل';
+      balEl.style.color = '#10b981';
+    }
+  };
+
+  // ۲. هک کردن تابع openCustomer برای مخفی کردن تب‌های اضافی مشتری
+  var _baseOpen = window.openCustomer;
+  if (typeof _baseOpen === 'function' && !window._openCustomerPatchedForSupplier) {
+    window.openCustomer = function(id) {
+      var c = customers.find(function(x) { return x.id === id && !x.deleted; });
+      _baseOpen.apply(this, arguments);
+      
+      // بعد از باز شدن صفحه، استایل‌ها را اصلاح می‌کنیم
+      setTimeout(function() {
+        var isSupplier = c && c.isSupplier;
+        var custNav = document.querySelector('.cust-sub-nav');
+        var supNav = document.getElementById('supplier-sub-nav');
+        var custSecs = ['cust-sec-quotes', 'cust-sec-new', 'cust-sec-history', 'cust-sec-quick'];
+        var supSecs = ['sup-sec-purchases', 'sup-sec-new'];
+        
+        if (isSupplier) {
+          if (custNav) custNav.style.setProperty('display', 'none', 'important');
+          custSecs.forEach(function(s) { var el = document.getElementById(s); if (el) el.style.setProperty('display', 'none', 'important'); });
+          if (supNav) supNav.style.setProperty('display', 'flex', 'important');
+          
+          // پیش‌فرض تب سوابق خرید باز باشد
+          supSecs.forEach(function(s) { var el = document.getElementById(s); if (el) el.style.setProperty('display', 'none', 'important'); });
+          window.switchSupplierTab('purchases');
+          window.renderSupplierBalance();
         } else {
-          totals.push({ label: div.innerText.trim(), val: '', isFinal: div.classList.contains('r-total-final') });
+          if (custNav) custNav.style.setProperty('display', 'flex', 'important');
+          custSecs.forEach(function(s) { var el = document.getElementById(s); if (el) el.style.setProperty('display', 'none', 'important'); });
+          if (supNav) supNav.style.setProperty('display', 'none', 'important');
+          supSecs.forEach(function(s) { var el = document.getElementById(s); if (el) el.style.setProperty('display', 'none', 'important'); });
         }
-      }
-
-      var lawEl = custPart.querySelector('.r-law');
-      var lawText = lawEl ? lawEl.innerText.trim() : '';
-
-      var shopHeaderSub = '';
-      var shopMetaLines = [];
-      var shopTechLines = [];
-      if (shopWork) {
-        var shDivs = shopWork.querySelectorAll('.r-header div');
-        for (var s1 = 0; s1 < shDivs.length; s1++) {
-          var st = (shDivs[s1].innerText || '').trim();
-          if (st && st.indexOf('قبض') !== -1) shopHeaderSub = st;
-        }
-        var sm = shopWork.querySelector('.r-meta');
-        if (sm) {
-          var smArr = sm.innerText.split('\n');
-          for (var s2 = 0; s2 < smArr.length; s2++) {
-            if (smArr[s2].trim()) shopMetaLines.push(smArr[s2].trim());
-          }
-        }
-        var stDivs = shopWork.querySelectorAll('.r-tech > div');
-        for (var s3 = 0; s3 < stDivs.length; s3++) {
-          var stTxt = stDivs[s3].innerText.trim();
-          if (stTxt) shopTechLines.push(stTxt);
-        }
-      }
-
-      var codeMatch = headerSub.match(/\d+/);
-      if (codeMatch) _lastCode = codeMatch[0];
-
-      return {
-        mode: 'SPLIT_A5',
-        title: title,
-        headerSub: headerSub,
-        qrSrc: qrSrc,
-        metaLines: metaLines,
-        tableRows: tableRows,
-        totals: totals,
-        lawText: lawText,
-        shopHeaderSub: shopHeaderSub || headerSub,
-        shopMetaLines: shopMetaLines,
-        shopTechLines: shopTechLines
-      };
-    }
-
-    var allText = (sec.innerText || '').trim();
-    if (allText.length > 5) {
-      var rows = [];
-      var allTrs = sec.querySelectorAll('table tr');
-      for (var r = 0; r < allTrs.length; r++) {
-        var cols = [];
-        var cEls = allTrs[r].querySelectorAll('th, td');
-        for (var c = 0; c < cEls.length; c++) cols.push(cEls[c].innerText.trim());
-        if (cols.length > 0) rows.push(cols);
-      }
-      var rawL = [];
-      var sp = allText.split('\n');
-      for (var l = 0; l < sp.length; l++) {
-        if (sp[l].trim()) rawL.push(sp[l].trim());
-      }
-      return {
-        mode: 'SINGLE_PAGE',
-        rawLines: rawL,
-        table: rows
-      };
-    }
-    return null;
+      }, 100);
+    };
+    window._openCustomerPatchedForSupplier = true;
   }
 
-  async function renderReceiptToCanvas(data) {
-    var canvas = document.createElement('canvas');
-    var W = 1480, H = 2100;
-    canvas.width = W;
-    canvas.height = H;
-    var ctx = canvas.getContext('2d');
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, W, H);
-    var fontName = 'Vazirmatn, Tahoma, Arial, sans-serif';
-
-    if (!data || data.mode === 'SINGLE_PAGE') {
-      roundRect(ctx, 36, 36, W - 72, H - 72, 14, '#ffffff', true, '#222', 4);
-      ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 34px ' + fontName;
-      ctx.textAlign = 'center';
-      var headTitle = (data && data.rawLines && data.rawLines[0]) ? data.rawLines[0] : 'فاکتور رسمی — موبایل پرشیا';
-      ctx.fillText(headTitle, W / 2, 100);
-      ctx.beginPath(); ctx.moveTo(70, 130); ctx.lineTo(W - 70, 130); ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
-
-      var y = 180;
-      ctx.font = 'bold 23px ' + fontName;
-      ctx.textAlign = 'right';
-      if (data && data.rawLines) {
-        var maxL = Math.min(data.rawLines.length, 6);
-        for (var i = 1; i < maxL; i++) {
-          ctx.fillText(data.rawLines[i], W - 70, y);
-          y += 42;
-        }
-      }
-      if (data && data.table && data.table.length > 0) {
-        y += 20;
-        var tblW = W - 140;
-        var maxR = Math.min(data.table.length, 22);
-        for (var rIdx = 0; rIdx < maxR; rIdx++) {
-          var row = data.table[rIdx];
-          var cellW = tblW / row.length;
-          ctx.fillStyle = rIdx === 0 ? '#e2e8f0' : '#ffffff';
-          ctx.fillRect(70, y, tblW, 48);
-          ctx.strokeStyle = '#64748b';
-          ctx.strokeRect(70, y, tblW, 48);
-          ctx.fillStyle = '#000';
-          ctx.font = (rIdx === 0 ? 'bold 21px ' : '20px ') + fontName;
-          ctx.textAlign = 'center';
-          for (var c = 0; c < row.length; c++) {
-            var cx = (W - 70) - (c * cellW) - (cellW / 2);
-            ctx.fillText(row[c], cx, y + 32);
-          }
-          y += 48;
-        }
-      }
-      return canvas;
-    }
-
-    var cX = 32, cY = 28, cW = W - 64, cH = 1015;
-    roundRect(ctx, cX, cY, cW, cH, 12, '#ffffff', true, '#222222', 3.5);
-
-    ctx.save();
-    ctx.translate(cX + cW / 2, cY + cH / 2);
-    ctx.rotate(-28 * Math.PI / 180);
-    ctx.font = '900 135px Arial, sans-serif';
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.038)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('PERSIA', 0, 0);
-    ctx.restore();
-
-    roundRect(ctx, cX + cW - 155, cY + 18, 135, 42, 6, '#f8fafc', true, '#333', 2);
-    ctx.fillStyle = '#000';
-    ctx.font = 'bold 21px ' + fontName;
-    ctx.textAlign = 'center';
-    ctx.fillText('نسخه مشتری', cX + cW - 87, cY + 46);
-
-    ctx.fillStyle = '#000';
-    ctx.font = '900 32px ' + fontName;
-    ctx.textAlign = 'center';
-    ctx.fillText(data.title, W / 2, cY + 50);
-
-    ctx.font = 'bold 21px ' + fontName;
-    ctx.fillStyle = '#334155';
-    ctx.fillText(data.headerSub || '', W / 2, cY + 86);
-
-    var qrImg = await loadSafeImage(data.qrSrc);
-    var qrX = cX + 22, qrY = cY + 14, qrSize = 92;
-    roundRect(ctx, qrX, qrY, qrSize, qrSize, 6, '#fff', true, '#333', 2);
-    if (qrImg) {
-      ctx.drawImage(qrImg, qrX + 3, qrY + 3, qrSize - 6, qrSize - 6);
-    } else {
-      ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 16px ' + fontName;
-      ctx.textAlign = 'center';
-      ctx.fillText('کد رهگیری', qrX + qrSize / 2, qrY + 38);
-      ctx.font = 'bold 18px monospace';
-      ctx.fillText(_lastCode, qrX + qrSize / 2, qrY + 68);
-    }
-
-    var curY = cY + 116;
-    ctx.beginPath(); ctx.moveTo(cX + 20, curY); ctx.lineTo(cX + cW - 20, curY);
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
-    curY += 34;
-
-    ctx.fillStyle = '#000';
-    ctx.font = 'bold 22px ' + fontName;
-    ctx.textAlign = 'right';
-    for (var mIdx = 0; mIdx < data.metaLines.length; mIdx++) {
-      curY = drawWrappedRTL(ctx, data.metaLines[mIdx], cX + cW - 24, curY, cW - 48, 32, 2);
-    }
-    curY += 6;
-
-    var tX = cX + 22, tW = cW - 44, colSplit = tX + 340, thH = 42;
-    roundRect(ctx, tX, curY, tW, thH, 4, '#e2e8f0', true, '#64748b', 2);
-    ctx.beginPath(); ctx.moveTo(colSplit, curY); ctx.lineTo(colSplit, curY + thH); ctx.strokeStyle = '#64748b'; ctx.stroke();
-    ctx.fillStyle = '#000';
-    ctx.font = 'bold 21px ' + fontName;
-    ctx.textAlign = 'right';
-    ctx.fillText('شرح خدمات / قطعه', tX + tW - 16, curY + 28);
-    ctx.textAlign = 'center';
-    ctx.fillText('مبلغ', tX + 170, curY + 28);
-    curY += thH;
-
-    var maxTRows = Math.min(data.tableRows.length, 5);
-    for (var trI = 0; trI < maxTRows; trI++) {
-      var r = data.tableRows[trI];
-      var rH = 42;
-      ctx.strokeStyle = '#94a3b8';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(tX, curY, tW, rH);
-      if (r.full) {
-        ctx.fillStyle = '#f8fafc';
-        ctx.fillRect(tX + 1, curY + 1, tW - 2, rH - 2);
-        ctx.fillStyle = '#334155';
-        ctx.font = 'bold 19px ' + fontName;
-        ctx.textAlign = 'right';
-        ctx.fillText(r.full, tX + tW - 14, curY + 27);
-      } else {
-        ctx.beginPath(); ctx.moveTo(colSplit, curY); ctx.lineTo(colSplit, curY + rH); ctx.stroke();
-        ctx.fillStyle = '#000';
-        ctx.font = 'bold 20px ' + fontName;
-        ctx.textAlign = 'right';
-        ctx.fillText(r.col1 || '', tX + tW - 14, curY + 28);
-        ctx.textAlign = 'center';
-        ctx.fillText(r.col2 || '', tX + 170, curY + 28);
-      }
-      curY += rH;
-    }
-
-    curY += 28;
-
-    for (var totI = 0; totI < data.totals.length; totI++) {
-      var tot = data.totals[totI];
-      if (tot.isFinal) {
-        ctx.beginPath(); ctx.moveTo(tX, curY - 18); ctx.lineTo(tX + tW, curY - 18);
-        ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
-        curY += 8;
-      }
-      ctx.font = (tot.isFinal ? '900 24px ' : 'bold 21px ') + fontName;
-      ctx.fillStyle = tot.isFinal ? '#b91c1c' : '#0f172a';
-      ctx.textAlign = 'right';
-      ctx.fillText(tot.label, tX + tW - 6, curY);
-      if (tot.val) {
-        ctx.textAlign = 'left';
-        ctx.fillText(tot.val, tX + 6, curY);
-      }
-      curY += 34;
-    }
-
-    if (data.lawText) {
-      var lawY = Math.max(curY + 4, cY + cH - 235);
-      var lawH = (cY + cH - 85) - lawY;
-      if (lawH > 60) {
-        roundRect(ctx, tX, lawY, tW, lawH, 6, '#f8fafc', true, '#cbd5e1', 1.5);
-        ctx.fillStyle = '#1e293b';
-        ctx.font = 'bold 16.5px ' + fontName;
-        drawWrappedRTL(ctx, data.lawText, tX + tW - 12, lawY 
-
+  console.log('[supplier-ui-fix] Ready ✅');
+})();
+</script>
 </body>
 </html>

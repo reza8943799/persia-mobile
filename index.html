@@ -19273,123 +19273,151 @@ body.apk-print-mode #apk-print-toolbar {
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ اصلاح نهایی: اتصال به Share Native اندروید + فallback به واتساپ
+// 🖨️ باز کردن فاکتور در کروم برای پرینت (مخصوص APK)
 // ═══════════════════════════════════════════════════════════════
-(function fixApkTextPrint() {
+(function setupChromePrint() {
   
-  // تابع کمکی برای ارسال متن (اول Native بعد Web بعد Clipboard)
-  function shareInvoiceText(text) {
-    // ۱. پلاگین کپسیتور (مخصوص APK)
+  // تابع ساخت یک فایل HTML مستقل و تمیز از فاکتور
+  function getStandaloneInvoiceHTML() {
+    var content = document.getElementById('print-section').innerHTML;
+    if (!content || content.trim() === '') return null;
+    
+    return `<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>فاکتور موبایل پرشیا</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: Tahoma, Arial, sans-serif; 
+      background: #f1f5f9; 
+      display: flex; 
+      justify-content: center; 
+      padding: 10px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    #print-section { background: #fff; width: 100%; max-width: 148mm; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .print-page { width: 148mm; min-height: 210mm; padding: 2mm 3mm; display: flex; flex-direction: column; box-sizing: border-box; }
+    .print-half { flex: 1; overflow: hidden; box-sizing: border-box; padding: 3mm 4mm; border: 1.5px solid #333; border-radius: 4px; display: flex; flex-direction: column; min-height: 0; position: relative; }
+    .print-half.split { flex-direction: row; padding: 0; gap: 0; }
+    .workshop-col { flex: 2; padding: 3mm 3.5mm; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+    .notes-col { flex: 1; padding: 3mm 2.5mm; border-right: 1px dashed #333; display: flex; flex-direction: column; min-height: 0; background: #fdfdfd; }
+    .cut-line-mid { height: 5mm; display: flex; align-items: center; justify-content: center; font-size: 6.5pt; color: #666; flex: 0 0 auto; }
+    .r-header { text-align: center; margin-bottom: 1.5mm; border-bottom: 1px solid #444; padding-bottom: 1mm; position: relative; }
+    .r-title { font-size: 9.5pt; font-weight: bold; line-height: 1.2; }
+    .r-badge { font-size: 6.5pt; position: absolute; right: 0; top: 0; font-weight: bold; border: 1px solid #333; padding: 0.5px 3px; border-radius: 2px; }
+    .r-meta { font-size: 6.8pt; line-height: 1.45; }
+    .r-meta table { width: 100%; border-collapse: collapse; }
+    .r-meta td { padding: 0.4mm 0; vertical-align: top; }
+    .r-table { width: 100%; border-collapse: collapse; font-size: 6.8pt; margin-top: 1mm; }
+    .r-table td, .r-table th { padding: 0.9mm 1mm; vertical-align: top; border: 1px solid #888; }
+    .r-table th { background: #eee; font-weight: bold; font-size: 6.8pt; }
+    .r-totals { margin-top: 1.2mm; font-size: 7.2pt; line-height: 1.6; }
+    .r-totals > div { display: flex; justify-content: space-between; }
+    .r-total-final { border-top: 1px solid #333; margin-top: 0.8mm; padding-top: 0.8mm; font-weight: bold; font-size: 8.2pt; }
+    .r-law { font-size: 5.2pt; line-height: 1.3; text-align: justify; margin-top: 1.2mm; padding: 1mm 1.5mm; background: #fafafa; border: 1px solid #e0e0e0; border-radius: 2px; }
+    .r-sign { display: flex; justify-content: space-between; font-size: 6.5pt; margin-top: auto; padding-top: 1.5mm; gap: 2mm; }
+    .r-sign > div { flex: 1; }
+    .r-sign .line { border-bottom: 1px dotted #333; height: 6mm; }
+    .r-qr-box { position: absolute; left: 3mm; top: 3mm; text-align: center; }
+    .r-qr-box img { width: 36px; height: 36px; border: 1px solid #333; border-radius: 3px; display: block; }
+    .r-qr-caption { font-size: 4.5pt; color: #333; margin-top: 0.5px; }
+    .r-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 65pt; font-weight: 900; letter-spacing: 12px; text-transform: uppercase; color: rgba(0, 0, 0, 0.04); z-index: 0; pointer-events: none; font-family: Arial, sans-serif; }
+    .r-tech { font-size: 6.5pt; line-height: 1.55; background: #fafafa; padding: 1.5mm; border: 1px solid #e0e0e0; border-radius: 2px; margin-top: 1mm; }
+    .r-tech b { font-weight: bold; }
+    .r-tech > div { margin-bottom: 0.3mm; }
+    .r-notes-title { font-size: 7pt; font-weight: bold; margin-bottom: 1mm; border-bottom: 1px solid #666; padding-bottom: 0.6mm; text-align: center; }
+    .r-notes-lines { flex: 1; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 5mm, #ccc 5mm, #ccc 5.05mm); min-height: 20mm; }
+    
+    @media print {
+      @page { size: A5 portrait; margin: 0; }
+      body { background: #fff; padding: 0; display: block; }
+      #print-section { box-shadow: none; max-width: none; }
+      .print-page { width: 148mm; height: 210mm; page-break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div id="print-section">
+    ${content}
+  </div>
+</body>
+</html>`;
+  }
+
+  // تابع باز کردن در مرورگر
+  async function openInvoiceInBrowser() {
+    var html = getStandaloneInvoiceHTML();
+    if (!html) {
+      showToast('فاکتور آماده نیست. لطفاً دوباره تلاش کنید.', 'warning');
+      return;
+    }
+
+    var CapFs = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
     var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
-    if (CapShare && typeof CapShare.share === 'function') {
-      CapShare.share({
-        title: 'فاکتور موبایل پرشیا',
-        text: text,
-        dialogTitle: 'ارسال فاکتور'
-      }).catch(function(err) {
-        console.warn('[Share] Capacitor failed:', err);
-        fallbackShare(text);
-      });
-      return;
-    }
-    
-    // ۲. Web Share API (مرورگر)
-    if (navigator.share) {
-      navigator.share({ title: 'فاکتور موبایل پرشیا', text: text }).catch(function(err) {
-        if (err.name !== 'AbortError') fallbackShare(text);
-      });
-      return;
-    }
-    
-    // ۳. fallback
-    fallbackShare(text);
-  }
-  
-  function fallbackShare(text) {
-    // تلاش برای باز کردن واتساپ
-    var waUrl = 'whatsapp://send?text=' + encodeURIComponent(text);
-    var win = window.open(waUrl, '_blank');
-    if (!win || win.closed) {
-      // اگه واتساپ نصب نبود، کپی کن
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text);
-        showToast('📋 متن کپی شد (واتساپ یافت نشد)', 'info');
+    var CapBrowser = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
+
+    // ۱. روش اول (بهترین): ساخت فایل HTML و ارسال به منوی اندروید (انتخاب کروم)
+    if (CapFs && CapShare) {
+      try {
+        var fileName = 'persia_invoice_' + Date.now() + '.html';
+        var res = await CapFs.writeFile({
+          path: fileName,
+          data: html,
+          directory: 'CACHE',
+          encoding: 'utf8'
+        });
+        
+        var uriRes = await CapFs.getUri({ path: fileName, directory: 'CACHE' });
+        
+        await CapShare.share({
+          title: 'فاکتور موبایل پرشیا',
+          url: uriRes.uri, 
+          dialogTitle: 'برای پرینت، Chrome را انتخاب کنید'
+        });
+        return;
+      } catch (e) {
+        console.warn('Filesystem/Share failed:', e);
       }
+    }
+
+    // ۲. روش دوم: استفاده از Blob و پلاگین مرورگر
+    var blob = new Blob([html], { type: 'text/html' });
+    var blobUrl = URL.createObjectURL(blob);
+
+    if (CapBrowser) {
+      try {
+        await CapBrowser.open({ url: blobUrl });
+        return;
+      } catch (e) {
+        console.warn('Browser.open failed:', e);
+      }
+    }
+
+    // ۳. روش سوم (اضطراری): باز کردن در WebView
+    var win = window.open(blobUrl, '_system');
+    if (!win) {
+      window.open(blobUrl, '_blank');
+      showToast('فایل باز شد. اگر پرینت نشد، از منوی اشتراک‌گذاری Chrome را انتخاب کنید.', 'info');
     }
   }
 
-  function buildInvoiceText(data, isHistory) {
-    var text = '✦ موبایل پرشیا ✦\n';
-    if (isHistory) text += '🧾 فاکتور رسمی\n\n';
-    else text += '🛠️ قبض پذیرش دستگاه\n\n';
+  // هوک کردن window.print برای جلوگیری از باز شدن پنجره‌ی سفید WebView
+  var _originalWindowPrint = window.print;
+  window.print = function() {
+    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
     
-    var c = customers.find(function(x) { return x.id === data.customerId && !x.deleted; }) || { name: 'نامشخص' };
-    
-    text += '👤 مشتری: ' + c.name + '\n';
-    text += '📱 دستگاه: ' + (data.model || 'نامشخص') + (data.color ? ' (' + data.color + ')' : '') + '\n';
-    text += '🔢 قبض: ' + (data.intakeCode || '---') + (data.trackCode ? ' | پیگیری: ' + data.trackCode : '') + '\n';
-    text += '📅 تاریخ: ' + (data.date || '---') + '\n';
-    if (data.problem) text += '🔍 ایراد: ' + data.problem + '\n';
-    
-    text += '\n📋 اقلام:\n';
-    if (data.items && data.items.length > 0) {
-      data.items.forEach(function(it) {
-        text += '• ' + it.title + ': ' + formatToman(it.amount || 0) + '\n';
-      });
+    if (isCapacitor) {
+      openInvoiceInBrowser();
     } else {
-      text += '• ' + (data.title || 'خدمات تعمیر') + '\n';
+      _originalWindowPrint.apply(this, arguments);
     }
-    
-    var finalTotal = Number(data.amount || data.totalWork || 0);
-    text += '\n💰 مبلغ کل: ' + formatToman(finalTotal) + '\n';
-    
-    var dep = Number(data.cashDeposit || data.deposit || 0) + Number(data.onlineDeposit || 0);
-    if (dep > 0) {
-      text += '💵 بیعانه: ' + formatToman(dep) + '\n';
-      text += '🔴 مانده قابل پرداخت: ' + formatToman(Math.max(0, finalTotal - dep)) + '\n';
-    }
-    
-    if (typeof customPaymentText !== 'undefined' && customPaymentText) {
-      text += '\n💳 اطلاعات واریز:\n' + customPaymentText;
-    }
-    
-    return text;
-  }
-
-  // ۱. هوک کردن دکمه پرینت از توی تب کارگاه (پذیرش)
-  var _basePrintIntake = window.printIntakeReceipt;
-  window.printIntakeReceipt = function(qId) {
-    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
-    
-    if (isCapacitor) {
-      var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
-      var t = transactions.find(function(x) { return x.id === qId && !x.deleted && x.type === 'DEBT'; });
-      var targetData = q || t;
-      
-      if (targetData) {
-        shareInvoiceText(buildInvoiceText(targetData, !q));
-        return;
-      }
-    }
-    return _basePrintIntake.apply(this, arguments);
   };
 
-  // ۲. هوک کردن دکمه پرینت از توی سوابق
-  var _basePrintCustomerInvoice = window.printCustomerInvoice;
-  window.printCustomerInvoice = function(txId) {
-    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
-    
-    if (isCapacitor) {
-      var t = transactions.find(function(x) { return x.id === txId && !x.deleted && x.type === 'DEBT'; });
-      if (t) {
-        shareInvoiceText(buildInvoiceText(t, true));
-        return;
-      }
-    }
-    return _basePrintCustomerInvoice.apply(this, arguments);
-  };
-
-  console.log('[apk-text-print-v2] Ready ✅');
+  console.log('[chrome-print] Ready ✅');
 })();
 </script>
 

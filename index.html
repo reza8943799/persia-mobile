@@ -18816,68 +18816,558 @@ body.apk-print-mode #apk-print-toolbar {
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ نسخه جایگزین پرینت: خروجی متن برای واتساپ (مخصوص APK)
+// 🖨️ اصلاح نهایی پرینت متنی برای APK (استخراج دقیق دیتای فاکتور)
 // ═══════════════════════════════════════════════════════════════
-(function setupTextPrintFallback() {
+(function fixApkTextPrint() {
   
-  var _originalWindowPrint = window.print;
-  
-  window.print = function() {
+  // تابع کمکی برای ساخت متن فاکتور از روی دیتای واقعی
+  function buildInvoiceText(data, isHistory) {
+    var text = '✦ موبایل پرشیا ✦\n';
+    if (isHistory) text += '🧾 فاکتور رسمی\n\n';
+    else text += '🛠️ قبض پذیرش دستگاه\n\n';
+    
+    var c = customers.find(function(x) { return x.id === data.customerId && !x.deleted; }) || { name: 'نامشخص' };
+    
+    text += '👤 مشتری: ' + c.name + '\n';
+    text += '📱 دستگاه: ' + (data.model || 'نامشخص') + (data.color ? ' (' + data.color + ')' : '') + '\n';
+    text += '🔢 قبض: ' + (data.intakeCode || '---') + (data.trackCode ? ' | پیگیری: ' + data.trackCode : '') + '\n';
+    text += '📅 تاریخ: ' + (data.date || '---') + '\n';
+    if (data.problem) text += '🔍 ایراد: ' + data.problem + '\n';
+    
+    text += '\n📋 اقلام:\n';
+    if (data.items && data.items.length > 0) {
+      data.items.forEach(function(it) {
+        text += '• ' + it.title + ': ' + formatToman(it.amount || 0) + '\n';
+      });
+    } else {
+      text += '• ' + (data.title || 'خدمات تعمیر') + '\n';
+    }
+    
+    var finalTotal = Number(data.amount || data.totalWork || 0);
+    text += '\n💰 مبلغ کل: ' + formatToman(finalTotal) + '\n';
+    
+    var dep = Number(data.cashDeposit || data.deposit || 0) + Number(data.onlineDeposit || 0);
+    if (dep > 0) {
+      text += '💵 بیعانه: ' + formatToman(dep) + '\n';
+      text += '🔴 مانده قابل پرداخت: ' + formatToman(Math.max(0, finalTotal - dep)) + '\n';
+    }
+    
+    if (typeof customPaymentText !== 'undefined' && customPaymentText) {
+      text += '\n💳 اطلاعات واریز:\n' + customPaymentText;
+    }
+    
+    return text;
+  }
+
+  // ۱. هوک کردن دکمه پرینت از توی تب کارگاه (پذیرش)
+  var _basePrintIntake = window.printIntakeReceipt;
+  window.printIntakeReceipt = function(qId) {
     var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
     
     if (isCapacitor) {
-      // ۱. اگر در APK بودیم، متن رو می‌سازیم
-      var qId = pendingDeliveryQuoteId;
+      // آیا این آیدی مربوط به یه دستگاه در حال تعمیره؟
       var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
-      var isIntake = !!q; // اگه فاکتور باز باشه یعنی پذیرشه
+      // یا مربوط به سوابق (فاکتور قطعی)؟
+      var t = transactions.find(function(x) { return x.id === qId && !x.deleted && x.type === 'DEBT'; });
       
-      // اگه پذیرش نبود، شاید فاکتور قطعی باشه (در این حالت باید پارامترها رو جور دیگه گرفت)
-      var text = '';
-      if (q) {
-         var c = customers.find(function(x) { return x.id === q.customerId && !x.deleted; });
-         text = '✦ موبایل پرشیا ✦\n\n';
-         text += '👤 مشتری: ' + (c ? c.name : '') + '\n';
-         text += '📱 دستگاه: ' + (q.model || '') + (q.color ? ' (' + q.color + ')' : '') + '\n';
-         text += '🔢 قبض: ' + (q.intakeCode || '') + ' | پیگیری: ' + (q.trackCode || '') + '\n';
-         text += '🔍 ایراد: ' + (q.problem || '---') + '\n\n';
-         text += '📋 اقلام:\n';
-         (q.items || []).forEach(function(it) { text += '• ' + it.title + ': ' + formatToman(it.amount) + '\n'; });
-         text += '\n💰 مبلغ کل: ' + formatToman(q.amount) + '\n';
-         var remain = q.amount - (q.cashDeposit||0) - (q.onlineDeposit||0);
-         if(remain > 0) text += '🔴 مانده: ' + formatToman(remain) + '\n';
-      } else {
-         // فاکتور قطعی
-         text = '✦ موبایل پرشیا ✦\nفاکتور خدمات\n\n' + (customPaymentText || '');
+      var targetData = q || t;
+      
+      if (targetData) {
+        var text = buildInvoiceText(targetData, !q);
+        if (navigator.share) {
+          navigator.share({ title: 'فاکتور موبایل پرشیا', text: text }).catch(function(){});
+        } else {
+          if (navigator.clipboard) navigator.clipboard.writeText(text);
+          showToast('✅ متن کامل فاکتور کپی شد', 'success');
+        }
+        return; // توقف ادامه کار (تا پنجره پرینت مرورگر باز نشه)
       }
-      
-      if (navigator.share) {
-        navigator.share({ title: 'فاکتور موبایل پرشیا', text: text }).catch(function(){});
-      } else {
-        // کپی در کلیپ‌بورد
-        if (navigator.clipboard) navigator.clipboard.writeText(text);
-        showToast('✅ متن فاکتور کپی شد', 'success');
+    }
+    // اگر توی وب بود یا دیتا پیدا نشد، از حالت عادی استفاده کن
+    return _basePrintIntake.apply(this, arguments);
+  };
+
+  // ۲. هوک کردن دکمه پرینت از توی سوابق (فاکتور رسمی)
+  var _basePrintCustomerInvoice = window.printCustomerInvoice;
+  window.printCustomerInvoice = function(txId) {
+    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+    
+    if (isCapacitor) {
+      var t = transactions.find(function(x) { return x.id === txId && !x.deleted && x.type === 'DEBT'; });
+      if (t) {
+        var text = buildInvoiceText(t, true);
+        if (navigator.share) {
+          navigator.share({ title: 'فاکتور موبایل پرشیا', text: text }).catch(function(){});
+        } else {
+          if (navigator.clipboard) navigator.clipboard.writeText(text);
+          showToast('✅ متن کامل فاکتور کپی شد', 'success');
+        }
+        return;
       }
-      
+    }
+    return _basePrintCustomerInvoice.apply(this, arguments);
+  };
+
+  console.log('[apk-text-print-fixed] Ready ✅');
+})();
+</script>
+
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 💸 سیستم تخفیف دستی هنگام تسویه حساب (تحویل دستگاه)
+// ═══════════════════════════════════════════════════════════════
+(function setupSettlementDiscount() {
+  
+  // ۱. تزریق فیلد تخفیف در مودال تحویل (modal-signature)
+  var paymentBox = document.getElementById('del-payment-amount');
+  if (paymentBox) {
+    paymentBox = paymentBox.closest('div[style*="background:#fffbeb"]');
+    if (paymentBox && !document.getElementById('del-discount-wrapper')) {
+      var discountHtml = `
+        <div id="del-discount-wrapper" style="background:#fef2f2; border:1.5px dashed #fca5a5; border-radius:12px; padding:10px 12px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          <span style="font-size:1.2rem;">💸</span>
+          <div style="flex:1;">
+            <label style="font-size:0.8rem; font-weight:bold; color:#991b1b; display:block; margin-bottom:4px;">تخفیف دستی هنگام تسویه (تومان):</label>
+            <input type="text" id="del-manual-discount" placeholder="0" oninput="formatAmountInput(this); window.updateDeliveryDiscount();" style="margin:0; padding:8px 10px; font-size:0.9rem; border-color:#f87171; background:#fff; color:#991b1b; font-weight:bold;">
+          </div>
+        </div>
+      `;
+      paymentBox.insertAdjacentHTML('beforebegin', discountHtml);
+    }
+  }
+
+  // ۲. تابع محاسبه مجدد مبلغ با تخفیف
+  window.updateDeliveryDiscount = function() {
+    if (!pendingDeliveryQuoteId) return;
+    var q = quotes.find(x => x.id === pendingDeliveryQuoteId && !x.deleted); if (!q) return;
+    
+    var totalAmount = Number(q.amount || 0);
+    var cashDep = Number(q.cashDeposit != null ? q.cashDeposit : (q.deposit || 0));
+    var onlineDep = Number(q.onlineDeposit || 0);
+    var totalDep = cashDep + onlineDep;
+    
+    var discInput = document.getElementById('del-manual-discount');
+    var discount = discInput ? Number(cleanNumber(discInput.value)) || 0 : 0;
+    
+    if (discount > totalAmount) discount = totalAmount; // جلوگیری از منفی شدن
+    
+    var finalTotal = Math.max(0, totalAmount - discount);
+    var remaining = Math.max(0, finalTotal - totalDep);
+    
+    // آپدیت فیلدها در مودال
+    var totalAmtEl = document.getElementById('del-total-amount');
+    if (discount > 0) {
+      totalAmtEl.innerHTML = '<span style="text-decoration:line-through;color:#94a3b8;font-size:0.75rem;">' + formatToman(totalAmount) + '</span> ' + formatToman(finalTotal);
     } else {
-      // در مرورگر (کروم) از پرینت عادی استفاده کن
-      var modal = document.getElementById('printer-modal');
-      if (modal) {
-        modal.style.display = 'flex';
-        modal.classList.add('printing');
-        setTimeout(function() {
-          modal.classList.remove('printing');
-          modal.style.display = 'none';
-          _originalWindowPrint(); 
-        }, 1800);
-      } else {
-        _originalWindowPrint();
+      totalAmtEl.innerText = formatToman(totalAmount);
+    }
+    
+    document.getElementById('del-remaining').innerText = formatToman(remaining);
+    document.getElementById('del-payment-amount').value = Number(remaining).toLocaleString('en-US');
+    
+    if (typeof window.updateDeliveryFinalRemaining === 'function') {
+      window.updateDeliveryFinalRemaining();
+    }
+  };
+
+  // ۳. بازنویسی تابع محاسبه مانده نهایی برای لحاظ کردن تخفیف
+  var _baseUpdateFinal = window.updateDeliveryFinalRemaining;
+  window.updateDeliveryFinalRemaining = function() {
+    if (!pendingDeliveryQuoteId) return;
+    var q = quotes.find(x => x.id === pendingDeliveryQuoteId && !x.deleted); if (!q) return;
+    
+    var totalAmount = Number(q.amount || 0);
+    var discInput = document.getElementById('del-manual-discount');
+    var discount = discInput ? Number(cleanNumber(discInput.value)) || 0 : 0;
+    
+    var cashDep = Number(q.cashDeposit != null ? q.cashDeposit : (q.deposit || 0));
+    var onlineDep = Number(q.onlineDeposit || 0);
+    var totalDep = cashDep + onlineDep;
+    var newPayment = Number(cleanNumber(document.getElementById('del-payment-amount').value)) || 0;
+    
+    var finalRemaining = Math.max(0, totalAmount - discount - totalDep - newPayment);
+    var el = document.getElementById('del-final-remaining');
+    if (el) { el.innerText = formatToman(finalRemaining); el.style.color = finalRemaining > 0 ? '#dc2626' : '#15803d'; }
+  };
+
+  // ۴. پاک کردن مقدار تخفیف هر بار که مودال تحویل باز می‌شود
+  var _baseOpenSig = window.openSignatureModal;
+  window.openSignatureModal = function(quoteId) {
+    _baseOpenSig.apply(this, arguments);
+    var discInput = document.getElementById('del-manual-discount');
+    if (discInput) discInput.value = '';
+  };
+
+  // ۵. اعمال تخفیف روی فاکتور و تراکنش نهایی هنگام ذخیره
+  var _baseConvert = window.convertQuoteToDebt;
+  window.convertQuoteToDebt = function(qId, deliverySignature, deliverySignatureDbId, newPayment, payMethod) {
+    var q = quotes.find(x => x.id === qId && !x.deleted);
+    var discount = 0;
+    if (q) {
+      var discInput = document.getElementById('del-manual-discount');
+      discount = discInput ? Number(cleanNumber(discInput.value)) || 0 : 0;
+    }
+    
+    // اجرای تابع اصلی تحویل
+    _baseConvert.apply(this, arguments);
+    
+    // اعمال تخفیف روی تراکنش ایجاد شده (فاکتور قطعی)
+    if (q && discount > 0) {
+      var lastTx = transactions.find(t => t.customerId === q.customerId && t.intakeCode === q.intakeCode && t.type === 'DEBT');
+      if (lastTx) {
+        lastTx.manualDiscount = discount;
+        lastTx.rawAmount = Number(q.amount || 0); // مبلغ اصلی قبل از تخفیف
+        lastTx.totalWork = Math.max(0, lastTx.totalWork - discount); // مبلغ نهایی
+        lastTx.amount = lastTx.totalWork;
+        saveAll();
       }
     }
   };
-  
-  console.log('[text-print-fallback] Ready ✅');
+
+  // ۶. نمایش تخفیف در فاکتور چاپی نهایی (printCustomerInvoice)
+  var _basePrintCustomerInv = window.printCustomerInvoice;
+  window.printCustomerInvoice = function(txId) {
+    var t = transactions.find(x => x.id === txId && !x.deleted);
+    var discount = t ? Number(t.manualDiscount || 0) : 0;
+    
+    if (t && discount > 0) {
+      if (!t.items) t.items = [];
+      var tempItem = { title: 'تخفیف دستی تسویه', amount: -discount };
+      t.items.push(tempItem); // اضافه کردن موقت برای چاپ
+      _basePrintCustomerInv.apply(this, arguments);
+      setTimeout(function() { t.items.pop(); }, 1000); // حذف بعد از چاپ
+    } else {
+      _basePrintCustomerInv.apply(this, arguments);
+    }
+  };
+
+  console.log('[settlement-discount] Ready ✅');
 })();
 </script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🚨 قابلیت‌های مدیریتی (سقف بدهی + مشتری خفته + چک IMEI)
+// ═══════════════════════════════════════════════════════════════
+(function setupSmartManagement() {
+  
+  // ─── ۱. چک خودکار IMEI موقع پذیرش ───
+  var imeiInput = document.getElementById('dev-imei');
+  if (imeiInput && !document.getElementById('imei-alert-box')) {
+    var alertBox = document.createElement('div');
+    alertBox.id = 'imei-alert-box';
+    alertBox.style.cssText = 'display:none; background:#fffbeb; border:1px dashed #f59e0b; border-radius:8px; padding:8px 10px; margin-top:6px; font-size:0.8rem; color:#b45309; cursor:pointer;';
+    imeiInput.parentNode.insertBefore(alertBox, imeiInput.nextSibling);
+
+    imeiInput.addEventListener('input', function() {
+      var val = (this.value || '').trim();
+      if (val.length < 5) { alertBox.style.display = 'none'; return; }
+      
+      var pastRecords = quotes.filter(function(q) {
+        return !q.deleted && q.imei && q.imei.toLowerCase() === val.toLowerCase();
+      });
+
+      if (pastRecords.length > 0) {
+        var lastRecord = pastRecords[0];
+        alertBox.innerHTML = '⚠️ <b>توجه:</b> این دستگاه قبلاً ' + pastRecords.length + ' بار در سیستم ثبت شده.<br>آخرین بار: ' + esc(lastRecord.date) + ' با ایراد «' + esc(lastRecord.problem || 'نامشخص') + '».<br><b style="text-decoration:underline; color:#0284c7;">(کلیک برای مشاهده تاریخچه کامل)</b>';
+        alertBox.style.display = 'block';
+        alertBox.onclick = function() { if(typeof showImeiHistory === 'function') showImeiHistory(val); };
+      } else {
+        alertBox.style.display = 'none';
+      }
+    });
+  }
+
+  // ─── ۲. سقف بدهی (جلوگیری از ضرر مالی) ───
+  window.DEBT_CEILING = 5000000; // سقف ۵ میلیون تومان (قابل تغییر)
+  
+  var _baseSaveMultiItem = window.saveMultiItemInvoice;
+  window.saveMultiItemInvoice = function(type) {
+    if (type === 'DEBT' || type === 'QUOTE') {
+      var currentDebt = getBalance(activeCustomerId);
+      // گرفتن مبلغ فاکتور فعلی از فرم
+      var totalItems = 0;
+      getInvoiceItemsFromForm().forEach(function(it) { totalItems += it.amount; });
+      
+      var manualEl = document.getElementById('tx-manual-discount');
+      var manualDisc = manualEl ? Number(cleanNumber(manualEl.value)) || 0 : 0;
+      var finalAmount = Math.max(0, totalItems - manualDisc);
+      
+      var newTotalDebt = currentDebt + finalAmount;
+      
+      if (currentDebt >= window.DEBT_CEILING) {
+        if (!confirm('⚠️ هشدار!\nبدهی این مشتری (' + formatToman(currentDebt) + ') از سقف مجاز (' + formatToman(window.DEBT_CEILING) + ') بیشتر است.\n\nآیا باز هم می‌خواهید پذیرش کنید؟')) return;
+      } else if (newTotalDebt >= window.DEBT_CEILING) {
+        if (!confirm('⚠️ توجه!\nبا ثبت این فاکتور، بدهی مشتری از سقف مجاز (' + formatToman(window.DEBT_CEILING) + ') عبور می‌کند.\n\nادامه می‌دهید؟')) return;
+      }
+    }
+    return _baseSaveMultiItem.apply(this, arguments);
+  };
+
+  // ─── ۳. فیلتر مشتریان خفته (۶ ماه+) ───
+  var filterSelect = document.getElementById('cust-filter-status');
+  if (filterSelect && !filterSelect.querySelector('option[value="DORMANT"]')) {
+    var opt = document.createElement('option');
+    opt.value = 'DORMANT';
+    opt.innerHTML = '💤 مشتریان غیرفعال (۶ ماه+)';
+    filterSelect.appendChild(opt);
+  }
+
+  var _baseRenderCustomers = window.renderCustomers;
+  window.renderCustomers = function() {
+    var filterMode = document.getElementById('cust-filter-status') ? document.getElementById('cust-filter-status').value : 'ALL';
+    
+    if (filterMode === 'DORMANT') {
+      // اینجا باید منطق رندر رو خودمون بنویسیم چون تابع اصلی فیلتر DORMANT رو نمی‌شناسه
+      var listEl = document.getElementById('customer-list');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+      
+      var sixMonthsAgoJdn = todayJDN() - (6 * 30);
+      
+      var dormantCustomers = customers.filter(function(c) {
+        if (c.deleted) return false;
+        // پیدا کردن آخرین تراکنش یا فاکتور این مشتری
+        var lastJdn = 0;
+        transactions.forEach(function(t) {
+          if (t.customerId === c.id && !t.deleted) {
+            var j = jalaliStrToJDN(t.date);
+            if (j > lastJdn) lastJdn = j;
+          }
+        });
+        quotes.forEach(function(q) {
+          if (q.customerId === c.id && !q.deleted) {
+            var j = jalaliStrToJDN(q.date);
+            if (j > lastJdn) lastJdn = j;
+          }
+        });
+        
+        // اگه اصلاً سابقه‌ای نداشته (تازه ثبت شده) جزو خفته‌ها نیست
+        if (lastJdn === 0) return false;
+        
+        return lastJdn < sixMonthsAgoJdn;
+      });
+      
+      if (dormantCustomers.length === 0) {
+        listEl.innerHTML = '<div class="empty-state-box"><div class="empty-state-icon">✨</div><div class="empty-state-title">عالیه!</div><div class="empty-state-subtitle">هیچ مشتری‌ای بیش از ۶ ماه غیرفعال نبوده است.</div></div>';
+        return;
+      }
+      
+      dormantCustomers.forEach(function(cust) {
+        var bal = getBalance(cust.id);
+        var badgeClass = bal > 0 ? 'badge-red' : (bal < 0 ? 'badge-green' : '');
+        var badgeText = bal > 0 ? ('بدهکار: ' + formatToman(bal)) : (bal < 0 ? ('بستانکار: ' + formatToman(Math.abs(bal))) : 'تسویه');
+        var avatarChar = (cust.name || 'م')[0]; var avatarBg = getAvatarColor(cust.name);
+        
+        var div = document.createElement('div');
+        div.className = 'card'; div.style.padding = '12px'; div.style.marginBottom = '8px'; div.style.cursor = 'pointer';
+        div.onclick = function() { openCustomer(cust.id); };
+        
+        div.innerHTML = '<div style="display:flex;align-items:center;gap:10px;">' +
+          '<div class="cust-avatar" style="background:' + avatarBg + ';">' + avatarChar + '</div>' +
+          '<div style="flex:1;">' +
+            '<div style="font-weight:bold;font-size:.95rem;">' + esc(cust.name) + '</div>' +
+            '<div style="font-size:.8rem;color:#64748b;margin-top:2px;">' + esc(cust.phone || '') + '</div>' +
+            '<div style="margin-top:4px;"><span class="badge ' + badgeClass + '">' + badgeText + '</span></div>' +
+          '</div>' +
+          '<div style="text-align:left;font-size:0.75rem;color:#94a3b8;">💤<br>غیرفعال</div>' +
+        '</div>';
+        listEl.appendChild(div);
+      });
+      return;
+    }
+    
+    // اجرای حالت عادی
+    _baseRenderCustomers.apply(this, arguments);
+  };
+
+  // ─── ۴. نوت چسبان (نمایش در پرونده مشتری) ───
+  // این رو با تغییرات کوچیک تو تابع openCustomer انجام می‌دیم که یادداشت رو پررنگ‌تر نشون بده
+  var _baseOpenCustomer = window.openCustomer;
+  window.openCustomer = function(id) {
+    _baseOpenCustomer.apply(this, arguments);
+    setTimeout(function() {
+      var c = customers.find(function(x) { return x.id === id && !x.deleted; });
+      var notesEl = document.getElementById('cust-notes-display');
+      if (c && c.notes && notesEl) {
+        notesEl.style.background = '#fef3c7'; // پس‌زمینه زرد برای جلب توجه
+        notesEl.style.border = '1px dashed #f59e0b';
+        notesEl.style.padding = '8px 12px';
+        notesEl.innerHTML = '<b style="color:#b45309;">📌 یادداشت خصوصی:</b><br>' + esc(c.notes);
+      }
+    }, 100);
+  };
+
+  console.log('[smart-management] Ready ✅');
+})();
+</script>
+
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🔄 مرجوعی قطعه به تامین‌کننده + ⏰ یادآور پیگیری سفارشات
+// ═══════════════════════════════════════════════════════════════
+(function setupReturnsAndOrderReminders() {
+  
+  // ─── ۱. مرجوعی قطعه به تامین‌کننده ───
+  var _baseRenderParts = window.renderParts;
+  window.renderParts = function() {
+    _baseRenderParts.apply(this, arguments);
+    
+    setTimeout(function() {
+      var listEl = document.getElementById('parts-list');
+      if (!listEl) return;
+      
+      var filteredParts = parts.filter(function(p) { 
+        var query = (document.getElementById('parts-search') ? document.getElementById('parts-search').value : '').toLowerCase();
+        return !p.deleted && (p.model || '').toLowerCase().indexOf(query) !== -1; 
+      });
+      
+      var cards = listEl.children;
+      filteredParts.forEach(function(item, idx) {
+        var card = cards[idx];
+        // اگه کارت پیدا شد و قطعه تامین‌کننده داشت و دکمه مرجوعی نداشت
+        if (card && item.supplierId && !card.querySelector('.btn-supplier-return')) {
+          var stockCtrl = card.querySelector('.stock-ctrl');
+          if (stockCtrl) {
+            var retBtn = document.createElement('button');
+            retBtn.type = 'button';
+            retBtn.className = 'action-btn btn-supplier-return';
+            retBtn.style.cssText = 'color:#ea580c;font-size:1.1rem;margin-right:6px;';
+            retBtn.title = 'مرجوعی به تامین‌کننده';
+            retBtn.innerHTML = '🔄';
+            retBtn.onclick = function(e) {
+              e.stopPropagation();
+              window.handleSupplierReturn(item.id);
+            };
+            stockCtrl.insertBefore(retBtn, stockCtrl.querySelector('.action-btn'));
+          }
+        }
+      });
+    }, 150);
+  };
+
+  window.handleSupplierReturn = function(partId) {
+    var item = parts.find(function(p) { return p.id === partId && !p.deleted; });
+    if (!item) return;
+    
+    var supplier = customers.find(function(c) { return c.id === item.supplierId && !c.deleted; });
+    if (!supplier) return showToast('تامین‌کننده این قطعه در سیستم یافت نشد.', 'error');
+    
+    var qtyStr = prompt('چند عدد از قطعه «' + item.model + '» مرجوع می‌شود؟\n(موجودی فعلی: ' + item.qty + ' عدد)', '1');
+    if (qtyStr === null) return;
+    
+    var qty = Number(cleanNumber(qtyStr));
+    if (isNaN(qty) || qty <= 0) return showToast('عدد نامعتبر است.', 'warning');
+    if (qty > item.qty) return showToast('تعداد مرجوعی نمی‌تواند بیشتر از موجودی باشد.', 'warning');
+    
+    var refundAmount = qty * Number(item.buyPrice || 0);
+    
+    if (!confirm('✅ مرجوعی ' + qty + ' عدد ' + item.model + '\n💰 کاهش بدهی به ' + supplier.name + ' به مبلغ ' + formatToman(refundAmount) + '\n\nتایید می‌کنید؟')) return;
+    
+    // ۱. کم کردن از موجودی انبار
+    item.qty -= qty;
+    item.updatedAt = Date.now();
+    
+    // ۲. کاهش بدهی به تامین‌کننده (ثبت یک تراکنش دریافتی/تخفیف)
+    if (refundAmount > 0) {
+      transactions.unshift({
+        id: Date.now(), customerId: supplier.id,
+        title: 'مرجوعی قطعه (' + item.model + ' × ' + qty + ')',
+        amount: refundAmount, payMethod: 'CASH', type: 'PAY', 
+        date: getTodayJalali(), deleted: false, updatedAt: Date.now()
+      });
+    }
+    
+    saveAll();
+    if (typeof uploadToDrive === 'function') uploadToDrive(true);
+    
+    window.renderParts();
+    if (typeof renderReports === 'function') renderReports();
+    if (typeof renderSupplierBalance === 'function' && activeCustomerId === supplier.id) renderSupplierBalance();
+    
+    showToast('✅ مرجوعی ثبت شد و از بدهی کسر گردید.', 'success');
+    if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
+  };
+
+  // ─── ۲. یادآور پیگیری سفارشات (بیش از ۲ روز) ───
+  var _baseRenderOrders = window.renderOrders;
+  window.renderOrders = function() {
+    if (typeof _baseRenderOrders !== 'function') return;
+    _baseRenderOrders.apply(this, arguments);
+    
+    setTimeout(function() {
+      var container = document.getElementById('orders-container');
+      if (!container) return;
+      
+      // پیدا کردن تمام کارت‌های سفارش
+      var orderCards = container.querySelectorAll('.card');
+      orderCards.forEach(function(card) {
+        // پیدا کردن ID سفارش از دکمه حذف (که همیشه وجود داره)
+        var delBtn = card.querySelector('button[onclick*="deleteOrder"]');
+        if (!delBtn) return;
+        
+        var match = delBtn.getAttribute('onclick').match(/deleteOrder\((\d+)\)/);
+        if (!match) return;
+        var orderId = Number(match[1]);
+        
+        var order = window.orders.find(function(o) { return o.id === orderId; });
+        if (!order || order.status !== 'PENDING' || order.deleted) return;
+        
+        // محاسبه روزهای گذشته
+        var daysPassed = typeof getDaysPassed === 'function' ? getDaysPassed(order.date) : 0;
+        var isUrgent = daysPassed >= 2;
+        
+        // اگه قبلاً پردازش نشده
+        if (!card.querySelector('.order-reminder-badge')) {
+          var titleEl = card.querySelector('div[style*="font-weight:800;font-size:0.95rem"]');
+          if (titleEl && isUrgent) {
+            var badge = document.createElement('span');
+            badge.className = 'order-reminder-badge';
+            badge.style.cssText = 'background:#ef4444;color:#fff;padding:2px 6px;border-radius:4px;font-size:0.7rem;margin-right:6px;vertical-align:middle;animation:pulseBadge 2s infinite;';
+            badge.innerHTML = '⚠️ ' + daysPassed + ' روز در انتظار!';
+            titleEl.appendChild(badge);
+          }
+          
+          // دکمه پیگیری
+          if (!card.querySelector('.btn-order-followup')) {
+            var actionDiv = delBtn.parentNode;
+            if (actionDiv) {
+              var followBtn = document.createElement('button');
+              followBtn.type = 'button';
+              followBtn.className = 'btn-order-followup';
+              followBtn.style.cssText = 'background:#0ea5e9;padding:6px 10px;font-size:0.75rem;margin:0 0 6px 0;border-radius:8px;width:auto;white-space:nowrap;color:#fff;border:none;cursor:pointer;display:block;';
+              followBtn.innerHTML = '📞 پیگیری';
+              followBtn.onclick = function(e) {
+                e.stopPropagation();
+                var msg = 'سلام، سفارش قطعه «' + order.itemName + '» که در تاریخ ' + order.date + ' ثبت شده بود، آماده شده؟';
+                if (navigator.share) {
+                  navigator.share({ title: 'پیگیری سفارش', text: msg }).catch(function(){});
+                } else {
+                  if (navigator.clipboard) navigator.clipboard.writeText(msg);
+                  showToast('📋 متن پیگیری کپی شد', 'info');
+                }
+              };
+              actionDiv.insertBefore(followBtn, actionDiv.firstChild);
+            }
+          }
+        }
+      });
+    }, 200);
+  };
+
+  // اجرای اولیه
+  setTimeout(function() {
+    if (typeof window.renderParts === 'function') window.renderParts();
+    if (typeof window.renderOrders === 'function') window.renderOrders();
+  }, 1000);
+
+  console.log('[returns-and-reminders] Ready ✅');
+})();
+</script>
+
+
 
 </body>
 </html>

@@ -19273,9 +19273,9 @@ body.apk-print-mode #apk-print-toolbar {
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ باز کردن فاکتور به صورت فایل واقعی HTML در کروم (اصلاح بریدگی)
+// 🖨️ جادوی نهایی چاپ: تزریق دکمه پرینت و دانلود عکس داخل خود فاکتور
 // ═══════════════════════════════════════════════════════════════
-(function setupChromePrintFinal() {
+(function setupUltimateChromePrint() {
   
   function getStandaloneInvoiceHTML() {
     var content = document.getElementById('print-section').innerHTML;
@@ -19287,34 +19287,42 @@ body.apk-print-mode #apk-print-toolbar {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>فاکتور موبایل پرشیا</title>
+  <!-- اضافه کردن کتابخانه عکس‌برداری -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
-    /* تنظیمات نمایش در صفحه گوشی (پیش‌نمایش) */
+    /* نوار دکمه‌های ثابت در پایین صفحه */
+    #invoice-action-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #1e293b; padding: 10px; display: flex; gap: 8px;
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.3); z-index: 9999;
+    }
+    #invoice-action-bar button {
+      flex: 1; padding: 12px; border: none; border-radius: 8px;
+      font-family: inherit; font-weight: bold; font-size: 14px; color: white;
+      cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px;
+    }
+    .btn-print { background: #0284c7; }
+    .btn-image { background: #10b981; }
+
+    /* تنظیمات نمایش در صفحه گوشی */
     @media screen {
       body { 
-        background: #525659; /* پس‌زمینه تیره مثل نرم‌افزارهای PDF خوان */
-        display: flex; 
-        justify-content: center; 
-        padding: 15px;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        background: #525659; display: flex; justify-content: center; 
+        padding: 15px; padding-bottom: 80px; /* فضا برای نوار دکمه‌ها */
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
       }
-      #print-section { 
-        background: #fff; 
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
-        /* کوچیک کردن کاغذ A5 تا کامل توی صفحه گوشی جا بشه */
-        zoom: 0.55; 
-        margin-bottom: 50px;
-      }
+      #print-section { background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.5); zoom: 0.55; margin-bottom: 20px; }
     }
 
-    /* تنظیمات موقع پرینت واقعی */
+    /* تنظیمات موقع پرینت واقعی (وقتی دکمه پرینت زده میشه، دکمه‌ها مخفی میشن) */
     @media print {
       @page { size: A5 portrait; margin: 0; }
       body { background: #fff; padding: 0; display: block; }
       #print-section { box-shadow: none; zoom: 1; margin: 0; }
       .print-page { width: 148mm; height: 210mm; page-break-after: avoid; }
+      #invoice-action-bar { display: none !important; }
     }
 
     /* استایل‌های داخلی فاکتور */
@@ -19355,82 +19363,90 @@ body.apk-print-mode #apk-print-toolbar {
   <div id="print-section">
     ${content}
   </div>
+
+  <!-- نوار دکمه‌های اختصاصی -->
+  <div id="invoice-action-bar">
+    <button class="btn-print" onclick="window.print()">🖨️ پرینت / PDF</button>
+    <button class="btn-image" onclick="downloadAsImage()">📥 دانلود عکس فاکتور</button>
+  </div>
+
+  <!-- اسکریپت تبدیل به عکس -->
+  <script>
+    function downloadAsImage() {
+      var btn = document.querySelector('.btn-image');
+      btn.innerHTML = '⏳ در حال ساخت...';
+      
+      var printArea = document.getElementById('print-section');
+      
+      // حذف موقت افکت زوم برای عکس گرفتن با کیفیت بالا
+      var originalZoom = printArea.style.zoom;
+      printArea.style.zoom = '1';
+
+      html2canvas(printArea, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        onclone: function(clonedDoc) {
+          // حذف QR کد که باعث خطای CORS میشه
+          var qr = clonedDoc.querySelectorAll('.r-qr-box img');
+          qr.forEach(function(img) { img.style.display = 'none'; });
+        }
+      }).then(function(canvas) {
+        printArea.style.zoom = originalZoom; // برگرداندن زوم
+        btn.innerHTML = '📥 دانلود عکس فاکتور';
+        
+        var link = document.createElement('a');
+        link.download = 'Persia_Invoice_' + Date.now() + '.jpg';
+        link.href = canvas.toDataURL('image/jpeg', 0.9);
+        link.click();
+      }).catch(function(err) {
+        printArea.style.zoom = originalZoom;
+        btn.innerHTML = '📥 دانلود عکس فاکتور';
+        alert('خطا در ساخت عکس: ' + err.message);
+      });
+    }
+  <\/script>
 </body>
 </html>`;
   }
 
   async function openInvoiceInBrowser() {
     var html = getStandaloneInvoiceHTML();
-    if (!html) {
-      showToast('فاکتور آماده نیست. لطفاً دوباره تلاش کنید.', 'warning');
-      return;
-    }
+    if (!html) return showToast('فاکتور آماده نیست.', 'warning');
 
     var CapFs = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
     var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
-    var CapFileOpener = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.FileOpener;
 
-    // ۱. ذخیره به عنوان فایل فیزیکی و باز کردن منوی اشتراک (انتخاب کروم)
     if (CapFs && CapShare) {
       try {
         var fileName = 'Persia_Invoice_' + Date.now() + '.html';
-        
-        // ذخیره فایل در پوشه کش
-        var writeRes = await CapFs.writeFile({
-          path: fileName,
-          data: html,
-          directory: 'CACHE',
-          encoding: 'utf8'
-        });
-        
+        await CapFs.writeFile({ path: fileName, data: html, directory: 'CACHE', encoding: 'utf8' });
         var uriRes = await CapFs.getUri({ path: fileName, directory: 'CACHE' });
         
-        // ارسال به منوی اشتراک‌گذاری
         await CapShare.share({
-          title: 'فاکتور موبایل پرشیا',
+          title: 'پیش‌نمایش فاکتور',
           url: uriRes.uri, 
-          dialogTitle: 'برای پرینت، Chrome را انتخاب کنید'
+          dialogTitle: 'برای مشاهده، مرورگر (Chrome) را انتخاب کنید'
         });
         return;
-      } catch (e) {
-        console.warn('Filesystem/Share failed:', e);
-      }
+      } catch (e) { console.warn(e); }
     }
 
-    // ۲. اگر اشتراک‌گذاری کار نکرد، مستقیم با FileOpener باز کن
-    if (CapFileOpener) {
-      try {
-        await CapFileOpener.open({
-          filePath: fileName,
-          contentType: 'text/html'
-        });
-        return;
-      } catch(e) {
-        console.warn('FileOpener failed:', e);
-      }
-    }
-
-    // ۳. راه اضطراری: باز کردن با Blob (اگر پلاگین‌ها نبودن)
+    // اضطراری
     var blob = new Blob([html], { type: 'text/html' });
-    var blobUrl = URL.createObjectURL(blob);
-    
-    // تلاش برای باز کردن در مرورگر خارجی
-    window.open(blobUrl, '_system');
+    window.open(URL.createObjectURL(blob), '_system');
   }
 
-  // هوک کردن window.print
   var _originalWindowPrint = window.print;
   window.print = function() {
-    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
-    
-    if (isCapacitor) {
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
       openInvoiceInBrowser();
     } else {
       _originalWindowPrint.apply(this, arguments);
     }
   };
 
-  console.log('[chrome-print-ultimate] Ready ✅');
+  console.log('[ultimate-chrome-print] Ready ✅');
 })();
 </script>
 

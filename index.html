@@ -19273,11 +19273,10 @@ body.apk-print-mode #apk-print-toolbar {
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ باز کردن فاکتور در کروم برای پرینت (مخصوص APK)
+// 🖨️ باز کردن فاکتور به صورت فایل واقعی HTML در کروم (اصلاح بریدگی)
 // ═══════════════════════════════════════════════════════════════
-(function setupChromePrint() {
+(function setupChromePrintFinal() {
   
-  // تابع ساخت یک فایل HTML مستقل و تمیز از فاکتور
   function getStandaloneInvoiceHTML() {
     var content = document.getElementById('print-section').innerHTML;
     if (!content || content.trim() === '') return null;
@@ -19286,21 +19285,40 @@ body.apk-print-mode #apk-print-toolbar {
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>فاکتور موبایل پرشیا</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      font-family: Tahoma, Arial, sans-serif; 
-      background: #f1f5f9; 
-      display: flex; 
-      justify-content: center; 
-      padding: 10px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+    
+    /* تنظیمات نمایش در صفحه گوشی (پیش‌نمایش) */
+    @media screen {
+      body { 
+        background: #525659; /* پس‌زمینه تیره مثل نرم‌افزارهای PDF خوان */
+        display: flex; 
+        justify-content: center; 
+        padding: 15px;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      #print-section { 
+        background: #fff; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+        /* کوچیک کردن کاغذ A5 تا کامل توی صفحه گوشی جا بشه */
+        zoom: 0.55; 
+        margin-bottom: 50px;
+      }
     }
-    #print-section { background: #fff; width: 100%; max-width: 148mm; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    .print-page { width: 148mm; min-height: 210mm; padding: 2mm 3mm; display: flex; flex-direction: column; box-sizing: border-box; }
+
+    /* تنظیمات موقع پرینت واقعی */
+    @media print {
+      @page { size: A5 portrait; margin: 0; }
+      body { background: #fff; padding: 0; display: block; }
+      #print-section { box-shadow: none; zoom: 1; margin: 0; }
+      .print-page { width: 148mm; height: 210mm; page-break-after: avoid; }
+    }
+
+    /* استایل‌های داخلی فاکتور */
+    .print-page { width: 148mm; min-height: 210mm; padding: 2mm 3mm; display: flex; flex-direction: column; box-sizing: border-box; background: #fff; }
     .print-half { flex: 1; overflow: hidden; box-sizing: border-box; padding: 3mm 4mm; border: 1.5px solid #333; border-radius: 4px; display: flex; flex-direction: column; min-height: 0; position: relative; }
     .print-half.split { flex-direction: row; padding: 0; gap: 0; }
     .workshop-col { flex: 2; padding: 3mm 3.5mm; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
@@ -19331,13 +19349,6 @@ body.apk-print-mode #apk-print-toolbar {
     .r-tech > div { margin-bottom: 0.3mm; }
     .r-notes-title { font-size: 7pt; font-weight: bold; margin-bottom: 1mm; border-bottom: 1px solid #666; padding-bottom: 0.6mm; text-align: center; }
     .r-notes-lines { flex: 1; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 5mm, #ccc 5mm, #ccc 5.05mm); min-height: 20mm; }
-    
-    @media print {
-      @page { size: A5 portrait; margin: 0; }
-      body { background: #fff; padding: 0; display: block; }
-      #print-section { box-shadow: none; max-width: none; }
-      .print-page { width: 148mm; height: 210mm; page-break-after: avoid; }
-    }
   </style>
 </head>
 <body>
@@ -19348,7 +19359,6 @@ body.apk-print-mode #apk-print-toolbar {
 </html>`;
   }
 
-  // تابع باز کردن در مرورگر
   async function openInvoiceInBrowser() {
     var html = getStandaloneInvoiceHTML();
     if (!html) {
@@ -19358,13 +19368,15 @@ body.apk-print-mode #apk-print-toolbar {
 
     var CapFs = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
     var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
-    var CapBrowser = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
+    var CapFileOpener = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.FileOpener;
 
-    // ۱. روش اول (بهترین): ساخت فایل HTML و ارسال به منوی اندروید (انتخاب کروم)
+    // ۱. ذخیره به عنوان فایل فیزیکی و باز کردن منوی اشتراک (انتخاب کروم)
     if (CapFs && CapShare) {
       try {
-        var fileName = 'persia_invoice_' + Date.now() + '.html';
-        var res = await CapFs.writeFile({
+        var fileName = 'Persia_Invoice_' + Date.now() + '.html';
+        
+        // ذخیره فایل در پوشه کش
+        var writeRes = await CapFs.writeFile({
           path: fileName,
           data: html,
           directory: 'CACHE',
@@ -19373,6 +19385,7 @@ body.apk-print-mode #apk-print-toolbar {
         
         var uriRes = await CapFs.getUri({ path: fileName, directory: 'CACHE' });
         
+        // ارسال به منوی اشتراک‌گذاری
         await CapShare.share({
           title: 'فاکتور موبایل پرشیا',
           url: uriRes.uri, 
@@ -19384,28 +19397,28 @@ body.apk-print-mode #apk-print-toolbar {
       }
     }
 
-    // ۲. روش دوم: استفاده از Blob و پلاگین مرورگر
-    var blob = new Blob([html], { type: 'text/html' });
-    var blobUrl = URL.createObjectURL(blob);
-
-    if (CapBrowser) {
+    // ۲. اگر اشتراک‌گذاری کار نکرد، مستقیم با FileOpener باز کن
+    if (CapFileOpener) {
       try {
-        await CapBrowser.open({ url: blobUrl });
+        await CapFileOpener.open({
+          filePath: fileName,
+          contentType: 'text/html'
+        });
         return;
-      } catch (e) {
-        console.warn('Browser.open failed:', e);
+      } catch(e) {
+        console.warn('FileOpener failed:', e);
       }
     }
 
-    // ۳. روش سوم (اضطراری): باز کردن در WebView
-    var win = window.open(blobUrl, '_system');
-    if (!win) {
-      window.open(blobUrl, '_blank');
-      showToast('فایل باز شد. اگر پرینت نشد، از منوی اشتراک‌گذاری Chrome را انتخاب کنید.', 'info');
-    }
+    // ۳. راه اضطراری: باز کردن با Blob (اگر پلاگین‌ها نبودن)
+    var blob = new Blob([html], { type: 'text/html' });
+    var blobUrl = URL.createObjectURL(blob);
+    
+    // تلاش برای باز کردن در مرورگر خارجی
+    window.open(blobUrl, '_system');
   }
 
-  // هوک کردن window.print برای جلوگیری از باز شدن پنجره‌ی سفید WebView
+  // هوک کردن window.print
   var _originalWindowPrint = window.print;
   window.print = function() {
     var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
@@ -19417,7 +19430,7 @@ body.apk-print-mode #apk-print-toolbar {
     }
   };
 
-  console.log('[chrome-print] Ready ✅');
+  console.log('[chrome-print-ultimate] Ready ✅');
 })();
 </script>
 

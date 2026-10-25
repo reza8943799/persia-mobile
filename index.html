@@ -19274,14 +19274,14 @@ body.apk-print-mode #apk-print-toolbar {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ نمایش فاکتور به صورت عکس برای ذخیره دستی (Long Press)
+// 🖨️ نهایی‌ترین راه‌حل: عکس درست + دکمه ذخیره با پلاگین اشتراک
 // ═══════════════════════════════════════════════════════════════
-(function setupDirectImageModal() {
+(function setupDirectImageModalFixed() {
   
   var _originalWindowPrint = window.print;
 
-  // تابع نمایش عکس در یه پنجره بزرگ
-  function showImageModal(dataUrl) {
+  // تابع نمایش عکس در مودال
+  function showImageModal(dataUrl, blob) {
     var old = document.getElementById('invoice-image-modal');
     if (old) old.remove();
 
@@ -19290,16 +19290,48 @@ body.apk-print-mode #apk-print-toolbar {
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.95);z-index:9999999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:15px;';
     
     overlay.innerHTML = `
-      <div style="color:#fff;font-weight:900;margin-bottom:12px;text-align:center;font-size:0.95rem;line-height:1.6;flex-shrink:0;">
-        📥 تصویر فاکتور آماده است<br>
-        <span style="font-size:0.85rem;color:#93c5fd;font-weight:normal;">برای ذخیره در گالری، انگشت خود را روی تصویر نگه دارید<br>(Save Image)</span>
+      <div style="color:#fff;font-weight:900;margin-bottom:12px;text-align:center;font-size:0.95rem;flex-shrink:0;">
+        🧾 پیش‌نمایش فاکتور
       </div>
-      <div style="flex:1;overflow:auto;width:100%;display:flex;justify-content:center;align-items:flex-start;border-radius:8px;background:#fff;max-height:70vh;box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <div style="flex:1;overflow:auto;width:100%;display:flex;justify-content:center;align-items:flex-start;border-radius:8px;background:#fff;max-height:65vh;">
           <img src="${dataUrl}" style="width:100%;max-width:600px;display:block;">
       </div>
-      <button type="button" onclick="document.getElementById('invoice-image-modal').remove()" style="margin-top:16px;background:#ef4444;color:#fff;border:none;padding:12px 30px;border-radius:10px;font-weight:900;font-size:0.9rem;width:auto;box-shadow:0 4px 15px rgba(239,68,68,0.4);flex-shrink:0;">✕ بستن</button>
+      <div style="display:flex;gap:8px;margin-top:16px;width:100%;max-width:400px;flex-shrink:0;">
+        <button type="button" id="btn-save-invoice-img" style="flex:1.5;background:#10b981;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:900;font-size:0.9rem;box-shadow:0 4px 15px rgba(16,185,129,0.4);">📥 ذخیره در گوشی</button>
+        <button type="button" onclick="document.getElementById('invoice-image-modal').remove()" style="flex:1;background:#ef4444;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:900;font-size:0.9rem;box-shadow:0 4px 15px rgba(239,68,68,0.4);">✕ بستن</button>
+      </div>
     `;
     document.body.appendChild(overlay);
+
+    // اتصال دکمه ذخیره به پلاگین اشتراک‌گذاری اندروید
+    document.getElementById('btn-save-invoice-img').onclick = async function() {
+      var file = new File([blob], 'Persia_Invoice.png', { type: 'image/png' });
+      
+      // روش اول: پلاگین Capacitor
+      var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+      if (CapShare && typeof CapShare.share === 'function') {
+        try {
+          await CapShare.share({ files: [file], title: 'ذخیره فاکتور' });
+          return;
+        } catch(e) { console.warn(e); }
+      }
+      
+      // روش دوم: Web Share API
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'ذخیره فاکتور' });
+          return;
+        } catch(e) { console.warn(e); }
+      }
+      
+      // روش سوم: دانلود مستقیم
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'Persia_Invoice.png';
+      a.click();
+      showToast('اگر ذخیره نشد، از منوی باز شده "Save to Gallery" را بزنید', 'info');
+    };
   }
 
   window.print = async function() {
@@ -19310,7 +19342,7 @@ body.apk-print-mode #apk-print-toolbar {
     }
 
     if (typeof html2canvas === 'undefined') {
-      return showToast('کتابخانه عکس‌برداری لود نشد. اینترنت را چک کنید.', 'error');
+      return showToast('کتابخانه عکس‌برداری لود نشد.', 'error');
     }
 
     var printArea = document.getElementById('print-section');
@@ -19320,83 +19352,81 @@ body.apk-print-mode #apk-print-toolbar {
 
     showToast('⏳ در حال ساخت تصویر...', 'info');
 
-    var originalDisplay = printArea.style.display;
-    var originalPosition = printArea.style.position;
-    var originalTop = printArea.style.top;
-    var originalLeft = printArea.style.left;
-    var originalWidth = printArea.style.width;
+    // ذخیره وضعیت اولیه
+    var originalStyles = {
+      position: printArea.style.position,
+      left: printArea.style.left,
+      top: printArea.style.top,
+      width: printArea.style.width,
+      zIndex: printArea.style.zIndex,
+      background: printArea.style.background
+    };
 
     try {
-      // آماده‌سازی DOM
-      printArea.style.display = 'block';
+      // ۱. آماده‌سازی: قرار دادن فاکتور در صفحه اصلی (اما مخفی شده)
+      // این کار باعث میشه html2canvas جهت RTL رو درست تشخیص بده و عکس برعکس نشه
       printArea.style.position = 'absolute';
-      printArea.style.top = '-9999px';
       printArea.style.left = '0';
+      printArea.style.top = '0';
       printArea.style.width = '600px';
-      printArea.style.zoom = '1';
+      printArea.style.zIndex = '-9999';
+      printArea.style.background = '#ffffff';
 
-      // حذف QR و واترمارک برای جلوگیری از باگ
-      var qrImages = printArea.querySelectorAll('.r-qr-box');
-      qrImages.forEach(function(el) { el.style.display = 'none'; });
-
-      var watermarks = printArea.querySelectorAll('.r-watermark');
-      watermarks.forEach(function(el) { el.style.display = 'none'; });
-
-      var allElements = printArea.querySelectorAll('*');
-      allElements.forEach(function(el) {
-        el.style.backgroundImage = 'none';
-        el.style.boxShadow = 'none';
+      // حذف QR و واترمارک
+      var hiddenElems = [];
+      printArea.querySelectorAll('.r-qr-box, .r-watermark').forEach(function(el) {
+        hiddenElems.push({ el: el, display: el.style.display });
+        el.style.display = 'none';
       });
 
-      // تبدیل به عکس
+      // تبدیل به عکس با فیکس کردن مشکل RTL
       var canvas = await html2canvas(printArea, {
         scale: 2,
         useCORS: true,
-        allowTaint: false,
         backgroundColor: '#ffffff',
-        logging: false
-      });
-
-      // بازگردانی DOM
-      printArea.style.display = originalDisplay;
-      printArea.style.position = originalPosition;
-      printArea.style.top = originalTop;
-      printArea.style.left = originalLeft;
-      printArea.style.width = originalWidth;
-      
-      qrImages.forEach(function(el) { el.style.display = ''; });
-      watermarks.forEach(function(el) { el.style.display = ''; });
-
-      var dataUrl = canvas.toDataURL('image/png');
-
-      // تلاش اول: اشتراک‌گذاری نیتیو
-      canvas.toBlob(async function(blob) {
-        var file = new File([blob], 'Persia_Invoice.png', { type: 'image/png' });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({ files: [file], title: 'فاکتور موبایل پرشیا' });
-            return; 
-          } catch (err) {
-            // اگر کاربر لغو کرد یا ارور داد، میریم سراغ نمایش عکس
+        logging: false,
+        onclone: function(clonedDoc) {
+          // فیکس قطعی مشکل برعکس شدن متن در حالت راست‌چین
+          var clonedPrintArea = clonedDoc.getElementById('print-section');
+          if (clonedPrintArea) {
+            clonedPrintArea.style.direction = 'rtl';
+            clonedPrintArea.style.transform = 'none'; // حذف هرگونه چرخش
           }
         }
-        // اگر ارسال نیتیو نشد، عکس رو نشون بده
-        showImageModal(dataUrl);
+      });
+
+      // بازگردانی استایل‌ها
+      printArea.style.position = originalStyles.position;
+      printArea.style.left = originalStyles.left;
+      printArea.style.top = originalStyles.top;
+      printArea.style.width = originalStyles.width;
+      printArea.style.zIndex = originalStyles.zIndex;
+      printArea.style.background = originalStyles.background;
+      
+      hiddenElems.forEach(function(item) { item.el.style.display = item.display; });
+
+      // تبدیل به Blob و نمایش
+      canvas.toBlob(function(blob) {
+        if (!blob) return showToast('خطا در ساخت تصویر', 'error');
+        var dataUrl = URL.createObjectURL(blob);
+        showImageModal(dataUrl, blob);
       }, 'image/png', 1.0);
 
     } catch (err) {
-      printArea.style.display = originalDisplay;
-      printArea.style.position = originalPosition;
-      printArea.style.top = originalTop;
-      printArea.style.left = originalLeft;
-      printArea.style.width = originalWidth;
+      // بازگردانی در صورت خطا
+      printArea.style.position = originalStyles.position;
+      printArea.style.left = originalStyles.left;
+      printArea.style.top = originalStyles.top;
+      printArea.style.width = originalStyles.width;
+      printArea.style.zIndex = originalStyles.zIndex;
+      printArea.style.background = originalStyles.background;
       
       console.error('html2canvas error:', err);
       showToast('❌ خطا در ساخت تصویر فاکتور.', 'error');
     }
   };
 
-  console.log('[direct-image-modal] Ready ✅');
+  console.log('[direct-image-modal-fixed] Ready ✅');
 })();
 </script>
 

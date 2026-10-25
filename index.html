@@ -18677,163 +18677,193 @@ body.apk-print-mode #apk-print-toolbar {
   console.log('[supplier-reports] Phase 4 Ready ✅');
 })();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ فعال‌سازی نهایی سیستم چاپ APK (نسخه ضد باگ WebView - جایگزین)
+// 📋 انتقال تایم‌لاین به سوابق مشتری + دکمه مشاهده
 // ═══════════════════════════════════════════════════════════════
-(function setupApkPrint() {
+(function setupTimelineInHistory() {
   
-  if (!document.getElementById('apk-print-toolbar')) {
-    var toolbar = document.createElement('div');
-    toolbar.id = 'apk-print-toolbar';
-    toolbar.innerHTML = 
-      '<button type="button" onclick="closeApkPrintMode()" style="background:#ef4444;width:auto;">✕ بستن</button>' +
-      '<div style="font-weight:900;font-size:0.9rem;color:#fff;flex:1;text-align:center;">پیش‌نمایش فاکتور</div>' +
-      '<button type="button" onclick="shareApkPrintImage()" style="background:#10b981;width:auto;">📤 ارسال / ذخیره</button>';
-    document.body.appendChild(toolbar);
+  // ۱. پچ کردن تابع تبدیل فاکتور به دِبت (تحویل دستگاه) برای انتقال تایم‌لاین
+  var _baseConvertQuoteToDebt = window.convertQuoteToDebt;
+  if (typeof _baseConvertQuoteToDebt === 'function') {
+    window.convertQuoteToDebt = function(qId, deliverySignature, deliverySignatureDbId, newPayment, payMethod) {
+      var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+      var result = _baseConvertQuoteToDebt.apply(this, arguments);
+      
+      // بعد از اجرای اصلی، تایم‌لاین رو کپی می‌کنیم به آخرین تراکنش ساخته شده
+      if (q && q.timeline) {
+        var lastTx = transactions.find(function(t) { 
+          return t.customerId === q.customerId && t.intakeCode === q.intakeCode && t.type === 'DEBT'; 
+        });
+        if (lastTx) {
+          lastTx.timeline = JSON.parse(JSON.stringify(q.timeline));
+          // یه رویداد جدید هم برای تحویل اضافه می‌کنیم
+          lastTx.timeline.push({
+            id: Date.now(), type: 'DELIVER', icon: '✍️', title: 'تحویل دستگاه', 
+            note: 'فاکتور قطعی صادر شد', timestamp: Date.now()
+          });
+          saveAll(); 
+        }
+      }
+      return result;
+    };
   }
 
-  window.closeApkPrintMode = function() {
-    document.body.classList.remove('apk-print-mode');
-    window.scrollTo(0, 0);
-  };
-
-  window.shareApkPrintImage = async function() {
-    if (typeof html2canvas === 'undefined') {
-      return showToast('کتابخانه عکس‌برداری لود نشد. اینترنت را چک کنید.', 'error');
-    }
-    
-    var printArea = document.getElementById('print-section');
-    if (!printArea || !printArea.offsetParent) {
-      return showToast('فاکتور روی صفحه پیدا نشد. صفحه را رفرش کنید.', 'error');
-    }
-
-    showToast('⏳ در حال ساخت تصویر...', 'info');
-    var btn = document.querySelector('#apk-print-toolbar button:last-child');
-    if (btn) { btn.disabled = true; btn.innerText = 'در حال ساخت...'; }
-
-    // اسکرول به بالا برای اطمینان از رندر کامل
-    window.scrollTo(0, 0);
-
-    var timeoutId = setTimeout(function() {
-      if (btn && btn.innerText === 'در حال ساخت...') {
-        btn.disabled = false;
-        btn.innerText = '📤 ارسال / ذخیره';
-        showToast('❌ زمان ساخت عکس طولانی شد. لطفاً دوباره تلاش کنید.', 'error');
-      }
-    }, 12000);
-
-    try {
-      var canvas = await html2canvas(printArea, {
-        scale: 1, // مقیاس ۱ برای جلوگیری از کمبود حافظه در WebView
-        useCORS: true, 
-        allowTaint: false,
-        backgroundColor: '#ffffff',
-        logging: false,
-        imageTimeout: 3000,
-        scrollX: 0,
-        scrollY: 0,
-        // 💡 راه‌حل اصلی: حذف QR کد و گرادیانت‌ها از کپیِ برداشته‌شده
-        onclone: function(clonedDoc) {
-          var clonedPrintArea = clonedDoc.getElementById('print-section');
-          if (clonedPrintArea) {
-            // حذف عکس‌های QR (که باعث خطای CORS و null می‌شوند)
-            var qrImages = clonedPrintArea.querySelectorAll('.r-qr-box img');
-            qrImages.forEach(function(img) {
-              img.style.display = 'none'; 
-              img.removeAttribute('src'); // جلوگیری از تلاش برای لود مجدد
-            });
-            // حذف واترمارک (که ممکن است شفافیت داشته باشد)
-            var watermarks = clonedPrintArea.querySelectorAll('.r-watermark');
-            watermarks.forEach(function(el) { el.style.display = 'none'; });
-            // حذف تمام پس‌زمینه‌های گرادیانت که html2canvas را دیوانه می‌کنند
-            var allElements = clonedPrintArea.querySelectorAll('*');
-            allElements.forEach(function(el) {
-              var bgImage = window.getComputedStyle(el).backgroundImage;
-              if (bgImage && bgImage.includes('gradient')) {
-                el.style.backgroundImage = 'none';
-                el.style.backgroundColor = '#ffffff';
-              }
-            });
-          }
+  // ۲. پچ کردن ثبت فاکتور مستقیم برای اینکه تایم‌لاین اولیه داشته باشه
+  var _baseSaveMultiItemInvoice = window.saveMultiItemInvoice;
+  if (typeof _baseSaveMultiItemInvoice === 'function') {
+    window.saveMultiItemInvoice = function(type) {
+      var result = _baseSaveMultiItemInvoice.apply(this, arguments);
+      if (type === 'DEBT') {
+        // پیدا کردن آخرین تراکنش ایجاد شده و اضافه کردن تایم‌لاین اولیه
+        var lastTx = transactions.find(function(t) { return t.customerId === activeCustomerId && !t.deleted; });
+        if (lastTx && !lastTx.timeline) {
+          lastTx.timeline = [{
+            id: Date.now(), type: 'CREATE', icon: '🆕', title: 'ثبت فاکتور قطعی', 
+            note: 'فاکتور به صورت مستقیم صادر شد', timestamp: Date.now()
+          }];
+          saveAll();
         }
-      });
+      }
+      return result;
+    };
+  }
 
-      clearTimeout(timeoutId);
-
-      var dataURL = canvas.toDataURL('image/png');
+  // ۳. اضافه کردن دکمه تایم‌لاین به کارت‌های سوابق (renderTransactions)
+  var _baseRenderTransactions = window.renderTransactions;
+  if (typeof _baseRenderTransactions === 'function') {
+    window.renderTransactions = function() {
+      _baseRenderTransactions.apply(this, arguments);
       
-      if (!dataURL || dataURL === 'data:,' || dataURL.length < 100) {
-        throw new Error("تصویر خالی تولید شد");
-      }
+      setTimeout(function() {
+        var listEl = document.getElementById('tx-list');
+        if (!listEl) return;
+        var custTx = transactions.filter(function(t) { return t.customerId === activeCustomerId && !t.deleted; });
+        var cards = listEl.children;
 
-      function dataURLtoBlob(dataurl) {
-        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-        while(n--){
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new Blob([u8arr], {type:mime});
-      }
+        custTx.forEach(function(t, idx) {
+          if (t.type !== 'DEBT' || !t.timeline || t.timeline.length === 0) return;
+          var card = cards[idx];
+          if (!card) return;
+          
+          if (!card.querySelector('.btn-tx-timeline')) {
+            var actionRow = card.querySelector('div[style*="justify-content:space-between;gap:8px;margin-top:8px"]');
+            if (actionRow) {
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'btn-tx-timeline';
+              btn.style.cssText = 'background:#8b5cf6;color:#fff;padding:7px 12px;width:auto;border-radius:8px;font-size:.78rem;font-weight:800;';
+              btn.innerHTML = '📋 تایم‌لاین';
+              btn.onclick = function(e) {
+                e.stopPropagation();
+                viewTxTimeline(t.id);
+              };
+              actionRow.insertBefore(btn, actionRow.firstChild);
+            }
+          }
+        });
+      }, 200);
+    };
+  }
 
-      var blob = dataURLtoBlob(dataURL);
-      var file = new File([blob], 'Persia_Invoice.png', { type: 'image/png' });
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            files: [file],
-            title: 'فاکتور موبایل پرشیا',
-            text: 'فاکتور شما از موبایل پرشیا'
-          });
-        } catch (err) {
-          console.warn('Share failed:', err);
-        }
-      } else {
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'Persia_Invoice_' + Date.now() + '.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
-        showToast('✅ تصویر ذخیره شد', 'success');
-      }
-
-    } catch (err) {
-      clearTimeout(timeoutId);
-      console.error('html2canvas error:', err);
-      showToast('❌ خطا در ساخت تصویر: ' + (err.message || 'ناشناخته'), 'error');
-    } finally {
-      if (btn) { btn.disabled = false; btn.innerText = '📤 ارسال / ذخیره'; }
-    }
+  // ۴. تابع نمایش تایم‌لاین برای تراکنش‌ها
+  window.viewTxTimeline = function(txId) {
+    var t = transactions.find(function(x) { return x.id === txId && !x.deleted; });
+    if (!t || !t.timeline || t.timeline.length === 0) return showToast('تایم‌لاینی ثبت نشده', 'info');
+    
+    var c = customers.find(function(x) { return x.id === t.customerId && !x.deleted; }) || { name: 'نامشخص' };
+    
+    // هدر مودال
+    document.getElementById('timeline-device-header').innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-weight:800;color:#1e40af;font-size:0.95rem;">📱 ' + esc(t.model || 'نامشخص') + (t.color ? ' - ' + esc(t.color) : '') + '</div>' +
+          '<div style="font-size:0.78rem;color:#475569;margin-top:3px;">مشتری: <b>' + esc(c.name) + '</b> | قبض: <b>' + esc(t.intakeCode || '---') + '</b></div>' +
+        '</div>' +
+        '<div style="background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:6px 10px;text-align:center;">' +
+          '<div style="font-size:0.7rem;color:#64748b;">رویدادها</div>' +
+          '<div style="font-size:1.2rem;font-weight:900;color:#2563eb;">' + t.timeline.length + '</div>' +
+        '</div>' +
+      '</div>';
+    
+    // لیست رویدادها
+    var container = document.getElementById('timeline-events-container');
+    var events = t.timeline.slice().reverse();
+    
+    var html = '<div style="position:relative;padding-right:24px;">';
+    html += '<div style="position:absolute;top:8px;bottom:8px;right:7px;width:2px;background:linear-gradient(to bottom,#c7d2fe,#bfdbfe);border-radius:2px;"></div>';
+    
+    events.forEach(function(ev) {
+      var dateStr = formatTimelineDate(ev.timestamp);
+      html += '<div style="position:relative;padding-bottom:14px;">' +
+        '<div style="position:absolute;right:-20px;top:4px;width:14px;height:14px;background:#fff;border:3px solid #2563eb;border-radius:50%;z-index:2;box-shadow:0 0 0 3px #fff;"></div>' +
+        '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;box-shadow:0 2px 6px rgba(0,0,0,0.03);">' +
+          '<div style="font-weight:800;font-size:0.85rem;color:#1e293b;margin-bottom:4px;">' + ev.icon + ' ' + esc(ev.title) + '</div>' +
+          (ev.note ? '<div style="font-size:0.82rem;color:#334155;line-height:1.6;background:#f8fafc;padding:6px 8px;border-radius:6px;border-right:2px solid #cbd5e1;">' + esc(ev.note) + '</div>' : '') +
+          '<div style="font-size:0.7rem;color:#94a3b8;margin-top:6px;text-align:left;">🕐 ' + dateStr + '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+    
+    document.getElementById('modal-timeline-view').style.display = 'flex';
   };
 
+  console.log('[timeline-in-history] Ready ✅');
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🖨️ نسخه جایگزین پرینت: خروجی متن برای واتساپ (مخصوص APK)
+// ═══════════════════════════════════════════════════════════════
+(function setupTextPrintFallback() {
+  
   var _originalWindowPrint = window.print;
+  
   window.print = function() {
     var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
     
     if (isCapacitor) {
-      var printerModal = document.getElementById('printer-modal');
-      if (printerModal) {
-        printerModal.style.display = 'flex';
-        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+      // ۱. اگر در APK بودیم، متن رو می‌سازیم
+      var qId = pendingDeliveryQuoteId;
+      var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+      var isIntake = !!q; // اگه فاکتور باز باشه یعنی پذیرشه
+      
+      // اگه پذیرش نبود، شاید فاکتور قطعی باشه (در این حالت باید پارامترها رو جور دیگه گرفت)
+      var text = '';
+      if (q) {
+         var c = customers.find(function(x) { return x.id === q.customerId && !x.deleted; });
+         text = '✦ موبایل پرشیا ✦\n\n';
+         text += '👤 مشتری: ' + (c ? c.name : '') + '\n';
+         text += '📱 دستگاه: ' + (q.model || '') + (q.color ? ' (' + q.color + ')' : '') + '\n';
+         text += '🔢 قبض: ' + (q.intakeCode || '') + ' | پیگیری: ' + (q.trackCode || '') + '\n';
+         text += '🔍 ایراد: ' + (q.problem || '---') + '\n\n';
+         text += '📋 اقلام:\n';
+         (q.items || []).forEach(function(it) { text += '• ' + it.title + ': ' + formatToman(it.amount) + '\n'; });
+         text += '\n💰 مبلغ کل: ' + formatToman(q.amount) + '\n';
+         var remain = q.amount - (q.cashDeposit||0) - (q.onlineDeposit||0);
+         if(remain > 0) text += '🔴 مانده: ' + formatToman(remain) + '\n';
+      } else {
+         // فاکتور قطعی
+         text = '✦ موبایل پرشیا ✦\nفاکتور خدمات\n\n' + (customPaymentText || '');
       }
       
-      setTimeout(function() {
-        if (printerModal) printerModal.style.display = 'none';
-        document.body.classList.add('apk-print-mode');
-        window.scrollTo(0, 0);
-      }, 800);
+      if (navigator.share) {
+        navigator.share({ title: 'فاکتور موبایل پرشیا', text: text }).catch(function(){});
+      } else {
+        // کپی در کلیپ‌بورد
+        if (navigator.clipboard) navigator.clipboard.writeText(text);
+        showToast('✅ متن فاکتور کپی شد', 'success');
+      }
+      
     } else {
+      // در مرورگر (کروم) از پرینت عادی استفاده کن
       var modal = document.getElementById('printer-modal');
       if (modal) {
         modal.style.display = 'flex';
         modal.classList.add('printing');
-        if (navigator.vibrate) navigator.vibrate([60, 40, 60, 40, 80, 50, 100]); 
-        
         setTimeout(function() {
           modal.classList.remove('printing');
           modal.style.display = 'none';
@@ -18844,8 +18874,8 @@ body.apk-print-mode #apk-print-toolbar {
       }
     }
   };
-
-  console.log('[apk-print-mode] Fixed WebView Null Error ✅');
+  
+  console.log('[text-print-fallback] Ready ✅');
 })();
 </script>
 

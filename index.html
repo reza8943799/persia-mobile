@@ -17567,7 +17567,7 @@ body.apk-print-mode #apk-print-toolbar {
   position: fixed;
   inset: 0;
   background: #0f172a;
-  z-index: 99999999;
+  z-index: 99999998;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
@@ -17644,34 +17644,71 @@ body.apk-print-mode #apk-print-toolbar {
   margin-bottom: 8px;
   line-height: 1.5;
 }
+#path-info-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.88);
+  z-index: 99999999;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  direction: rtl;
+}
+#path-info-modal.open {
+  display: flex !important;
+}
 </style>
 
+<!-- ۱. پنجره پیش‌نمایش و دکمه‌های ذخیره فاکتور -->
 <div id="persia-print-studio" onclick="if(this.classList.contains('fullscreen-shot')) this.classList.remove('fullscreen-shot');">
   <div id="pps-toolbar" onclick="event.stopPropagation();">
     <button type="button" class="pps-btn" onclick="closePersiaPrintStudio()" style="background:#ef4444;">⬅ بازگشت</button>
-    <button type="button" class="pps-btn" id="pps-btn-pdf" onclick="exportPersiaInvoice('PDF')" style="flex:1.2;background:linear-gradient(135deg,#10b981 0%,#047857 100%);">📄 ذخیره و اشتراک PDF</button>
+    <button type="button" class="pps-btn" id="pps-btn-pdf" onclick="exportPersiaInvoice('PDF')" style="flex:1.2;background:linear-gradient(135deg,#10b981 0%,#047857 100%);">📄 ذخیره PDF</button>
     <button type="button" class="pps-btn" id="pps-btn-png" onclick="exportPersiaInvoice('PNG')" style="flex:1.2;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);">🖼️ ذخیره عکس</button>
     <button type="button" class="pps-btn" onclick="enableFullscreenShot()" style="background:#2563eb;" title="تمام‌صفحه برای اسکرین‌شات">📱</button>
   </div>
 
   <div id="pps-hint">
-    💡 روی <b>«ذخیره و اشتراک PDF»</b> یا <b>«ذخیره عکس»</b> بزنید تا فایل در پوشه <b>Documents</b> گوشی ذخیره و آماده چاپ شود.
+    💡 روی <b>«ذخیره PDF»</b> یا <b>«ذخیره عکس»</b> بزنید تا فاکتور در پوشه <b>Documents</b> گوشی ذخیره و آماده پرینت شود.
   </div>
 
   <div id="pps-preview-wrap" onclick="if(document.getElementById('persia-print-studio').classList.contains('fullscreen-shot')) { document.getElementById('persia-print-studio').classList.remove('fullscreen-shot'); event.stopPropagation(); }">
-    <img id="pps-preview-img" src="" alt="فاکتور موبایل پرشیا">
+    <img id="pps-preview-img" src="" alt="در حال ساخت پیش‌نمایش فاکتور...">
+  </div>
+</div>
+
+<!-- ۲. پنجره نمایش مسیر ذخیره فایل در گوشی -->
+<div id="path-info-modal">
+  <div style="background:#fff;border-radius:16px;padding:20px;max-width:400px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:3rem;margin-bottom:8px;">✅</div>
+      <div style="font-weight:900;font-size:1.1rem;color:#10b981;">فاکتور در گوشی ذخیره شد</div>
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px;margin-bottom:16px;font-size:0.85rem;line-height:1.8;color:#166534;">
+      <div><b>📁 پوشه:</b> <span id="pim-folder-name">Documents</span></div>
+      <div style="margin-top:6px;"><b>📄 نام فایل:</b></div>
+      <div id="pim-file-name" style="background:#fff;padding:8px;border-radius:6px;margin-top:4px;direction:ltr;text-align:left;font-family:monospace;font-size:0.78rem;word-break:break-all;color:#0f172a;">Invoice.pdf</div>
+    </div>
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px;margin-bottom:16px;font-size:0.82rem;line-height:1.7;color:#92400e;">
+      <b>🔍 چطور فایل رو پیدا و پرینت کنم؟</b><br>
+      به برنامه «Files» یا «مدیریت فایل» گوشی برو و پوشه بالا رو باز کن؛ فایل فاکتور اونجا آماده پرینت است.
+    </div>
+    <button type="button" onclick="document.getElementById('path-info-modal').classList.remove('open')" style="width:100%;background:linear-gradient(135deg,#10b981 0%,#047857 100%);color:#fff;padding:14px;border:none;border-radius:10px;font-size:1rem;font-weight:900;cursor:pointer;">باشه، ممنون</button>
   </div>
 </div>
 
 <script>
 (function() {
-  var _nativePrint = window.print.bind(window);
+  var _nativePrint = window.print ? window.print.bind(window) : function(){};
   var _lastCanvas = null;
   var _lastCode = 'Factor';
 
   function hideOldPrinterOverlays() {
     var els = document.querySelectorAll('.printer-overlay, #printer-overlay, #apk-print-toolbar');
-    els.forEach(function(el) { el.style.display = 'none'; });
+    for (var i = 0; i < els.length; i++) {
+      els[i].style.display = 'none';
+    }
     document.body.classList.remove('apk-print-mode');
   }
 
@@ -17689,32 +17726,13 @@ body.apk-print-mode #apk-print-toolbar {
     }
   };
 
-  // پنجره نمایش مسیر دقیق ذخیره شدن فایل در گوشی
   function showPathInfoModal(folderLabel, filename) {
-    var old = document.getElementById('path-info-modal');
-    if (old) old.remove();
-
-    var html =
-      '<div id="path-info-modal" style="position:fixed;inset:0;background:rgba(15,23,42,0.85);z-index:999999999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl;">' +
-        '<div style="background:#fff;border-radius:16px;padding:20px;max-width:400px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.5);">' +
-          '<div style="text-align:center;margin-bottom:16px;">' +
-            '<div style="font-size:3rem;margin-bottom:8px;">✅</div>' +
-            '<div style="font-weight:900;font-size:1.1rem;color:#10b981;">فاکتور در گوشی ذخیره شد</div>' +
-          </div>' +
-          '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px;margin-bottom:16px;font-size:0.85rem;line-height:1.8;color:#166534;">' +
-            '<div><b>📁 پوشه:</b> ' + folderLabel + '</div>' +
-            '<div style="margin-top:6px;"><b>📄 نام فایل:</b></div>' +
-            '<div style="background:#fff;padding:8px;border-radius:6px;margin-top:4px;direction:ltr;text-align:left;font-family:monospace;font-size:0.78rem;word-break:break-all;color:#0f172a;">' + filename + '</div>' +
-          '</div>' +
-          '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px;margin-bottom:16px;font-size:0.82rem;line-height:1.7;color:#92400e;">' +
-            '<b>🔍 چطور فایل رو پرینت بگیرم؟</b><br>' +
-            'به برنامه «مدیریت فایل» (Files) گوشی برو و پوشه <b>' + folderLabel.split(' ')[0] + '</b> رو باز کن؛ فایل فاکتور اونجاست.' +
-          '</div>' +
-          '<button type="button" onclick="document.getElementById(\'path-info-modal\').remove()" style="width:100%;background:linear-gradient(135deg,#10b981 0%,#047857 100%);color:#fff;padding:14px;border:none;border-radius:10px;font-size:1rem;font-weight:900;cursor:pointer;">باشه، ممنون</button>' +
-        '</div>' +
-      '</div>';
-
-    document.body.insertAdjacentHTML('beforeend', html);
+    var fEl = document.getElementById('pim-folder-name');
+    var nEl = document.getElementById('pim-file-name');
+    var modal = document.getElementById('path-info-modal');
+    if (fEl) fEl.innerText = folderLabel;
+    if (nEl) nEl.innerText = filename;
+    if (modal) modal.classList.add('open');
   }
 
   function roundRect(ctx, x, y, w, h, r, fill, stroke, strokeColor, lineWidth) {
@@ -17783,61 +17801,85 @@ body.apk-print-mode #apk-print-toolbar {
     var shopWork = sec.querySelector('#print-shop-workshop');
 
     if (custPart && custPart.innerHTML.trim().length > 10) {
-      var title = (custPart.querySelector('.r-title') || {}).innerText || 'تعمیرات تخصصی موبایل پرشیا';
+      var titleEl = custPart.querySelector('.r-title');
+      var title = titleEl ? titleEl.innerText.trim() : 'تعمیرات تخصصی موبایل پرشیا';
       var headerSub = '';
-      custPart.querySelectorAll('.r-header div').forEach(function(d) {
+      var hDivs = custPart.querySelectorAll('.r-header div');
+      for (var i = 0; i < hDivs.length; i++) {
+        var d = hDivs[i];
         if (!d.classList.contains('r-title') && !d.classList.contains('r-badge') && !d.classList.contains('r-qr-box') && !d.classList.contains('r-qr-caption')) {
           var t = (d.innerText || '').trim();
           if (t && t.indexOf('قبض') !== -1) headerSub = t;
         }
-      });
+      }
 
       var qrImgEl = custPart.querySelector('.r-qr-box img');
       var qrSrc = qrImgEl ? qrImgEl.src : '';
 
       var metaLines = [];
-      custPart.querySelectorAll('.r-meta tr').forEach(function(tr) {
-        var rowTxt = Array.from(tr.querySelectorAll('td')).map(function(td) { return td.innerText.trim(); }).filter(Boolean).join('   |   ');
-        if (rowTxt) metaLines.push(rowTxt);
-      });
+      var mRows = custPart.querySelectorAll('.r-meta tr');
+      for (var m = 0; m < mRows.length; m++) {
+        var tds = mRows[m].querySelectorAll('td');
+        var parts = [];
+        for (var k = 0; k < tds.length; k++) {
+          var txt = tds[k].innerText.trim();
+          if (txt) parts.push(txt);
+        }
+        if (parts.length > 0) metaLines.push(parts.join('   |   '));
+      }
       if (metaLines.length === 0 && custPart.querySelector('.r-meta')) {
-        metaLines = custPart.querySelector('.r-meta').innerText.split('\n').map(function(s){return s.trim();}).filter(Boolean);
+        var rawM = custPart.querySelector('.r-meta').innerText.split('\n');
+        for (var rm = 0; rm < rawM.length; rm++) {
+          if (rawM[rm].trim()) metaLines.push(rawM[rm].trim());
+        }
       }
 
       var tableRows = [];
-      custPart.querySelectorAll('.r-table tr').forEach(function(tr, idx) {
-        if (idx === 0 && tr.querySelector('th')) return;
+      var tRows = custPart.querySelectorAll('.r-table tr');
+      for (var trIdx = 0; trIdx < tRows.length; trIdx++) {
+        var tr = tRows[trIdx];
+        if (trIdx === 0 && tr.querySelector('th')) continue;
         var cells = tr.querySelectorAll('td, th');
         if (cells.length === 1) tableRows.push({ full: cells[0].innerText.trim() });
         else if (cells.length >= 2) tableRows.push({ col1: cells[0].innerText.trim(), col2: cells[1].innerText.trim() });
-      });
+      }
 
       var totals = [];
-      custPart.querySelectorAll('.r-totals > div').forEach(function(div) {
+      var totDivs = custPart.querySelectorAll('.r-totals > div');
+      for (var tdIdx = 0; tdIdx < totDivs.length; tdIdx++) {
+        var div = totDivs[tdIdx];
         var spans = div.querySelectorAll('span, b');
         if (spans.length >= 2) {
           totals.push({ label: spans[0].innerText.trim(), val: spans[spans.length - 1].innerText.trim(), isFinal: div.classList.contains('r-total-final') });
         } else {
           totals.push({ label: div.innerText.trim(), val: '', isFinal: div.classList.contains('r-total-final') });
         }
-      });
+      }
 
-      var lawText = (custPart.querySelector('.r-law') || {}).innerText || '';
+      var lawEl = custPart.querySelector('.r-law');
+      var lawText = lawEl ? lawEl.innerText.trim() : '';
 
       var shopHeaderSub = '';
       var shopMetaLines = [];
       var shopTechLines = [];
       if (shopWork) {
-        shopWork.querySelectorAll('.r-header div').forEach(function(d) {
-          var t = (d.innerText || '').trim();
-          if (t && t.indexOf('قبض') !== -1) shopHeaderSub = t;
-        });
+        var shDivs = shopWork.querySelectorAll('.r-header div');
+        for (var s1 = 0; s1 < shDivs.length; s1++) {
+          var st = (shDivs[s1].innerText || '').trim();
+          if (st && st.indexOf('قبض') !== -1) shopHeaderSub = st;
+        }
         var sm = shopWork.querySelector('.r-meta');
-        if (sm) shopMetaLines = sm.innerText.split('\n').map(function(s){return s.trim();}).filter(Boolean);
-        shopWork.querySelectorAll('.r-tech > div').forEach(function(d) {
-          var t = d.innerText.trim();
-          if (t) shopTechLines.push(t);
-        });
+        if (sm) {
+          var smArr = sm.innerText.split('\n');
+          for (var s2 = 0; s2 < smArr.length; s2++) {
+            if (smArr[s2].trim()) shopMetaLines.push(smArr[s2].trim());
+          }
+        }
+        var stDivs = shopWork.querySelectorAll('.r-tech > div');
+        for (var s3 = 0; s3 < stDivs.length; s3++) {
+          var stTxt = stDivs[s3].innerText.trim();
+          if (stTxt) shopTechLines.push(stTxt);
+        }
       }
 
       var codeMatch = headerSub.match(/\d+/);
@@ -17858,16 +17900,24 @@ body.apk-print-mode #apk-print-toolbar {
       };
     }
 
-    var allText = sec.innerText.trim();
+    var allText = (sec.innerText || '').trim();
     if (allText.length > 5) {
       var rows = [];
-      sec.querySelectorAll('table tr').forEach(function(tr) {
-        var cols = Array.from(tr.querySelectorAll('th, td')).map(function(c){ return c.innerText.trim(); });
+      var allTrs = sec.querySelectorAll('table tr');
+      for (var r = 0; r < allTrs.length; r++) {
+        var cols = [];
+        var cEls = allTrs[r].querySelectorAll('th, td');
+        for (var c = 0; c < cEls.length; c++) cols.push(cEls[c].innerText.trim());
         if (cols.length > 0) rows.push(cols);
-      });
+      }
+      var rawL = [];
+      var sp = allText.split('\n');
+      for (var l = 0; l < sp.length; l++) {
+        if (sp[l].trim()) rawL.push(sp[l].trim());
+      }
       return {
         mode: 'SINGLE_PAGE',
-        rawLines: allText.split('\n').map(function(s){return s.trim();}).filter(Boolean),
+        rawLines: rawL,
         table: rows
       };
     }
@@ -17885,25 +17935,31 @@ body.apk-print-mode #apk-print-toolbar {
     ctx.fillRect(0, 0, W, H);
     var fontName = 'Vazirmatn, Tahoma, Arial, sans-serif';
 
-    if (data.mode === 'SINGLE_PAGE') {
+    if (!data || data.mode === 'SINGLE_PAGE') {
       roundRect(ctx, 36, 36, W - 72, H - 72, 14, '#ffffff', true, '#222', 4);
       ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 34px ' + fontName;
       ctx.textAlign = 'center';
-      ctx.fillText(data.rawLines[0] || 'صورت‌حساب رسمی — موبایل پرشیا', W / 2, 100);
+      var headTitle = (data && data.rawLines && data.rawLines[0]) ? data.rawLines[0] : 'فاکتور رسمی — موبایل پرشیا';
+      ctx.fillText(headTitle, W / 2, 100);
       ctx.beginPath(); ctx.moveTo(70, 130); ctx.lineTo(W - 70, 130); ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
 
       var y = 180;
       ctx.font = 'bold 23px ' + fontName;
       ctx.textAlign = 'right';
-      data.rawLines.slice(1, 5).forEach(function(line) {
-        ctx.fillText(line, W - 70, y);
-        y += 42;
-      });
-      if (data.table && data.table.length > 0) {
+      if (data && data.rawLines) {
+        var maxL = Math.min(data.rawLines.length, 6);
+        for (var i = 1; i < maxL; i++) {
+          ctx.fillText(data.rawLines[i], W - 70, y);
+          y += 42;
+        }
+      }
+      if (data && data.table && data.table.length > 0) {
         y += 20;
         var tblW = W - 140;
-        data.table.slice(0, 22).forEach(function(row, rIdx) {
+        var maxR = Math.min(data.table.length, 22);
+        for (var rIdx = 0; rIdx < maxR; rIdx++) {
+          var row = data.table[rIdx];
           var cellW = tblW / row.length;
           ctx.fillStyle = rIdx === 0 ? '#e2e8f0' : '#ffffff';
           ctx.fillRect(70, y, tblW, 48);
@@ -17917,7 +17973,7 @@ body.apk-print-mode #apk-print-toolbar {
             ctx.fillText(row[c], cx, y + 32);
           }
           y += 48;
-        });
+        }
       }
       return canvas;
     }
@@ -17972,9 +18028,9 @@ body.apk-print-mode #apk-print-toolbar {
     ctx.fillStyle = '#000';
     ctx.font = 'bold 22px ' + fontName;
     ctx.textAlign = 'right';
-    data.metaLines.forEach(function(line) {
-      curY = drawWrappedRTL(ctx, line, cX + cW - 24, curY, cW - 48, 32, 2);
-    });
+    for (var mIdx = 0; mIdx < data.metaLines.length; mIdx++) {
+      curY = drawWrappedRTL(ctx, data.metaLines[mIdx], cX + cW - 24, curY, cW - 48, 32, 2);
+    }
     curY += 6;
 
     var tX = cX + 22, tW = cW - 44, colSplit = tX + 340, thH = 42;
@@ -17988,7 +18044,9 @@ body.apk-print-mode #apk-print-toolbar {
     ctx.fillText('مبلغ', tX + 170, curY + 28);
     curY += thH;
 
-    data.tableRows.slice(0, 5).forEach(function(r) {
+    var maxTRows = Math.min(data.tableRows.length, 5);
+    for (var trI = 0; trI < maxTRows; trI++) {
+      var r = data.tableRows[trI];
       var rH = 42;
       ctx.strokeStyle = '#94a3b8';
       ctx.lineWidth = 1.5;
@@ -18010,11 +18068,12 @@ body.apk-print-mode #apk-print-toolbar {
         ctx.fillText(r.col2 || '', tX + 170, curY + 28);
       }
       curY += rH;
-    });
+    }
 
     curY += 28;
 
-    data.totals.forEach(function(tot) {
+    for (var totI = 0; totI < data.totals.length; totI++) {
+      var tot = data.totals[totI];
       if (tot.isFinal) {
         ctx.beginPath(); ctx.moveTo(tX, curY - 18); ctx.lineTo(tX + tW, curY - 18);
         ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
@@ -18029,7 +18088,7 @@ body.apk-print-mode #apk-print-toolbar {
         ctx.fillText(tot.val, tX + 6, curY);
       }
       curY += 34;
-    });
+    }
 
     if (data.lawText) {
       var lawY = Math.max(curY + 4, cY + cH - 235);
@@ -18038,271 +18097,7 @@ body.apk-print-mode #apk-print-toolbar {
         roundRect(ctx, tX, lawY, tW, lawH, 6, '#f8fafc', true, '#cbd5e1', 1.5);
         ctx.fillStyle = '#1e293b';
         ctx.font = 'bold 16.5px ' + fontName;
-        drawWrappedRTL(ctx, data.lawText, tX + tW - 12, lawY + 25, tW - 24, 24, 6);
-      }
-    }
-
-    var signY = cY + cH - 28;
-    ctx.fillStyle = '#000';
-    ctx.font = 'bold 20px ' + fontName;
-    ctx.textAlign = 'right';
-    ctx.fillText('امضای مشتری: ....................................', tX + tW - 10, signY);
-    ctx.textAlign = 'left';
-    ctx.fillText('مهر و امضای تعمیرگاه: ....................................', tX + 10, signY);
-
-    var cutY = 1068;
-    ctx.save();
-    ctx.beginPath();
-    ctx.setLineDash([12, 10]);
-    ctx.moveTo(40, cutY);
-    ctx.lineTo(W - 40, cutY);
-    ctx.strokeStyle = '#64748b';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.restore();
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(W / 2 - 150, cutY - 16, 300, 32);
-    ctx.fillStyle = '#475569';
-    ctx.font = 'bold 20px ' + fontName;
-    ctx.textAlign = 'center';
-    ctx.fillText('✂ ────── محل برش ────── ✂', W / 2, cutY + 7);
-
-    var sX = 32, sY = 1094, sW = W - 64, sH = 974;
-    roundRect(ctx, sX, sY, sW, sH, 12, '#ffffff', true, '#222222', 3.5);
-
-    var splitX = sX + Math.round(sW * 0.33);
-    ctx.save();
-    ctx.beginPath();
-    ctx.setLineDash([10, 8]);
-    ctx.moveTo(splitX, sY + 10);
-    ctx.lineTo(splitX, sY + sH - 10);
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.restore();
-
-    var wRight = sX + sW - 22;
-    var wWidth = (sX + sW) - splitX - 44;
-    var wCenter = splitX + ((sX + sW - splitX) / 2);
-
-    roundRect(ctx, sX + sW - 145, sY + 16, 125, 40, 6, '#f1f5f9', true, '#333', 2);
-    ctx.fillStyle = '#000';
-    ctx.font = 'bold 20px ' + fontName;
-    ctx.textAlign = 'center';
-    ctx.fillText('نسخه کارگاه', sX + sW - 82, sY + 42);
-
-    ctx.font = '900 30px ' + fontName;
-    ctx.fillText('پرونده فنی کارگاه', wCenter, sY + 46);
-    ctx.font = 'bold 20px ' + fontName;
-    ctx.fillStyle = '#334155';
-    ctx.fillText(data.shopHeaderSub || '', wCenter, sY + 80);
-
-    var wy = sY + 105;
-    ctx.beginPath(); ctx.moveTo(splitX + 18, wy); ctx.lineTo(sX + sW - 18, wy);
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
-    wy += 34;
-
-    ctx.fillStyle = '#000';
-    ctx.font = 'bold 21px ' + fontName;
-    data.shopMetaLines.forEach(function(line) {
-      wy = drawWrappedRTL(ctx, line, wRight, wy, wWidth, 32, 2);
-    });
-    wy += 10;
-
-    var techBoxH = Math.max(200, (sY + sH - 30) - wy);
-    roundRect(ctx, splitX + 20, wy, wWidth, techBoxH, 8, '#f8fafc', true, '#cbd5e1', 2);
-    var ty = wy + 34;
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 20px ' + fontName;
-    data.shopTechLines.forEach(function(tLine) {
-      if (ty < wy + techBoxH - 20) {
-        ty = drawWrappedRTL(ctx, '• ' + tLine, wRight - 14, ty, wWidth - 28, 33, 3);
-        ty += 4;
-      }
-    });
-
-    var nCenter = sX + ((splitX - sX) / 2);
-    ctx.fillStyle = '#000';
-    ctx.font = '900 24px ' + fontName;
-    ctx.textAlign = 'center';
-    ctx.fillText('📝 یادداشت و گزارش تعمیرکار', nCenter, sY + 52);
-
-    ctx.beginPath(); ctx.moveTo(sX + 18, sY + 75); ctx.lineTo(splitX - 18, sY + 75);
-    ctx.strokeStyle = '#475569'; ctx.lineWidth = 2; ctx.stroke();
-
-    ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 1.5;
-    for (var ly = sY + 135; ly < sY + sH - 110; ly += 55) {
-      ctx.beginPath();
-      ctx.moveTo(sX + 20, ly);
-      ctx.lineTo(splitX - 20, ly);
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = '#000';
-    ctx.font = 'bold 19px ' + fontName;
-    ctx.textAlign = 'right';
-    ctx.fillText('امضای تکنسین و تاریخ تحویل:', splitX - 22, sY + sH - 65);
-    ctx.fillText('................................................', splitX - 22, sY + sH - 28);
-
-    return canvas;
-  }
-
-  function canvasToA5PdfBlob(canvas) {
-    var jpegDataUrl = canvas.toDataURL('image/jpeg', 0.92);
-    var rawJpeg = atob(jpegDataUrl.split(',')[1]);
-    var jpegLen = rawJpeg.length;
-    var chunks = [], offsets = [], currentLen = 0;
-
-    function pushStr(str) {
-      var arr = new Uint8Array(str.length);
-      for (var i = 0; i < str.length; i++) arr[i] = str.charCodeAt(i) & 0xff;
-      chunks.push(arr);
-      currentLen += arr.length;
-    }
-    function startObj(id) {
-      offsets[id] = currentLen;
-      pushStr(id + ' 0 obj\n');
-    }
-
-    pushStr('%PDF-1.4\n%\xFF\xFF\xFF\xFF\n');
-    startObj(1); pushStr('<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
-    startObj(2); pushStr('<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n');
-    startObj(3); pushStr('<< /Type /Page /Parent 2 0 R /Resources << /XObject << /Im0 4 0 R >> >> /MediaBox [0 0 420 595] /Contents 5 0 R >>\nendobj\n');
-    startObj(4);
-    pushStr('<< /Type /XObject /Subtype /Image /Width ' + canvas.width + ' /Height ' + canvas.height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpegLen + ' >>\nstream\n');
-    var jpegBytes = new Uint8Array(jpegLen);
-    for (var j = 0; j < jpegLen; j++) jpegBytes[j] = rawJpeg.charCodeAt(j) & 0xff;
-    chunks.push(jpegBytes);
-    currentLen += jpegLen;
-    pushStr('\nendstream\nendobj\n');
-
-    var contentCmd = 'q 420 0 0 595 0 0 cm /Im0 Do Q\n';
-    startObj(5); pushStr('<< /Length ' + contentCmd.length + ' >>\nstream\n' + contentCmd + 'endstream\nendobj\n');
-
-    var xrefOffset = currentLen;
-    pushStr('xref\n0 6\n0000000000 65535 f \n');
-    for (var k = 1; k <= 5; k++) pushStr(String(offsets[k]).padStart(10, '0') + ' 00000 n \n');
-    pushStr('trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n' + xrefOffset + '\n%%EOF');
-
-    return new Blob(chunks, { type: 'application/pdf' });
-  }
-
-  function blobToBase64(blob) {
-    return new Promise(function(resolve) {
-      var reader = new FileReader();
-      reader.onloadend = function() {
-        var res = reader.result || '';
-        resolve(res.split(',')[1] || '');
-      };
-      reader.readAsDataURL(blob);
-    });
-  }
-
-  // ذخیره با Capacitor Filesystem (در صورت وجود در APK) یا اشتراک‌گذاری مستقیم
-  window.exportPersiaInvoice = async function(format) {
-    if (!_lastCanvas) return;
-    var isPdf = (format === 'PDF');
-    var btn = document.getElementById(isPdf ? 'pps-btn-pdf' : 'pps-btn-png');
-    var origText = btn ? btn.innerHTML : '';
-    if (btn) { btn.innerHTML = '⏳ در حال ذخیره...'; btn.disabled = true; }
-
-    function done() {
-      if (btn) { btn.innerHTML = origText; btn.disabled = false; }
-    }
-
-    try {
-      var ext = isPdf ? '.pdf' : '.png';
-      var mime = isPdf ? 'application/pdf' : 'image/png';
-      var filename = 'Invoice_' + _lastCode + '_' + Date.now() + ext;
-      var blob = isPdf
-        ? canvasToA5PdfBlob(_lastCanvas)
-        : await new Promise(function(r) { _lastCanvas.toBlob(r, 'image/png'); });
-
-      // ۱. اولویت اول: ذخیره در حافظه گوشی با Capacitor Filesystem (مخصوص APK)
-      var Cap = window.Capacitor && window.Capacitor.Plugins;
-      if (Cap && Cap.Filesystem) {
-        var b64Data = await blobToBase64(blob);
-        var dirsToTry = ['DOCUMENTS', 'EXTERNAL_STORAGE', 'CACHE'];
-        var dirLabels = {
-          'DOCUMENTS': 'Documents (اسناد)',
-          'EXTERNAL_STORAGE': 'حافظه داخلی گوشی',
-          'CACHE': 'کش برنامه'
-        };
-        var savedInfo = null;
-
-        for (var d = 0; d < dirsToTry.length; d++) {
-          try {
-            var writeRes = await Cap.Filesystem.writeFile({
-              path: filename,
-              data: b64Data,
-              directory: dirsToTry[d],
-              encoding: 'base64',
-              recursive: true
-            });
-            savedInfo = { dir: dirsToTry[d], label: dirLabels[dirsToTry[d]], uri: writeRes.uri };
-            break;
-          } catch (e) {}
-        }
-
-        if (savedInfo) {
-          done();
-          if (Cap.Share) {
-            try {
-              await Cap.Share.share({
-                title: 'فاکتور موبایل پرشیا (' + _lastCode + ')',
-                text: 'فایل ذخیره شد در: ' + savedInfo.label + '\n' + filename,
-                url: savedInfo.uri,
-                dialogTitle: 'چاپ یا اشتراک‌گذاری فاکتور'
-              });
-            } catch (se) {}
-          }
-          showPathInfoModal(savedInfo.label, filename);
-          return;
-        }
-      }
-
-      // ۲. اولویت دوم: اشتراک‌گذاری مستقیم Web Share API
-      var fileObj = new File([blob], filename, { type: mime });
-      if (navigator.canShare && navigator.canShare({ files: [fileObj] })) {
-        await navigator.share({ title: 'فاکتور موبایل پرشیا (' + _lastCode + ')', files: [fileObj] });
-        done();
-        return;
-      }
-
-      // ۳. اولویت سوم: دانلود مستقیم مرورگر
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      a.click();
-      done();
-      if (typeof showToast === 'function') showToast('✅ فایل آماده شد', 'success');
-    } catch (err) {
-      done();
-      alert('خطا در ذخیره فایل: ' + (err && err.message ? err.message : ''));
-    }
-  };
-
-  window.print = function() {
-    hideOldPrinterOverlays();
-    var data = capturePrintSectionData();
-    if (!data) {
-      try { _nativePrint(); } catch (e) {}
-      return;
-    }
-
-    var studio = document.getElementById('persia-print-studio');
-    var previewImg = document.getElementById('pps-preview-img');
-    if (studio) studio.classList.add('open');
-
-    renderReceiptToCanvas(data).then(function(canvas) {
-      _lastCanvas = canvas;
-      if (previewImg) previewImg.src = canvas.toDataURL('image/png');
-      hideOldPrinterOverlays();
-    });
-  };
-})();
-</script>
+        drawWrappedRTL(ctx, data.lawText, tX + tW - 12, lawY 
 
 </body>
 </html>

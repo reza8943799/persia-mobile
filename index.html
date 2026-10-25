@@ -18680,7 +18680,7 @@ body.apk-print-mode #apk-print-toolbar {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ فعال‌سازی نهایی سیستم چاپ APK (نسخه ضد باگ WebView)
+// 🖨️ فعال‌سازی نهایی سیستم چاپ APK (نسخه ضد باگ WebView - جایگزین)
 // ═══════════════════════════════════════════════════════════════
 (function setupApkPrint() {
   
@@ -18705,42 +18705,69 @@ body.apk-print-mode #apk-print-toolbar {
     }
     
     var printArea = document.getElementById('print-section');
-    if (!printArea) return;
+    if (!printArea || !printArea.offsetParent) {
+      return showToast('فاکتور روی صفحه پیدا نشد. صفحه را رفرش کنید.', 'error');
+    }
 
     showToast('⏳ در حال ساخت تصویر...', 'info');
     var btn = document.querySelector('#apk-print-toolbar button:last-child');
     if (btn) { btn.disabled = true; btn.innerText = 'در حال ساخت...'; }
 
-    // اسکرول به بالا برای اطمینان از رندر صحیح
+    // اسکرول به بالا برای اطمینان از رندر کامل
     window.scrollTo(0, 0);
 
     var timeoutId = setTimeout(function() {
       if (btn && btn.innerText === 'در حال ساخت...') {
         btn.disabled = false;
         btn.innerText = '📤 ارسال / ذخیره';
-        showToast('❌ زمان ساخت عکس طولانی شد. اینترنت را چک کنید.', 'error');
+        showToast('❌ زمان ساخت عکس طولانی شد. لطفاً دوباره تلاش کنید.', 'error');
       }
-    }, 10000);
+    }, 12000);
 
     try {
-      // کاهش مقیاس به ۱.۲ برای جلوگیری از کمبود حافظه در WebView
       var canvas = await html2canvas(printArea, {
-        scale: 1.2, 
+        scale: 1, // مقیاس ۱ برای جلوگیری از کمبود حافظه در WebView
         useCORS: true, 
         allowTaint: false,
         backgroundColor: '#ffffff',
         logging: false,
         imageTimeout: 3000,
+        scrollX: 0,
         scrollY: 0,
-        scrollX: 0
+        // 💡 راه‌حل اصلی: حذف QR کد و گرادیانت‌ها از کپیِ برداشته‌شده
+        onclone: function(clonedDoc) {
+          var clonedPrintArea = clonedDoc.getElementById('print-section');
+          if (clonedPrintArea) {
+            // حذف عکس‌های QR (که باعث خطای CORS و null می‌شوند)
+            var qrImages = clonedPrintArea.querySelectorAll('.r-qr-box img');
+            qrImages.forEach(function(img) {
+              img.style.display = 'none'; 
+              img.removeAttribute('src'); // جلوگیری از تلاش برای لود مجدد
+            });
+            // حذف واترمارک (که ممکن است شفافیت داشته باشد)
+            var watermarks = clonedPrintArea.querySelectorAll('.r-watermark');
+            watermarks.forEach(function(el) { el.style.display = 'none'; });
+            // حذف تمام پس‌زمینه‌های گرادیانت که html2canvas را دیوانه می‌کنند
+            var allElements = clonedPrintArea.querySelectorAll('*');
+            allElements.forEach(function(el) {
+              var bgImage = window.getComputedStyle(el).backgroundImage;
+              if (bgImage && bgImage.includes('gradient')) {
+                el.style.backgroundImage = 'none';
+                el.style.backgroundColor = '#ffffff';
+              }
+            });
+          }
+        }
       });
 
       clearTimeout(timeoutId);
 
-      // ✅ استفاده از toDataURL به جای toBlob (سازگاری بیشتر با WebView)
       var dataURL = canvas.toDataURL('image/png');
       
-      // تبدیل DataURL به Blob
+      if (!dataURL || dataURL === 'data:,' || dataURL.length < 100) {
+        throw new Error("تصویر خالی تولید شد");
+      }
+
       function dataURLtoBlob(dataurl) {
         var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
@@ -18751,11 +18778,6 @@ body.apk-print-mode #apk-print-toolbar {
       }
 
       var blob = dataURLtoBlob(dataURL);
-      
-      if (!blob || blob.size < 1000) {
-        throw new Error("Blob is empty or too small");
-      }
-
       var file = new File([blob], 'Persia_Invoice.png', { type: 'image/png' });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -18769,7 +18791,6 @@ body.apk-print-mode #apk-print-toolbar {
           console.warn('Share failed:', err);
         }
       } else {
-        // دانلود مستقیم اگر اشتراک‌گذاری پشتیبانی نشد
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
@@ -18824,7 +18845,7 @@ body.apk-print-mode #apk-print-toolbar {
     }
   };
 
-  console.log('[apk-print-mode] Fixed WebView Bug ✅');
+  console.log('[apk-print-mode] Fixed WebView Null Error ✅');
 })();
 </script>
 

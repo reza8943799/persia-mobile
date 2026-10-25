@@ -18814,103 +18814,7 @@ body.apk-print-mode #apk-print-toolbar {
 })();
 </script>
 
-<script>
-// ═══════════════════════════════════════════════════════════════
-// 🖨️ اصلاح نهایی پرینت متنی برای APK (استخراج دقیق دیتای فاکتور)
-// ═══════════════════════════════════════════════════════════════
-(function fixApkTextPrint() {
-  
-  // تابع کمکی برای ساخت متن فاکتور از روی دیتای واقعی
-  function buildInvoiceText(data, isHistory) {
-    var text = '✦ موبایل پرشیا ✦\n';
-    if (isHistory) text += '🧾 فاکتور رسمی\n\n';
-    else text += '🛠️ قبض پذیرش دستگاه\n\n';
-    
-    var c = customers.find(function(x) { return x.id === data.customerId && !x.deleted; }) || { name: 'نامشخص' };
-    
-    text += '👤 مشتری: ' + c.name + '\n';
-    text += '📱 دستگاه: ' + (data.model || 'نامشخص') + (data.color ? ' (' + data.color + ')' : '') + '\n';
-    text += '🔢 قبض: ' + (data.intakeCode || '---') + (data.trackCode ? ' | پیگیری: ' + data.trackCode : '') + '\n';
-    text += '📅 تاریخ: ' + (data.date || '---') + '\n';
-    if (data.problem) text += '🔍 ایراد: ' + data.problem + '\n';
-    
-    text += '\n📋 اقلام:\n';
-    if (data.items && data.items.length > 0) {
-      data.items.forEach(function(it) {
-        text += '• ' + it.title + ': ' + formatToman(it.amount || 0) + '\n';
-      });
-    } else {
-      text += '• ' + (data.title || 'خدمات تعمیر') + '\n';
-    }
-    
-    var finalTotal = Number(data.amount || data.totalWork || 0);
-    text += '\n💰 مبلغ کل: ' + formatToman(finalTotal) + '\n';
-    
-    var dep = Number(data.cashDeposit || data.deposit || 0) + Number(data.onlineDeposit || 0);
-    if (dep > 0) {
-      text += '💵 بیعانه: ' + formatToman(dep) + '\n';
-      text += '🔴 مانده قابل پرداخت: ' + formatToman(Math.max(0, finalTotal - dep)) + '\n';
-    }
-    
-    if (typeof customPaymentText !== 'undefined' && customPaymentText) {
-      text += '\n💳 اطلاعات واریز:\n' + customPaymentText;
-    }
-    
-    return text;
-  }
 
-  // ۱. هوک کردن دکمه پرینت از توی تب کارگاه (پذیرش)
-  var _basePrintIntake = window.printIntakeReceipt;
-  window.printIntakeReceipt = function(qId) {
-    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
-    
-    if (isCapacitor) {
-      // آیا این آیدی مربوط به یه دستگاه در حال تعمیره؟
-      var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
-      // یا مربوط به سوابق (فاکتور قطعی)؟
-      var t = transactions.find(function(x) { return x.id === qId && !x.deleted && x.type === 'DEBT'; });
-      
-      var targetData = q || t;
-      
-      if (targetData) {
-        var text = buildInvoiceText(targetData, !q);
-        if (navigator.share) {
-          navigator.share({ title: 'فاکتور موبایل پرشیا', text: text }).catch(function(){});
-        } else {
-          if (navigator.clipboard) navigator.clipboard.writeText(text);
-          showToast('✅ متن کامل فاکتور کپی شد', 'success');
-        }
-        return; // توقف ادامه کار (تا پنجره پرینت مرورگر باز نشه)
-      }
-    }
-    // اگر توی وب بود یا دیتا پیدا نشد، از حالت عادی استفاده کن
-    return _basePrintIntake.apply(this, arguments);
-  };
-
-  // ۲. هوک کردن دکمه پرینت از توی سوابق (فاکتور رسمی)
-  var _basePrintCustomerInvoice = window.printCustomerInvoice;
-  window.printCustomerInvoice = function(txId) {
-    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
-    
-    if (isCapacitor) {
-      var t = transactions.find(function(x) { return x.id === txId && !x.deleted && x.type === 'DEBT'; });
-      if (t) {
-        var text = buildInvoiceText(t, true);
-        if (navigator.share) {
-          navigator.share({ title: 'فاکتور موبایل پرشیا', text: text }).catch(function(){});
-        } else {
-          if (navigator.clipboard) navigator.clipboard.writeText(text);
-          showToast('✅ متن کامل فاکتور کپی شد', 'success');
-        }
-        return;
-      }
-    }
-    return _basePrintCustomerInvoice.apply(this, arguments);
-  };
-
-  console.log('[apk-text-print-fixed] Ready ✅');
-})();
-</script>
 
 
 <script>
@@ -19367,7 +19271,127 @@ body.apk-print-mode #apk-print-toolbar {
 })();
 </script>
 
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🖨️ اصلاح نهایی: اتصال به Share Native اندروید + فallback به واتساپ
+// ═══════════════════════════════════════════════════════════════
+(function fixApkTextPrint() {
+  
+  // تابع کمکی برای ارسال متن (اول Native بعد Web بعد Clipboard)
+  function shareInvoiceText(text) {
+    // ۱. پلاگین کپسیتور (مخصوص APK)
+    var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+    if (CapShare && typeof CapShare.share === 'function') {
+      CapShare.share({
+        title: 'فاکتور موبایل پرشیا',
+        text: text,
+        dialogTitle: 'ارسال فاکتور'
+      }).catch(function(err) {
+        console.warn('[Share] Capacitor failed:', err);
+        fallbackShare(text);
+      });
+      return;
+    }
+    
+    // ۲. Web Share API (مرورگر)
+    if (navigator.share) {
+      navigator.share({ title: 'فاکتور موبایل پرشیا', text: text }).catch(function(err) {
+        if (err.name !== 'AbortError') fallbackShare(text);
+      });
+      return;
+    }
+    
+    // ۳. fallback
+    fallbackShare(text);
+  }
+  
+  function fallbackShare(text) {
+    // تلاش برای باز کردن واتساپ
+    var waUrl = 'whatsapp://send?text=' + encodeURIComponent(text);
+    var win = window.open(waUrl, '_blank');
+    if (!win || win.closed) {
+      // اگه واتساپ نصب نبود، کپی کن
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+        showToast('📋 متن کپی شد (واتساپ یافت نشد)', 'info');
+      }
+    }
+  }
 
+  function buildInvoiceText(data, isHistory) {
+    var text = '✦ موبایل پرشیا ✦\n';
+    if (isHistory) text += '🧾 فاکتور رسمی\n\n';
+    else text += '🛠️ قبض پذیرش دستگاه\n\n';
+    
+    var c = customers.find(function(x) { return x.id === data.customerId && !x.deleted; }) || { name: 'نامشخص' };
+    
+    text += '👤 مشتری: ' + c.name + '\n';
+    text += '📱 دستگاه: ' + (data.model || 'نامشخص') + (data.color ? ' (' + data.color + ')' : '') + '\n';
+    text += '🔢 قبض: ' + (data.intakeCode || '---') + (data.trackCode ? ' | پیگیری: ' + data.trackCode : '') + '\n';
+    text += '📅 تاریخ: ' + (data.date || '---') + '\n';
+    if (data.problem) text += '🔍 ایراد: ' + data.problem + '\n';
+    
+    text += '\n📋 اقلام:\n';
+    if (data.items && data.items.length > 0) {
+      data.items.forEach(function(it) {
+        text += '• ' + it.title + ': ' + formatToman(it.amount || 0) + '\n';
+      });
+    } else {
+      text += '• ' + (data.title || 'خدمات تعمیر') + '\n';
+    }
+    
+    var finalTotal = Number(data.amount || data.totalWork || 0);
+    text += '\n💰 مبلغ کل: ' + formatToman(finalTotal) + '\n';
+    
+    var dep = Number(data.cashDeposit || data.deposit || 0) + Number(data.onlineDeposit || 0);
+    if (dep > 0) {
+      text += '💵 بیعانه: ' + formatToman(dep) + '\n';
+      text += '🔴 مانده قابل پرداخت: ' + formatToman(Math.max(0, finalTotal - dep)) + '\n';
+    }
+    
+    if (typeof customPaymentText !== 'undefined' && customPaymentText) {
+      text += '\n💳 اطلاعات واریز:\n' + customPaymentText;
+    }
+    
+    return text;
+  }
+
+  // ۱. هوک کردن دکمه پرینت از توی تب کارگاه (پذیرش)
+  var _basePrintIntake = window.printIntakeReceipt;
+  window.printIntakeReceipt = function(qId) {
+    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+    
+    if (isCapacitor) {
+      var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+      var t = transactions.find(function(x) { return x.id === qId && !x.deleted && x.type === 'DEBT'; });
+      var targetData = q || t;
+      
+      if (targetData) {
+        shareInvoiceText(buildInvoiceText(targetData, !q));
+        return;
+      }
+    }
+    return _basePrintIntake.apply(this, arguments);
+  };
+
+  // ۲. هوک کردن دکمه پرینت از توی سوابق
+  var _basePrintCustomerInvoice = window.printCustomerInvoice;
+  window.printCustomerInvoice = function(txId) {
+    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+    
+    if (isCapacitor) {
+      var t = transactions.find(function(x) { return x.id === txId && !x.deleted && x.type === 'DEBT'; });
+      if (t) {
+        shareInvoiceText(buildInvoiceText(t, true));
+        return;
+      }
+    }
+    return _basePrintCustomerInvoice.apply(this, arguments);
+  };
+
+  console.log('[apk-text-print-v2] Ready ✅');
+})();
+</script>
 
 </body>
 </html>

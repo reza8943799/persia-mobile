@@ -18677,11 +18677,10 @@ body.apk-print-mode #apk-print-toolbar {
   console.log('[supplier-reports] Phase 4 Ready ✅');
 })();
 </script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ فعال‌سازی نهایی سیستم چاپ APK (نسخه ضد فریز شدن)
+// 🖨️ فعال‌سازی نهایی سیستم چاپ APK (نسخه ضد باگ WebView)
 // ═══════════════════════════════════════════════════════════════
 (function setupApkPrint() {
   
@@ -18708,72 +18707,89 @@ body.apk-print-mode #apk-print-toolbar {
     var printArea = document.getElementById('print-section');
     if (!printArea) return;
 
-    showToast('⏳ در حال ساخت تصویر فاکتور...', 'info');
+    showToast('⏳ در حال ساخت تصویر...', 'info');
     var btn = document.querySelector('#apk-print-toolbar button:last-child');
     if (btn) { btn.disabled = true; btn.innerText = 'در حال ساخت...'; }
 
-    // ⏱️ تایمر اضطراری: اگر بعد از ۸ ثانیه عکس ساخته نشد، دکمه را آزاد کن
+    // اسکرول به بالا برای اطمینان از رندر صحیح
+    window.scrollTo(0, 0);
+
     var timeoutId = setTimeout(function() {
       if (btn && btn.innerText === 'در حال ساخت...') {
         btn.disabled = false;
         btn.innerText = '📤 ارسال / ذخیره';
-        showToast('❌ زمان ساخت عکس طولانی شد. (شاید اینترنت قطع باشد)', 'error');
+        showToast('❌ زمان ساخت عکس طولانی شد. اینترنت را چک کنید.', 'error');
       }
-    }, 8000);
+    }, 10000);
 
     try {
-      // 💡 imageTimeout: 3000 باعث میشه اگه QR کد لود نشد، به جای فریز کردن، ازش بگذره
+      // کاهش مقیاس به ۱.۲ برای جلوگیری از کمبود حافظه در WebView
       var canvas = await html2canvas(printArea, {
-        scale: 1.5, 
+        scale: 1.2, 
         useCORS: true, 
         allowTaint: false,
         backgroundColor: '#ffffff',
         logging: false,
-        imageTimeout: 3000 
+        imageTimeout: 3000,
+        scrollY: 0,
+        scrollX: 0
       });
 
-      clearTimeout(timeoutId); // تایمر رو متوقف کن
+      clearTimeout(timeoutId);
 
-      canvas.toBlob(async function(blob) {
-        if (!blob) {
-            showToast('❌ خطا در تبدیل تصویر', 'error');
-            if (btn) { btn.disabled = false; btn.innerText = '📤 ارسال / ذخیره'; }
-            return;
+      // ✅ استفاده از toDataURL به جای toBlob (سازگاری بیشتر با WebView)
+      var dataURL = canvas.toDataURL('image/png');
+      
+      // تبدیل DataURL به Blob
+      function dataURLtoBlob(dataurl) {
+        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
         }
-        var file = new File([blob], 'Persia_Invoice.png', { type: 'image/png' });
-        
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: 'فاکتور موبایل پرشیا',
-              text: 'فاکتور شما از موبایل پرشیا'
-            });
-          } catch (err) {
-            if (err.name !== 'AbortError') console.warn('Share failed:', err);
-          }
-        } else {
-          var url = URL.createObjectURL(blob);
-          var a = document.createElement('a');
-          a.href = url;
-          a.download = 'Persia_Invoice_' + Date.now() + '.png';
-          a.click();
-          setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
-          showToast('✅ تصویر فاکتور ذخیره شد', 'success');
+        return new Blob([u8arr], {type:mime});
+      }
+
+      var blob = dataURLtoBlob(dataURL);
+      
+      if (!blob || blob.size < 1000) {
+        throw new Error("Blob is empty or too small");
+      }
+
+      var file = new File([blob], 'Persia_Invoice.png', { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'فاکتور موبایل پرشیا',
+            text: 'فاکتور شما از موبایل پرشیا'
+          });
+        } catch (err) {
+          console.warn('Share failed:', err);
         }
-        
-        if (btn) { btn.disabled = false; btn.innerText = '📤 ارسال / ذخیره'; }
-      }, 'image/png', 0.95);
+      } else {
+        // دانلود مستقیم اگر اشتراک‌گذاری پشتیبانی نشد
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'Persia_Invoice_' + Date.now() + '.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+        showToast('✅ تصویر ذخیره شد', 'success');
+      }
 
     } catch (err) {
       clearTimeout(timeoutId);
       console.error('html2canvas error:', err);
-      showToast('❌ خطا در ساخت تصویر. لطفاً دوباره تلاش کنید.', 'error');
+      showToast('❌ خطا در ساخت تصویر: ' + (err.message || 'ناشناخته'), 'error');
+    } finally {
       if (btn) { btn.disabled = false; btn.innerText = '📤 ارسال / ذخیره'; }
     }
   };
 
-  // هوک کردن window.print
   var _originalWindowPrint = window.print;
   window.print = function() {
     var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
@@ -18808,8 +18824,9 @@ body.apk-print-mode #apk-print-toolbar {
     }
   };
 
-  console.log('[apk-print-mode] Fixed & Ready ✅');
+  console.log('[apk-print-mode] Fixed WebView Bug ✅');
 })();
 </script>
+
 </body>
 </html>

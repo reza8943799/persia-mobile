@@ -14522,430 +14522,6 @@ if (typeof window.renderOrders !== 'function') {
 
 
 // ═══════════════════════════════════════════════════
-// 🛒 سیستم کامل سفارشات — v2 (جستجو + کسری انبار)
-// ═══════════════════════════════════════════════════
-(function setupOrdersSystem() {
-  if (!window.orders) window.orders = [];
-  if (!window._ordersLoaded) {
-    window._ordersLoaded = true;
-    setTimeout(function() {
-      openAppDB().then(function(db) {
-        var req = db.transaction('store', 'readonly').objectStore('store').get('db_orders');
-        req.onsuccess = function(e) {
-          if (e.target.result && Array.isArray(e.target.result)) window.orders = e.target.result;
-          if (typeof renderOrders === 'function') renderOrders();
-        };
-      });
-    }, 500);
-  }
-
-  if (!window._ordersSavePatched) {
-    window._ordersSavePatched = true;
-    var _baseSaveAll = saveAll;
-    saveAll = function() {
-      var p = _baseSaveAll();
-      openAppDB().then(function(db) {
-        db.transaction('store', 'readwrite').objectStore('store').put(window.orders, 'db_orders');
-      });
-      return p;
-    };
-  }
-
-  ['modal-add-order', 'modal-transfer-order'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.remove();
-  });
-
-  document.body.insertAdjacentHTML('beforeend', `
-    <div class="modal-overlay" id="modal-add-order">
-      <div class="modal-content" style="max-width:480px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;">
-          <h3 style="font-size:1rem;color:#1e293b;">🛒 ثبت سفارش جدید</h3>
-          <button type="button" onclick="closeAddOrderModal()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">✕</button>
-        </div>
-
-        <div style="background:#fffbeb;border:1.5px dashed #f59e0b;border-radius:8px;padding:10px;margin-top:10px;display:flex;align-items:center;gap:8px;">
-          <input type="checkbox" id="order-is-shortage" onchange="toggleOrderShortage()" style="width:20px;height:20px;margin:0;">
-          <label for="order-is-shortage" style="font-size:0.85rem;font-weight:800;color:#92400e;cursor:pointer;margin:0;flex:1;">📉 کسری انبار (خرید برای موجودی مغازه)</label>
-        </div>
-
-        <label class="field-label" id="order-cust-label">مشتری (اجباری):</label>
-        <div id="order-cust-wrap" style="position:relative;margin-top:6px;">
-          <input type="text" id="order-cust-search" placeholder="🔍 جستجوی نام یا شماره..." oninput="searchOrderCustomer(this.value)" onfocus="searchOrderCustomer(this.value)" autocomplete="off" style="margin-top:0;">
-          <input type="hidden" id="order-cust-id" value="">
-          <div id="order-cust-results" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.15);max-height:220px;overflow-y:auto;margin-top:4px;"></div>
-        </div>
-
-        <label class="field-label">نام قطعه / کالا:</label>
-        <input type="text" id="order-item-name" placeholder="مثال: LCD سامسونگ A54">
-
-        <div class="row">
-          <div style="flex:1;">
-            <label class="field-label">قیمت خرید (اختیاری):</label>
-            <input type="text" id="order-buy-price" placeholder="تومان" oninput="formatAmountInput(this)">
-          </div>
-          <div style="flex:1;">
-            <label class="field-label">قیمت فروش (اختیاری):</label>
-            <input type="text" id="order-sell-price" placeholder="تومان" oninput="formatAmountInput(this)">
-          </div>
-        </div>
-
-        <label class="field-label">یادداشت:</label>
-        <input type="text" id="order-note" placeholder="مثال: رنگ سفید، فابریک...">
-
-        <div class="row" style="margin-top:14px;">
-          <button type="button" onclick="saveNewOrder()" style="background:var(--success);flex:1.4;padding:11px;font-weight:800;">✓ ثبت سفارش</button>
-          <button type="button" onclick="closeAddOrderModal()" style="background:#cbd5e1;color:#1e293b;flex:1;padding:11px;">انصراف</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal-overlay" id="modal-transfer-order">
-      <div class="modal-content" style="max-width:460px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;">
-          <h3 style="font-size:1rem;color:#1e293b;">📦 انتقال به انبار قطعات</h3>
-          <button type="button" onclick="closeTransferModal()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">✕</button>
-        </div>
-        <input type="hidden" id="transfer-order-id">
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px;margin:10px 0;">
-          <div style="font-size:0.8rem;color:#166534;">در حال انتقال سفارش:</div>
-          <div id="transfer-item-title" style="font-weight:800;color:#065f46;font-size:1rem;margin-top:2px;"></div>
-        </div>
-        <div class="row">
-          <div style="flex:1;">
-            <label class="field-label">کیفیت / توضیح:</label>
-            <input type="text" id="transfer-quality" placeholder="مثال: اورجینال، کپی...">
-          </div>
-          <div style="flex:1;">
-            <label class="field-label">تعداد:</label>
-            <input type="text" id="transfer-qty" placeholder="1" oninput="formatAmountInput(this)">
-          </div>
-        </div>
-        <div class="row">
-          <div style="flex:1;">
-            <label class="field-label" style="color:var(--danger);">قیمت خرید:</label>
-            <input type="text" id="transfer-buy-price" placeholder="تومان" oninput="formatAmountInput(this)">
-          </div>
-          <div style="flex:1;">
-            <label class="field-label" style="color:var(--success);">قیمت فروش:</label>
-            <input type="text" id="transfer-sell-price" placeholder="تومان" oninput="formatAmountInput(this)">
-          </div>
-        </div>
-        <div class="row" style="margin-top:14px;">
-          <button type="button" onclick="confirmTransferToInventory()" style="background:var(--primary);flex:1.4;padding:11px;font-weight:800;">✓ تایید و وارد انبار</button>
-          <button type="button" onclick="closeTransferModal()" style="background:#cbd5e1;color:#1e293b;flex:1;padding:11px;">انصراف</button>
-        </div>
-      </div>
-    </div>
-  `);
-
-// ─── رندر لیست سفارشات
-window.renderOrders = function() {
-  var container = document.getElementById('orders-container');
-  if (!container) return;
-
-  var activeOrders = window.orders.filter(function(o) { return !o.deleted; });
-  activeOrders.sort(function(a, b) {
-    if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
-    if (b.status === 'PENDING' && a.status !== 'PENDING') return 1;
-    return b.id - a.id;
-  });
-
-  var html = `
-    <div class="card" style="background:#eff6ff;border:1.5px solid #93c5fd;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <div style="font-weight:800;font-size:1rem;color:#1e40af;">🛒 سفارشات قطعات</div>
-        <div style="font-size:0.78rem;color:#475569;margin-top:2px;">لیست خرید و تهیه قطعات</div>
-      </div>
-      <button type="button" onclick="openAddOrderModal()" style="background:#2563eb;width:auto;padding:8px 14px;font-size:0.82rem;margin:0;border-radius:8px;">➕ سفارش جدید</button>
-    </div>
-  `;
-
-  if (activeOrders.length === 0) {
-    html += `
-      <div class="card" style="text-align:center;padding:40px 20px;">
-        <div style="font-size:3.5rem;margin-bottom:12px;animation:emptyFloat 3s ease-in-out infinite;display:inline-block;">🛒</div>
-        <div style="font-weight:900;font-size:1.1rem;color:#1e293b;margin-bottom:6px;">سفارشی ثبت نشده</div>
-        <div style="font-size:0.85rem;color:#64748b;line-height:1.7;">برای خرید قطعه، از دکمه بالا استفاده کن.</div>
-      </div>
-    `;
-  } else {
-    activeOrders.forEach(function(o) {
-      var c = o.customerId ? customers.find(function(x) { return x.id === o.customerId && !x.deleted; }) : null;
-      var isArrived = (o.status === 'ARRIVED');
-      var isTransferred = o.transferredToInventory;
-      var isShortage = o.isShortage || !o.customerId;
-
-      var bg = isTransferred ? '#f8fafc' : (isArrived ? '#f0fdf4' : (isShortage ? '#fff7ed' : '#fffbeb'));
-      var border = isTransferred ? '#e2e8f0' : (isArrived ? '#86efac' : (isShortage ? '#fdba74' : '#fde68a'));
-
-      var customerLine = isShortage
-        ? '<span style="display:inline-block;background:#fed7aa;color:#9a3412;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:bold;">📉 کسری انبار</span>'
-        : '👤 ' + esc(c ? c.name : 'نامشخص');
-
-      // 👇 اینجا دکمه‌های انتقال و پیامک رو کنار هم چیدیم
-      var actionButtons = '';
-      if (isTransferred) {
-        actionButtons = `<span class="badge badge-green" style="font-size:0.7rem;">وارد انبار شد</span>`;
-      } else if (isArrived) {
-        actionButtons = `
-          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-            <button type="button" onclick="openTransferModal(${o.id})" style="background:#2563eb;padding:6px 10px;font-size:0.75rem;margin:0;border-radius:8px;width:auto;white-space:nowrap;">📦 انتقال</button>
-            ${c ? `<button type="button" onclick="sendOrderReadySMS(${o.id})" style="background:#10b981;padding:6px 10px;font-size:0.75rem;margin:0;border-radius:8px;width:auto;white-space:nowrap;color:#fff;border:none;cursor:pointer;">✉️ پیامک</button>` : ''}
-          </div>
-        `;
-      } else {
-        actionButtons = `<span class="badge badge-orange" style="font-size:0.7rem;">⏳ منتظر</span>`;
-      }
-
-      html += `
-        <div class="card" style="padding:12px;margin-bottom:8px;background:${bg};border:1px solid ${border};">
-          <div style="display:flex;align-items:flex-start;gap:10px;">
-            <div onclick="toggleOrderStatus(${o.id})" style="cursor:pointer;margin-top:2px;">
-              <div style="width:24px;height:24px;border-radius:6px;border:2px solid ${isArrived ? '#10b981' : '#cbd5e1'};background:${isArrived ? '#10b981' : '#fff'};display:flex;justify-content:center;align-items:center;color:#fff;font-size:1rem;transition:all 0.2s;">
-                ${isArrived ? '✓' : ''}
-              </div>
-            </div>
-            <div style="flex:1;min-width:0;">
-              <div style="font-weight:800;font-size:0.95rem;color:#1e293b;text-decoration:${isTransferred ? 'line-through' : 'none'};">${esc(o.itemName)}</div>
-              <div style="font-size:0.78rem;color:#475569;margin-top:4px;">${customerLine}</div>
-              <div style="font-size:0.75rem;color:#64748b;margin-top:2px;">📅 ${esc(o.date)}</div>
-              ${o.buyPrice || o.sellPrice ? `
-                <div style="font-size:0.75rem;margin-top:4px;display:flex;gap:8px;">
-                  ${o.buyPrice ? `<span style="color:#dc2626;">خرید: ${formatToman(o.buyPrice)}</span>` : ''}
-                  ${o.sellPrice ? `<span style="color:#10b981;">فروش: ${formatToman(o.sellPrice)}</span>` : ''}
-                </div>
-              ` : ''}
-              ${o.note ? `<div style="font-size:0.75rem;color:#92400e;background:#fef3c7;padding:4px 8px;border-radius:6px;margin-top:6px;display:inline-block;">📝 ${esc(o.note)}</div>` : ''}
-            </div>
-            <div style="text-align:left;flex-shrink:0;">
-              ${actionButtons}
-              <button type="button" onclick="deleteOrder(${o.id})" style="background:none;border:none;color:#ef4444;font-size:1rem;padding:4px;margin-top:8px;width:auto;box-shadow:none;cursor:pointer;display:block;">🗑️</button>
-            </div>
-          </div>
-        </div>
-      `;
-    });
-  }
-  container.innerHTML = html;
-};
-
-
-// ─── تابع ارسال پیامک آماده‌سازی قطعه
-window.sendOrderReadySMS = function(id) {
-  var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
-  if (!o) return;
-  var c = customers.find(function(x) { return x.id === o.customerId && !x.deleted; });
-  if (!c || !c.phone) return showToast('شماره تماس مشتری ثبت نشده است.', 'warning');
-  var msg = '✦ موبایل پرشیا ✦\n' +
-            'قطعه مورد نظر شما (' + o.itemName + ') تهیه شد.\n' +
-            'لطفاً جهت تحویل به موبایل پرشیا مراجعه فرمایید.';
-  window.location.href = buildSmsLink(c.phone, msg);
-};
-  
-
-// ─── جستجوی مشتری
-window.searchOrderCustomer = function(q) {
-  var results = document.getElementById('order-cust-results');
-  if (!results) return;
-  q = (q || '').trim().toLowerCase();
-
-  var matches = customers.filter(function(c) {
-    if (c.deleted) return false;
-    if (!q) return true;
-    return (c.name || '').toLowerCase().indexOf(q) !== -1 || 
-           (c.phone || '').indexOf(q) !== -1 ||
-           (c.notes || '').toLowerCase().indexOf(q) !== -1;
-  }).slice(0, 25);
-
-  if (matches.length === 0) {
-    results.innerHTML = '<div style="padding:12px;color:#94a3b8;text-align:center;font-size:0.8rem;">مشتری یافت نشد</div>';
-    results.style.display = 'block';
-    return;
-  }
-
-  var html = '';
-  matches.forEach(function(c) {
-    var notesHtml = '';
-    if (c.notes && c.notes.trim()) {
-      notesHtml = '<span style="color:#b45309;font-size:0.72rem;background:#fef3c7;padding:2px 6px;border-radius:4px;display:inline-block;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom;margin-right:6px;">📝 ' + esc(c.notes) + '</span>';
-    }
-
-window.selectOrderCustomer = function(custId) {
-  // مقایسه امن آیدی (String) برای جلوگیری از باگ‌های عددی/متنی
-  var c = customers.find(function(x) { return String(x.id) === String(custId) && !x.deleted; });
-  if (!c) return;
-
-  document.getElementById('order-cust-id').value = c.id;
-  document.getElementById('order-cust-search').value = c.name + (c.phone ? ' — ' + c.phone : '');
-  document.getElementById('order-cust-results').style.display = 'none';
-  
-  // بستن کیبورد و برداشتن فوکوس
-  document.getElementById('order-cust-search').blur();
-};
-    // استفاده از onmousedown برای اینکه قبل از بسته شدن کیبورد اجرا بشه
-    html += '<div class="part-search-item" onmousedown="event.preventDefault(); window.selectOrderCustomer(\'' + c.id + '\')" style="cursor:pointer; align-items:flex-start;">' +
-      '<div style="flex:1;min-width:0;">' +
-        '<div style="font-weight:bold;color:#1e293b;font-size:0.88rem;margin-bottom:2px;">' + esc(c.name) + (c.isCollab ? ' 🤝' : '') + '</div>' +
-        '<div style="font-size:0.75rem;color:#64748b;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">' +
-          '<span style="font-family:monospace;">' + esc(c.phone || '---') + '</span>' +
-          notesHtml +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  });
-  results.innerHTML = html;
-  results.style.display = 'block';
-};
-
-  // ─── کسری انبار
-  window.toggleOrderShortage = function() {
-    var isShortage = document.getElementById('order-is-shortage').checked;
-    var wrap = document.getElementById('order-cust-wrap');
-    var label = document.getElementById('order-cust-label');
-
-    if (isShortage) {
-      wrap.style.opacity = '0.35';
-      wrap.style.pointerEvents = 'none';
-      document.getElementById('order-cust-id').value = '';
-      document.getElementById('order-cust-search').value = '';
-      document.getElementById('order-cust-search').placeholder = 'کسری انبار (بدون مشتری)';
-      if (label) label.innerText = 'مشتری (اختیاری — کسری انبار):';
-    } else {
-      wrap.style.opacity = '1';
-      wrap.style.pointerEvents = '';
-      document.getElementById('order-cust-search').placeholder = '🔍 جستجوی نام یا شماره...';
-      if (label) label.innerText = 'مشتری (اجباری):';
-    }
-  };
-
-  // ─── مدیریت
-  window.openAddOrderModal = function() {
-    document.getElementById('order-cust-id').value = '';
-    document.getElementById('order-cust-search').value = '';
-    document.getElementById('order-cust-results').style.display = 'none';
-    document.getElementById('order-is-shortage').checked = false;
-    document.getElementById('order-item-name').value = '';
-    document.getElementById('order-buy-price').value = '';
-    document.getElementById('order-sell-price').value = '';
-    document.getElementById('order-note').value = '';
-    toggleOrderShortage();
-    document.getElementById('modal-add-order').style.display = 'flex';
-  };
-
-  window.closeAddOrderModal = function() {
-    document.getElementById('modal-add-order').style.display = 'none';
-  };
-
-  window.saveNewOrder = function() {
-    var isShortage = document.getElementById('order-is-shortage').checked;
-    var custId = Number(document.getElementById('order-cust-id').value) || null;
-    var itemName = (document.getElementById('order-item-name').value || '').trim();
-    var buyPrice = Number(cleanNumber(document.getElementById('order-buy-price').value)) || 0;
-    var sellPrice = Number(cleanNumber(document.getElementById('order-sell-price').value)) || 0;
-    var note = (document.getElementById('order-note').value || '').trim();
-
-    if (!isShortage && !custId) return showToast('انتخاب مشتری اجباری است', 'warning');
-    if (!itemName) return showToast('نام قطعه را وارد کنید', 'warning');
-
-    window.orders.unshift({
-      id: Date.now(),
-      customerId: isShortage ? null : custId,
-      isShortage: isShortage,
-      itemName: itemName,
-      buyPrice: buyPrice,
-      sellPrice: sellPrice,
-      note: note,
-      status: 'PENDING',
-      transferredToInventory: false,
-      date: getTodayJalali(),
-      deleted: false,
-      updatedAt: Date.now()
-    });
-
-    saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
-    closeAddOrderModal();
-    renderOrders();
-    showToast('✅ سفارش ثبت شد', 'success');
-  };
-
-  window.toggleOrderStatus = function(id) {
-    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
-    if (!o || o.transferredToInventory) return;
-    o.status = (o.status === 'PENDING') ? 'ARRIVED' : 'PENDING';
-    o.updatedAt = Date.now();
-    saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
-    renderOrders();
-    if (navigator.vibrate) navigator.vibrate(20);
-  };
-
-  window.deleteOrder = function(id) {
-    if (!confirm('این سفارش حذف شود؟')) return;
-    var o = window.orders.find(function(x) { return x.id === id; });
-    if (o) {
-      o.deleted = true;
-      o.updatedAt = Date.now();
-      saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
-      renderOrders();
-      showToast('🗑️ سفارش حذف شد', 'info');
-    }
-  };
-
-  window.openTransferModal = function(id) {
-    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
-    if (!o) return;
-    document.getElementById('transfer-order-id').value = id;
-    document.getElementById('transfer-item-title').innerText = o.itemName;
-    document.getElementById('transfer-quality').value = '';
-    document.getElementById('transfer-qty').value = '1';
-    document.getElementById('transfer-buy-price').value = o.buyPrice ? Number(o.buyPrice).toLocaleString('en-US') : '';
-    document.getElementById('transfer-sell-price').value = o.sellPrice ? Number(o.sellPrice).toLocaleString('en-US') : '';
-    document.getElementById('modal-transfer-order').style.display = 'flex';
-  };
-
-  window.closeTransferModal = function() {
-    document.getElementById('modal-transfer-order').style.display = 'none';
-  };
-
-  window.confirmTransferToInventory = function() {
-    var id = Number(document.getElementById('transfer-order-id').value);
-    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
-    if (!o) return;
-
-    var quality = (document.getElementById('transfer-quality').value || '').trim();
-    var qty = Number(cleanNumber(document.getElementById('transfer-qty').value)) || 1;
-    var buyPrice = Number(cleanNumber(document.getElementById('transfer-buy-price').value)) || 0;
-    var sellPrice = Number(cleanNumber(document.getElementById('transfer-sell-price').value)) || 0;
-
-    if (!window.parts) window.parts = [];
-    window.parts.unshift({
-      id: Date.now(),
-      model: o.itemName,
-      quality: quality,
-      shop: 'سفارشات',
-      qty: qty,
-      buyPrice: buyPrice,
-      sellPrice: sellPrice,
-      date: getTodayJalali(),
-      deleted: false,
-      updatedAt: Date.now()
-    });
-
-    o.transferredToInventory = true;
-    o.updatedAt = Date.now();
-
-    saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
-    if (typeof renderParts === 'function') renderParts();
-    closeTransferModal();
-    renderOrders();
-    showToast('📦 قطعه با موفقیت به انبار منتقل شد', 'success');
-  };
-
-  console.log('[orders-system] Ready v2 ✅');
-})();
-
-
-// ═══════════════════════════════════════════════════
 // 📋 نمایش مشخصات دستگاه در سوابق و فاکتورهای مشتری
 // ═══════════════════════════════════════════════════
 (function showInvoiceDetailsInHistory() {
@@ -19108,170 +18684,6 @@ body.apk-print-mode #apk-print-toolbar {
 </script>
 
 
-<script>
-// ═══════════════════════════════════════════════════════════════
-// 🔄 مرجوعی قطعه به تامین‌کننده + ⏰ یادآور پیگیری سفارشات
-// ═══════════════════════════════════════════════════════════════
-(function setupReturnsAndOrderReminders() {
-  
-  // ─── ۱. مرجوعی قطعه به تامین‌کننده ───
-  var _baseRenderParts = window.renderParts;
-  window.renderParts = function() {
-    _baseRenderParts.apply(this, arguments);
-    
-    setTimeout(function() {
-      var listEl = document.getElementById('parts-list');
-      if (!listEl) return;
-      
-      var filteredParts = parts.filter(function(p) { 
-        var query = (document.getElementById('parts-search') ? document.getElementById('parts-search').value : '').toLowerCase();
-        return !p.deleted && (p.model || '').toLowerCase().indexOf(query) !== -1; 
-      });
-      
-      var cards = listEl.children;
-      filteredParts.forEach(function(item, idx) {
-        var card = cards[idx];
-        // اگه کارت پیدا شد و قطعه تامین‌کننده داشت و دکمه مرجوعی نداشت
-        if (card && item.supplierId && !card.querySelector('.btn-supplier-return')) {
-          var stockCtrl = card.querySelector('.stock-ctrl');
-          if (stockCtrl) {
-            var retBtn = document.createElement('button');
-            retBtn.type = 'button';
-            retBtn.className = 'action-btn btn-supplier-return';
-            retBtn.style.cssText = 'color:#ea580c;font-size:1.1rem;margin-right:6px;';
-            retBtn.title = 'مرجوعی به تامین‌کننده';
-            retBtn.innerHTML = '🔄';
-            retBtn.onclick = function(e) {
-              e.stopPropagation();
-              window.handleSupplierReturn(item.id);
-            };
-            stockCtrl.insertBefore(retBtn, stockCtrl.querySelector('.action-btn'));
-          }
-        }
-      });
-    }, 150);
-  };
-
-  window.handleSupplierReturn = function(partId) {
-    var item = parts.find(function(p) { return p.id === partId && !p.deleted; });
-    if (!item) return;
-    
-    var supplier = customers.find(function(c) { return c.id === item.supplierId && !c.deleted; });
-    if (!supplier) return showToast('تامین‌کننده این قطعه در سیستم یافت نشد.', 'error');
-    
-    var qtyStr = prompt('چند عدد از قطعه «' + item.model + '» مرجوع می‌شود؟\n(موجودی فعلی: ' + item.qty + ' عدد)', '1');
-    if (qtyStr === null) return;
-    
-    var qty = Number(cleanNumber(qtyStr));
-    if (isNaN(qty) || qty <= 0) return showToast('عدد نامعتبر است.', 'warning');
-    if (qty > item.qty) return showToast('تعداد مرجوعی نمی‌تواند بیشتر از موجودی باشد.', 'warning');
-    
-    var refundAmount = qty * Number(item.buyPrice || 0);
-    
-    if (!confirm('✅ مرجوعی ' + qty + ' عدد ' + item.model + '\n💰 کاهش بدهی به ' + supplier.name + ' به مبلغ ' + formatToman(refundAmount) + '\n\nتایید می‌کنید؟')) return;
-    
-    // ۱. کم کردن از موجودی انبار
-    item.qty -= qty;
-    item.updatedAt = Date.now();
-    
-    // ۲. کاهش بدهی به تامین‌کننده (ثبت یک تراکنش دریافتی/تخفیف)
-    if (refundAmount > 0) {
-      transactions.unshift({
-        id: Date.now(), customerId: supplier.id,
-        title: 'مرجوعی قطعه (' + item.model + ' × ' + qty + ')',
-        amount: refundAmount, payMethod: 'CASH', type: 'PAY', 
-        date: getTodayJalali(), deleted: false, updatedAt: Date.now()
-      });
-    }
-    
-    saveAll();
-    if (typeof uploadToDrive === 'function') uploadToDrive(true);
-    
-    window.renderParts();
-    if (typeof renderReports === 'function') renderReports();
-    if (typeof renderSupplierBalance === 'function' && activeCustomerId === supplier.id) renderSupplierBalance();
-    
-    showToast('✅ مرجوعی ثبت شد و از بدهی کسر گردید.', 'success');
-    if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
-  };
-
-  // ─── ۲. یادآور پیگیری سفارشات (بیش از ۲ روز) ───
-  var _baseRenderOrders = window.renderOrders;
-  window.renderOrders = function() {
-    if (typeof _baseRenderOrders !== 'function') return;
-    _baseRenderOrders.apply(this, arguments);
-    
-    setTimeout(function() {
-      var container = document.getElementById('orders-container');
-      if (!container) return;
-      
-      // پیدا کردن تمام کارت‌های سفارش
-      var orderCards = container.querySelectorAll('.card');
-      orderCards.forEach(function(card) {
-        // پیدا کردن ID سفارش از دکمه حذف (که همیشه وجود داره)
-        var delBtn = card.querySelector('button[onclick*="deleteOrder"]');
-        if (!delBtn) return;
-        
-        var match = delBtn.getAttribute('onclick').match(/deleteOrder\((\d+)\)/);
-        if (!match) return;
-        var orderId = Number(match[1]);
-        
-        var order = window.orders.find(function(o) { return o.id === orderId; });
-        if (!order || order.status !== 'PENDING' || order.deleted) return;
-        
-        // محاسبه روزهای گذشته
-        var daysPassed = typeof getDaysPassed === 'function' ? getDaysPassed(order.date) : 0;
-        var isUrgent = daysPassed >= 2;
-        
-        // اگه قبلاً پردازش نشده
-        if (!card.querySelector('.order-reminder-badge')) {
-          var titleEl = card.querySelector('div[style*="font-weight:800;font-size:0.95rem"]');
-          if (titleEl && isUrgent) {
-            var badge = document.createElement('span');
-            badge.className = 'order-reminder-badge';
-            badge.style.cssText = 'background:#ef4444;color:#fff;padding:2px 6px;border-radius:4px;font-size:0.7rem;margin-right:6px;vertical-align:middle;animation:pulseBadge 2s infinite;';
-            badge.innerHTML = '⚠️ ' + daysPassed + ' روز در انتظار!';
-            titleEl.appendChild(badge);
-          }
-          
-          // دکمه پیگیری
-          if (!card.querySelector('.btn-order-followup')) {
-            var actionDiv = delBtn.parentNode;
-            if (actionDiv) {
-              var followBtn = document.createElement('button');
-              followBtn.type = 'button';
-              followBtn.className = 'btn-order-followup';
-              followBtn.style.cssText = 'background:#0ea5e9;padding:6px 10px;font-size:0.75rem;margin:0 0 6px 0;border-radius:8px;width:auto;white-space:nowrap;color:#fff;border:none;cursor:pointer;display:block;';
-              followBtn.innerHTML = '📞 پیگیری';
-              followBtn.onclick = function(e) {
-                e.stopPropagation();
-                var msg = 'سلام، سفارش قطعه «' + order.itemName + '» که در تاریخ ' + order.date + ' ثبت شده بود، آماده شده؟';
-                if (navigator.share) {
-                  navigator.share({ title: 'پیگیری سفارش', text: msg }).catch(function(){});
-                } else {
-                  if (navigator.clipboard) navigator.clipboard.writeText(msg);
-                  showToast('📋 متن پیگیری کپی شد', 'info');
-                }
-              };
-              actionDiv.insertBefore(followBtn, actionDiv.firstChild);
-            }
-          }
-        }
-      });
-    }, 200);
-  };
-
-  // اجرای اولیه
-  setTimeout(function() {
-    if (typeof window.renderParts === 'function') window.renderParts();
-    if (typeof window.renderOrders === 'function') window.renderOrders();
-  }, 1000);
-
-  console.log('[returns-and-reminders] Ready ✅');
-})();
-</script>
-
-
 <style>
   /* ۱. رفع مشکل فونت و پس‌زمینه فیلدها در حالت تاریک (شب) */
   body.dark-mode input:not([type="checkbox"]):not([type="radio"]), 
@@ -19455,76 +18867,519 @@ body.apk-print-mode #apk-print-toolbar {
 })();
 </script>
 
-<script>
 
 
+
+<style>
+  /* رفع مشکل رنگ لیست کشویی مشتری در سفارشات (حالت شب) */
+  body.dark-mode #order-cust-results {
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+  }
+  body.dark-mode #order-cust-results > div {
+    color: #f8fafc !important;
+    border-bottom-color: #334155 !important;
+  }
+  body.dark-mode #order-cust-results .part-search-item {
+    background-color: #1e293b !important;
+  }
+  body.dark-mode #order-cust-results .part-search-item:hover,
+  body.dark-mode #order-cust-results .part-search-item:active {
+    background-color: #334155 !important;
+  }
+  body.dark-mode #order-cust-results span {
+    color: #94a3b8 !important;
+  }
+</style>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🛒 ارتقای سفارشات: پرسیدن قیمت خرید هنگام کلیک روی "انتقال به انبار"
+// 🛒 سیستم یکپارچه و نهایی سفارشات (نسخه ۴ - رفع کامل باگ‌ها)
 // ═══════════════════════════════════════════════════════════════
-(function fixOrderTransferPrompt() {
-  
-  // ۱. برگرداندن تابع تیک زدن به حالت عادی (بدون پرسیدن سوال)
+(function setupUnifiedOrdersSystem() {
+  if (!window.orders) window.orders = [];
+  if (!window.supplierPurchases) window.supplierPurchases = [];
+
+  // ─── لود دیتا از دیتابیس ───
+  if (!window._ordersLoaded) {
+    window._ordersLoaded = true;
+    setTimeout(function() {
+      openAppDB().then(function(db) {
+        var req = db.transaction('store', 'readonly').objectStore('store').get('db_orders');
+        req.onsuccess = function(e) {
+          if (e.target.result && Array.isArray(e.target.result)) window.orders = e.target.result;
+          if (typeof renderOrders === 'function') renderOrders();
+        };
+      });
+    }, 500);
+  }
+
+  if (!window._ordersSavePatched) {
+    window._ordersSavePatched = true;
+    var _baseSaveAll = saveAll;
+    saveAll = function() {
+      var p = _baseSaveAll();
+      openAppDB().then(function(db) {
+        db.transaction('store', 'readwrite').objectStore('store').put(window.orders, 'db_orders');
+      });
+      return p;
+    };
+  }
+
+  // ─── پاکسازی و تزریق HTML جدید ───
+  ['modal-add-order', 'modal-transfer-order'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.remove();
+  });
+
+  document.body.insertAdjacentHTML('beforeend', `
+    <!-- 🛒 مودال ثبت سفارش جدید -->
+    <div class="modal-overlay" id="modal-add-order">
+      <div class="modal-content" style="max-width:480px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;">
+          <h3 style="font-size:1rem;color:#1e293b;">🛒 ثبت سفارش جدید</h3>
+          <button type="button" onclick="closeAddOrderModal()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">✕</button>
+        </div>
+
+        <div style="background:#fffbeb;border:1.5px dashed #f59e0b;border-radius:8px;padding:10px;margin-top:10px;display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="order-is-shortage" onchange="toggleOrderShortage()" style="width:20px;height:20px;margin:0;">
+          <label for="order-is-shortage" style="font-size:0.85rem;font-weight:800;color:#92400e;cursor:pointer;margin:0;flex:1;">📉 کسری انبار (خرید برای موجودی مغازه)</label>
+        </div>
+
+        <label class="field-label" id="order-cust-label">مشتری (اجباری):</label>
+        <div id="order-cust-wrap" style="position:relative;margin-top:6px;">
+          <input type="text" id="order-cust-search" placeholder="🔍 جستجوی نام یا شماره..." oninput="searchOrderCustomer(this.value)" onfocus="searchOrderCustomer(this.value)" autocomplete="off" style="margin-top:0;">
+          <input type="hidden" id="order-cust-id" value="">
+          <div id="order-cust-results" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.15);max-height:220px;overflow-y:auto;margin-top:4px;"></div>
+        </div>
+
+        <label class="field-label" style="color:#c2410c;">🏪 خرید از تامین‌کننده (اختیاری):</label>
+        <select id="order-supplier-id" style="border-color:#fdba74; font-weight:bold; background:#fff7ed;">
+          <option value="">-- خرید آزاد از بازار / کسری --</option>
+        </select>
+
+        <label class="field-label">نام قطعه / کالا:</label>
+        <input type="text" id="order-item-name" placeholder="مثال: LCD سامسونگ A54">
+
+        <div class="row">
+          <div style="flex:1;">
+            <label class="field-label">قیمت خرید تخمینی (اختیاری):</label>
+            <input type="text" id="order-buy-price" placeholder="تومان" oninput="formatAmountInput(this)">
+          </div>
+          <div style="flex:1;">
+            <label class="field-label" style="color:#c2410c;">💰 قیمت اعلامی به مشتری:</label>
+            <input type="text" id="order-quoted-price" placeholder="تومان" oninput="formatAmountInput(this)" style="border-color:#fdba74; background:#fff7ed;">
+          </div>
+        </div>
+
+        <label class="field-label">یادداشت:</label>
+        <input type="text" id="order-note" placeholder="مثال: رنگ سفید، فابریک...">
+
+        <div class="row" style="margin-top:14px;">
+          <button type="button" onclick="saveNewOrder()" style="background:var(--success);flex:1.4;padding:11px;font-weight:800;">✓ ثبت سفارش</button>
+          <button type="button" onclick="closeAddOrderModal()" style="background:#cbd5e1;color:#1e293b;flex:1;padding:11px;">انصراف</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📦 مودال انتقال به انبار (با فیلد تامین‌کننده) -->
+    <div class="modal-overlay" id="modal-transfer-order">
+      <div class="modal-content" style="max-width:460px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;">
+          <h3 style="font-size:1rem;color:#1e293b;">📦 انتقال به انبار قطعات</h3>
+          <button type="button" onclick="closeTransferModal()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">✕</button>
+        </div>
+        <input type="hidden" id="transfer-order-id">
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px;margin:10px 0;">
+          <div style="font-size:0.8rem;color:#166534;">در حال انتقال سفارش:</div>
+          <div id="transfer-item-title" style="font-weight:800;color:#065f46;font-size:1rem;margin-top:2px;"></div>
+        </div>
+
+        <label class="field-label" style="color:#c2410c;">🏪 تامین‌کننده (اختیاری):</label>
+        <select id="transfer-supplier-id" style="border-color:#fdba74; font-weight:bold; background:#fff7ed;">
+          <option value="">-- خرید آزاد از بازار / کسری --</option>
+        </select>
+
+        <div class="row">
+          <div style="flex:1;">
+            <label class="field-label">کیفیت / توضیح:</label>
+            <input type="text" id="transfer-quality" placeholder="مثال: اورجینال، کپی...">
+          </div>
+          <div style="flex:1;">
+            <label class="field-label">تعداد:</label>
+            <input type="text" id="transfer-qty" placeholder="1" oninput="formatAmountInput(this)">
+          </div>
+        </div>
+        <div class="row">
+          <div style="flex:1;">
+            <label class="field-label" style="color:var(--danger);">قیمت خرید:</label>
+            <input type="text" id="transfer-buy-price" placeholder="تومان" oninput="formatAmountInput(this)">
+          </div>
+          <div style="flex:1;">
+            <label class="field-label" style="color:var(--success);">قیمت فروش:</label>
+            <input type="text" id="transfer-sell-price" placeholder="تومان" oninput="formatAmountInput(this)">
+          </div>
+        </div>
+        <div class="row" style="margin-top:14px;">
+          <button type="button" onclick="confirmTransferToInventory()" style="background:var(--primary);flex:1.4;padding:11px;font-weight:800;">✓ تایید و وارد انبار</button>
+          <button type="button" onclick="closeTransferModal()" style="background:#cbd5e1;color:#1e293b;flex:1;padding:11px;">انصراف</button>
+        </div>
+      </div>
+    </div>
+  `);
+
+  // ─── توابع کمکی ───
+  function populateSuppliers(selectId, selectedId) {
+    var sel = document.getElementById(selectId);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">-- خرید آزاد از بازار / کسری --</option>';
+    var suppliers = customers.filter(function(c) { return !c.deleted && c.isSupplier; });
+    suppliers.forEach(function(s) {
+      var opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = s.name;
+      if (String(s.id) === String(selectedId)) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  window.searchOrderCustomer = function(q) {
+    var results = document.getElementById('order-cust-results');
+    if (!results) return;
+    q = (q || '').trim().toLowerCase();
+    var matches = customers.filter(function(c) {
+      if (c.deleted) return false;
+      if (!q) return true;
+      return (c.name || '').toLowerCase().indexOf(q) !== -1 || (c.phone || '').indexOf(q) !== -1;
+    }).slice(0, 25);
+
+    if (matches.length === 0) {
+      results.innerHTML = '<div style="padding:12px;color:#94a3b8;text-align:center;font-size:0.8rem;">مشتری یافت نشد</div>';
+    } else {
+      var html = '';
+      matches.forEach(function(c) {
+        html += '<div class="part-search-item" onmousedown="event.preventDefault(); window.selectOrderCustomer(\'' + c.id + '\')" style="cursor:pointer;">' +
+          '<div style="font-weight:bold;color:#1e293b;font-size:0.88rem;">' + esc(c.name) + (c.isCollab ? ' 🤝' : '') + '</div>' +
+          '<div style="font-size:0.75rem;color:#64748b;">' + esc(c.phone || '---') + '</div></div>';
+      });
+      results.innerHTML = html;
+    }
+    results.style.display = 'block';
+  };
+
+  window.selectOrderCustomer = function(custId) {
+    var c = customers.find(function(x) { return String(x.id) === String(custId) && !x.deleted; });
+    if (!c) return;
+    document.getElementById('order-cust-id').value = c.id;
+    document.getElementById('order-cust-search').value = c.name + (c.phone ? ' — ' + c.phone : '');
+    document.getElementById('order-cust-results').style.display = 'none';
+    document.getElementById('order-cust-search').blur();
+  };
+
+  window.toggleOrderShortage = function() {
+    var isShortage = document.getElementById('order-is-shortage').checked;
+    var wrap = document.getElementById('order-cust-wrap');
+    var label = document.getElementById('order-cust-label');
+    if (isShortage) {
+      wrap.style.opacity = '0.35';
+      wrap.style.pointerEvents = 'none';
+      document.getElementById('order-cust-id').value = '';
+      document.getElementById('order-cust-search').value = '';
+      if (label) label.innerText = 'مشتری (اختیاری — کسری انبار):';
+    } else {
+      wrap.style.opacity = '1';
+      wrap.style.pointerEvents = '';
+      if (label) label.innerText = 'مشتری (اجباری):';
+    }
+  };
+
+  window.openAddOrderModal = function() {
+    document.getElementById('order-cust-id').value = '';
+    document.getElementById('order-cust-search').value = '';
+    document.getElementById('order-cust-results').style.display = 'none';
+    document.getElementById('order-is-shortage').checked = false;
+    document.getElementById('order-item-name').value = '';
+    document.getElementById('order-buy-price').value = '';
+    document.getElementById('order-quoted-price').value = '';
+    document.getElementById('order-note').value = '';
+    populateSuppliers('order-supplier-id', null);
+    toggleOrderShortage();
+    document.getElementById('modal-add-order').style.display = 'flex';
+  };
+
+  window.closeAddOrderModal = function() {
+    document.getElementById('modal-add-order').style.display = 'none';
+  };
+
+  window.saveNewOrder = function() {
+    var isShortage = document.getElementById('order-is-shortage').checked;
+    var custId = Number(document.getElementById('order-cust-id').value) || null;
+    var supplierId = Number(document.getElementById('order-supplier-id').value) || null;
+    var itemName = (document.getElementById('order-item-name').value || '').trim();
+    var buyPrice = Number(cleanNumber(document.getElementById('order-buy-price').value)) || 0;
+    var quotedPrice = Number(cleanNumber(document.getElementById('order-quoted-price').value)) || 0;
+    var note = (document.getElementById('order-note').value || '').trim();
+
+    if (!isShortage && !custId) return showToast('انتخاب مشتری اجباری است', 'warning');
+    if (!itemName) return showToast('نام قطعه را وارد کنید', 'warning');
+
+    window.orders.unshift({
+      id: Date.now(),
+      customerId: isShortage ? null : custId,
+      supplierId: supplierId,
+      isShortage: isShortage,
+      itemName: itemName,
+      buyPrice: buyPrice,
+      sellPrice: quotedPrice,
+      note: note,
+      status: 'PENDING',
+      transferredToInventory: false,
+      date: getTodayJalali(),
+      deleted: false,
+      updatedAt: Date.now()
+    });
+
+    saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
+    closeAddOrderModal();
+    renderOrders();
+    showToast('✅ سفارش ثبت شد', 'success');
+  };
+
   window.toggleOrderStatus = function(id) {
     var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
     if (!o || o.transferredToInventory) return;
-    
     o.status = (o.status === 'PENDING') ? 'ARRIVED' : 'PENDING';
     o.updatedAt = Date.now();
-    saveAll().then(function() { 
-      if (typeof uploadToDrive === 'function') uploadToDrive(true); 
-    });
-    window.renderOrders();
+    saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
+    renderOrders();
     if (navigator.vibrate) navigator.vibrate(20);
   };
 
-  // ۲. بازنویسی تابع باز کردن مودال انتقال
-  var _baseOpenTransfer = window.openTransferModal;
-  
+  window.deleteOrder = function(id) {
+    if (!confirm('این سفارش حذف شود؟')) return;
+    var o = window.orders.find(function(x) { return x.id === id; });
+    if (o) {
+      o.deleted = true;
+      o.updatedAt = Date.now();
+      saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
+      renderOrders();
+      showToast('🗑️ سفارش حذف شد', 'info');
+    }
+  };
+
   window.openTransferModal = function(id) {
     var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
     if (!o) return;
-
-    // اگر قبلاً قیمت خرید ثبت نشده بود، همینجا از کاربر می‌پرسیم
-    if (!o.buyPrice || o.buyPrice <= 0) {
-      var buyPriceStr = prompt('📦 انتقال به انبار\n\nقیمت خرید «' + o.itemName + '» را وارد کنید (تومان):', '');
-      
-      // اگر کاربر دکمه انصراف (Cancel) را زد، کل عملیات انتقال لغو می‌شود
-      if (buyPriceStr === null) return;
-      
-      var buyPrice = Number(cleanNumber(buyPriceStr));
-      if (!buyPrice || buyPrice <= 0) {
-        return showToast('مبلغ خرید معتبر نیست. انتقال لغو شد.', 'warning');
-      }
-
-      // پرسیدن قیمت فروش
-      var sellPriceStr = prompt('قیمت فروش پیشنهادی (اختیاری):', o.sellPrice || Math.round(buyPrice * 1.3));
-      var sellPrice = sellPriceStr ? Number(cleanNumber(sellPriceStr)) : 0;
-
-      // ذخیره قیمت‌ها در سفارش
-      o.buyPrice = buyPrice;
-      o.sellPrice = sellPrice;
-      o.updatedAt = Date.now();
-      
-      saveAll().then(function() { 
-        if (typeof uploadToDrive === 'function') uploadToDrive(true); 
-      });
-    }
-
-    // حالا مودال انتقال باز می‌شود (چون قیمت‌ها الان پر شده‌اند، فیلدهای مودال از قبل پر خواهند بود)
-    _baseOpenTransfer.apply(this, arguments);
+    document.getElementById('transfer-order-id').value = id;
+    document.getElementById('transfer-item-title').innerText = o.itemName;
+    document.getElementById('transfer-quality').value = '';
+    document.getElementById('transfer-qty').value = '1';
+    document.getElementById('transfer-buy-price').value = o.buyPrice ? Number(o.buyPrice).toLocaleString('en-US') : '';
+    document.getElementById('transfer-sell-price').value = o.sellPrice ? Number(o.sellPrice).toLocaleString('en-US') : '';
+    
+    // پر کردن لیست تامین‌کننده‌ها و انتخاب تامین‌کننده ثبت‌شده در سفارش
+    populateSuppliers('transfer-supplier-id', o.supplierId);
+    
+    document.getElementById('modal-transfer-order').style.display = 'flex';
   };
 
-  console.log('[transfer-prompt-on-click] Ready ✅');
+  window.closeTransferModal = function() {
+    document.getElementById('modal-transfer-order').style.display = 'none';
+  };
+
+  window.confirmTransferToInventory = function() {
+    var id = Number(document.getElementById('transfer-order-id').value);
+    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
+    if (!o) return;
+
+    var supplierId = Number(document.getElementById('transfer-supplier-id').value) || null;
+    var quality = (document.getElementById('transfer-quality').value || '').trim();
+    var qty = Number(cleanNumber(document.getElementById('transfer-qty').value)) || 1;
+    var buyPrice = Number(cleanNumber(document.getElementById('transfer-buy-price').value)) || 0;
+    var sellPrice = Number(cleanNumber(document.getElementById('transfer-sell-price').value)) || 0;
+
+    var supplierName = '';
+    if (supplierId) {
+      var sup = customers.find(function(x){ return x.id === supplierId; });
+      if (sup) supplierName = sup.name;
+    }
+
+    if (!window.parts) window.parts = [];
+    var newPartId = Date.now();
+    window.parts.unshift({
+      id: newPartId,
+      model: o.itemName,
+      quality: quality,
+      shop: supplierName || 'سفارشات',
+      supplierId: supplierId,
+      qty: qty,
+      buyPrice: buyPrice,
+      sellPrice: sellPrice,
+      date: getTodayJalali(),
+      deleted: false,
+      updatedAt: Date.now()
+    });
+
+    // اگر سفارش برای یک مشتری خاص بود، خودکار به فاکتور در حال تعمیرش اضافه کن
+    if (o.customerId && sellPrice > 0) {
+      var activeQuote = quotes.find(function(q) { 
+        return q.customerId === o.customerId && !q.deleted && q.deviceStatus !== 'DELIVERED'; 
+      });
+
+      if (activeQuote) {
+        if (!activeQuote.items) activeQuote.items = [];
+        activeQuote.items.push({
+          title: 'قطعه: ' + o.itemName + (quality ? ' (' + quality + ')' : ''),
+          amount: sellPrice,
+          partId: newPartId,
+          buyPrice: buyPrice
+        });
+        activeQuote.amount = (activeQuote.amount || 0) + (sellPrice * qty);
+        activeQuote.rawAmount = (activeQuote.rawAmount || 0) + (sellPrice * qty);
+        activeQuote.updatedAt = Date.now();
+        
+        if (typeof addTimelineEvent === 'function') {
+          addTimelineEvent(activeQuote, 'PART', '📦', 'افزودن قطعه', o.itemName + ' با مبلغ ' + formatToman(sellPrice));
+        }
+        showToast('✅ قطعه به انبار و فاکتور «' + activeQuote.model + '» اضافه شد.', 'success');
+      } else {
+        showToast('⚠️ قطعه به انبار رفت، ولی فاکتور در حال تعمیری برای مشتری پیدا نشد.', 'info');
+      }
+    } else {
+      showToast('📦 قطعه با موفقیت به انبار منتقل شد', 'success');
+    }
+
+    o.transferredToInventory = true;
+    o.supplierId = supplierId;
+    o.buyPrice = buyPrice; 
+    o.sellPrice = sellPrice;
+    o.updatedAt = Date.now();
+
+    saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
+    
+    if (typeof renderParts === 'function') renderParts();
+    closeTransferModal();
+    renderOrders();
+    if (typeof renderQuotes === 'function') renderQuotes();
+    if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
+  };
+
+  // ─── رندر کارت‌های سفارشات ───
+  window.renderOrders = function() {
+    var container = document.getElementById('orders-container');
+    if (!container) return;
+
+    var activeOrders = window.orders.filter(function(o) { return !o.deleted; });
+    activeOrders.sort(function(a, b) {
+      if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
+      if (b.status === 'PENDING' && a.status !== 'PENDING') return 1;
+      return b.id - a.id;
+    });
+
+    var html = `
+      <div class="card" style="background:#eff6ff;border:1.5px solid #93c5fd;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:800;font-size:1rem;color:#1e40af;">🛒 سفارشات قطعات</div>
+          <div style="font-size:0.78rem;color:#475569;margin-top:2px;">لیست خرید و تهیه قطعات</div>
+        </div>
+        <button type="button" onclick="openAddOrderModal()" style="background:#2563eb;width:auto;padding:8px 14px;font-size:0.82rem;margin:0;border-radius:8px;">➕ سفارش جدید</button>
+      </div>
+    `;
+
+    if (activeOrders.length === 0) {
+      html += `
+        <div class="card" style="text-align:center;padding:40px 20px;">
+          <div style="font-size:3.5rem;margin-bottom:12px;animation:emptyFloat 3s ease-in-out infinite;display:inline-block;">🛒</div>
+          <div style="font-weight:900;font-size:1.1rem;color:#1e293b;margin-bottom:6px;">سفارشی ثبت نشده</div>
+          <div style="font-size:0.85rem;color:#64748b;line-height:1.7;">برای خرید قطعه، از دکمه بالا استفاده کن.</div>
+        </div>
+      `;
+    } else {
+      activeOrders.forEach(function(o) {
+        var c = o.customerId ? customers.find(function(x) { return x.id === o.customerId && !x.deleted; }) : null;
+        var isArrived = (o.status === 'ARRIVED');
+        var isTransferred = o.transferredToInventory;
+        var isShortage = o.isShortage || !o.customerId;
+
+        var bg = isTransferred ? '#f8fafc' : (isArrived ? '#f0fdf4' : (isShortage ? '#fff7ed' : '#fffbeb'));
+        var border = isTransferred ? '#e2e8f0' : (isArrived ? '#86efac' : (isShortage ? '#fdba74' : '#fde68a'));
+
+        var customerLine = isShortage
+          ? '<span style="display:inline-block;background:#fed7aa;color:#9a3412;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:bold;">📉 کسری انبار</span>'
+          : '👤 ' + esc(c ? c.name : 'نامشخص');
+
+        var supplierLine = '';
+        if (o.supplierId) {
+          var s = customers.find(function(x) { return x.id === o.supplierId; });
+          if (s) supplierLine = '<span style="display:inline-block;background:#ffedd5;color:#9a3412;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:bold;margin-top:4px;">🏪 ' + esc(s.name) + '</span>';
+        }
+
+        var priceHtml = '<div style="font-size:0.75rem;margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">';
+        if (o.buyPrice > 0) {
+          priceHtml += `<span style="background:#fef2f2;color:#b91c1c;padding:2px 6px;border-radius:4px;">💸 خرید: ${formatToman(o.buyPrice)}</span>`;
+        }
+        if (o.sellPrice > 0) {
+          priceHtml += `<span style="background:#f0fdf4;color:#166534;padding:2px 6px;border-radius:4px;">💰 مشتری: ${formatToman(o.sellPrice)}</span>`;
+        }
+        priceHtml += '</div>';
+
+        var actionButtons = '';
+        if (isTransferred) {
+          actionButtons = `<span class="badge badge-green" style="font-size:0.7rem;">وارد انبار شد</span>`;
+        } else if (isArrived) {
+          actionButtons = `
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+              <button type="button" onclick="openTransferModal(${o.id})" style="background:#2563eb;padding:6px 10px;font-size:0.75rem;margin:0;border-radius:8px;width:auto;white-space:nowrap;">📦 انتقال</button>
+            </div>
+          `;
+        } else {
+          actionButtons = `<span class="badge badge-orange" style="font-size:0.7rem;">⏳ منتظر</span>`;
+        }
+
+        // یادآور پیگیری برای سفارشات بیش از ۲ روز
+        var daysPassed = typeof getDaysPassed === 'function' ? getDaysPassed(o.date) : 0;
+        var reminderBadge = '';
+        if (!isArrived && !isTransferred && daysPassed >= 2) {
+          reminderBadge = `<span style="background:#ef4444;color:#fff;padding:2px 6px;border-radius:4px;font-size:0.7rem;margin-right:6px;vertical-align:middle;animation:pulseBadge 2s infinite;">⚠️ ${daysPassed} روز در انتظار!</span>`;
+        }
+
+        html += `
+          <div class="card" style="padding:12px;margin-bottom:8px;background:${bg};border:1px solid ${border};">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <div onclick="toggleOrderStatus(${o.id})" style="cursor:pointer;margin-top:2px;">
+                <div style="width:24px;height:24px;border-radius:6px;border:2px solid ${isArrived ? '#10b981' : '#cbd5e1'};background:${isArrived ? '#10b981' : '#fff'};display:flex;justify-content:center;align-items:center;color:#fff;font-size:1rem;transition:all 0.2s;">
+                  ${isArrived ? '✓' : ''}
+                </div>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:800;font-size:0.95rem;color:#1e293b;text-decoration:${isTransferred ? 'line-through' : 'none'};">${esc(o.itemName)} ${reminderBadge}</div>
+                <div style="font-size:0.78rem;color:#475569;margin-top:4px;">${customerLine}</div>
+                ${supplierLine}
+                <div style="font-size:0.75rem;color:#64748b;margin-top:2px;">📅 ${esc(o.date)}</div>
+                ${priceHtml}
+                ${o.note ? `<div style="font-size:0.75rem;color:#92400e;background:#fef3c7;padding:4px 8px;border-radius:6px;margin-top:6px;display:inline-block;">📝 ${esc(o.note)}</div>` : ''}
+              </div>
+              <div style="text-align:left;flex-shrink:0;">
+                ${actionButtons}
+                <button type="button" onclick="deleteOrder(${o.id})" style="background:none;border:none;color:#ef4444;font-size:1rem;padding:4px;margin-top:8px;width:auto;box-shadow:none;cursor:pointer;display:block;">🗑️</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+    container.innerHTML = html;
+  };
+
+  console.log('[unified-orders-v4] Ready ✅');
 })();
 </script>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ نسخه نهایی پرینت (با دکمه داخلی و پشتیبانی از PDF)
+// 🖨️ پرینت نهایی از طریق منوی اشتراک‌گذاری اندروید (روش نهایی)
 // ═══════════════════════════════════════════════════════════════
-(function setupFinalPrint() {
+(function setupNativePrintShare() {
   
   function getHTML() {
     var content = document.getElementById('print-section').innerHTML;
@@ -19534,28 +19389,12 @@ body.apk-print-mode #apk-print-toolbar {
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>فاکتور موبایل پرشیا</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Tahoma, Arial, sans-serif; background: #525659; padding-top: 60px; }
-    
-    /* نوار ابزار بالای صفحه (فقط توی گوشی دیده میشه) */
-    .toolbar { 
-      position: fixed; top: 0; left: 0; right: 0; height: 55px; 
-      background: #0f172a; display: flex; align-items: center; justify-content: center; 
-      padding: 0 15px; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-    }
-    .toolbar button { 
-      background: #10b981; color: #fff; border: none; padding: 10px 20px; 
-      border-radius: 8px; font-weight: bold; font-size: 15px; width: 100%; max-width: 300px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer;
-    }
-
-    /* استایل فاکتور */
-    .print-wrapper { display: flex; justify-content: center; padding: 15px; }
-    #print-section { background: #fff; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-    
+    body { font-family: Tahoma, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; padding: 15px; }
+    #print-section { background: #fff; width: 100%; max-width: 148mm; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     .print-page { width: 148mm; min-height: 210mm; padding: 2mm 3mm; display: flex; flex-direction: column; box-sizing: border-box; background: #fff; }
     .print-half { flex: 1; overflow: hidden; box-sizing: border-box; padding: 3mm 4mm; border: 1.5px solid #333; border-radius: 4px; display: flex; flex-direction: column; min-height: 0; position: relative; }
     .print-half.split { flex-direction: row; padding: 0; gap: 0; }
@@ -19585,97 +19424,66 @@ body.apk-print-mode #apk-print-toolbar {
     .r-tech { font-size: 6.5pt; line-height: 1.55; background: #fafafa; padding: 1.5mm; border: 1px solid #e0e0e0; border-radius: 2px; margin-top: 1mm; }
     .r-notes-title { font-size: 7pt; font-weight: bold; margin-bottom: 1mm; border-bottom: 1px solid #666; padding-bottom: 0.6mm; text-align: center; }
     .r-notes-lines { flex: 1; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 5mm, #ccc 5mm, #ccc 5.05mm); min-height: 20mm; }
-
-    /* استایل‌های مخصوص پرینت (پنهان کردن نوار ابزار) */
+    
     @media print {
       @page { size: A5 portrait; margin: 0; }
-      body { background: #fff; padding: 0; }
-      .toolbar { display: none !important; }
-      .print-wrapper { padding: 0; display: block; }
-      #print-section { box-shadow: none; max-width: none; width: 100%; }
+      body { background: #fff; padding: 0; display: block; }
+      #print-section { box-shadow: none; max-width: none; }
       .print-page { width: 148mm; height: 210mm; page-break-after: avoid; }
     }
   </style>
 </head>
 <body>
-  <!-- نوار ابزار اختصاصی -->
-  <div class="toolbar">
-    <button onclick="window.print()">🖨️ پرینت / ذخیره PDF</button>
-  </div>
-
-  <div class="print-wrapper">
-    <div id="print-section">
-      ${content}
-    </div>
+  <div id="print-section">
+    ${content}
   </div>
 </body>
 </html>`;
   }
 
-  async function openPrintPage() {
+  async function shareInvoice() {
     var html = getHTML();
-    if (!html) return;
+    if (!html) return showToast('فاکتور خالی است', 'warning');
 
-    var CapFs = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
-    var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
-
-    if (CapFs && CapShare) {
-      try {
-        var fileName = 'Persia_Print_' + Date.now() + '.html';
-        await CapFs.writeFile({ path: fileName, data: html, directory: 'CACHE', encoding: 'utf8' });
-        var uriRes = await CapFs.getUri({ path: fileName, directory: 'CACHE' });
-        
-        await CapShare.share({
-          title: 'پیش‌نمایش فاکتور',
-          url: uriRes.uri,
-          dialogTitle: 'برای باز شدن، یک مرورگر (مثل Chrome) انتخاب کنید'
-        });
-        return;
-      } catch(e) { console.warn(e); }
-    }
-    
-    // اگر پلاگین نبود
+    // تبدیل HTML به فایل
     var blob = new Blob([html], { type: 'text/html' });
-    window.open(URL.createObjectURL(blob), '_blank');
+    var file = new File([blob], 'Persia_Invoice.html', { type: 'text/html' });
+
+    // استفاده از منوی اشتراک‌گذاری نیتیو اندروید
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'فاکتور موبایل پرشیا',
+          text: 'برای مشاهده و پرینت، Chrome را انتخاب کنید'
+        });
+        showToast('💡 در منوی باز شده، Chrome را انتخاب کنید', 'info');
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.warn('Share failed:', err);
+          showToast('خطا در باز کردن منو', 'error');
+        }
+      }
+    } else {
+      // فال‌بک برای گوشی‌هایی که از ارسال فایل پشتیبانی نمی‌کنند
+      showToast('❌ گوشی شما از ارسال فایل پشتیبانی نمی‌کند', 'error');
+    }
   }
 
-  var _origPrint = window.print;
+  // هوک کردن تابع پرینت اصلی
+  var _originalWindowPrint = window.print;
   window.print = function() {
-    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-      openPrintPage();
+    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+    
+    if (isCapacitor) {
+      shareInvoice();
     } else {
-      _origPrint.apply(this, arguments);
+      _originalWindowPrint.apply(this, arguments);
     }
   };
 
-  console.log('[final-print-with-button] Ready ✅');
+  console.log('[native-print-share] Ready ✅');
 })();
 </script>
-
-
-
-
-<style>
-  /* رفع مشکل رنگ لیست کشویی مشتری در سفارشات (حالت شب) */
-  body.dark-mode #order-cust-results {
-    background-color: #1e293b !important;
-    border: 1px solid #334155 !important;
-  }
-  body.dark-mode #order-cust-results > div {
-    color: #f8fafc !important;
-    border-bottom-color: #334155 !important;
-  }
-  body.dark-mode #order-cust-results .part-search-item {
-    background-color: #1e293b !important;
-  }
-  body.dark-mode #order-cust-results .part-search-item:hover,
-  body.dark-mode #order-cust-results .part-search-item:active {
-    background-color: #334155 !important;
-  }
-  body.dark-mode #order-cust-results span {
-    color: #94a3b8 !important;
-  }
-</style>
-
 </body>
 </html>

@@ -19374,10 +19374,9 @@ body.apk-print-mode #apk-print-toolbar {
   console.log('[unified-orders-v4] Ready ✅');
 })();
 </script>
-
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ پرینت نهایی از طریق منوی اشتراک‌گذاری اندروید (روش نهایی)
+// 🖨️ پرینت نهایی: باز کردن فاکتور در کروم (دور زدن محدودیت فایل)
 // ═══════════════════════════════════════════════════════════════
 (function setupNativePrintShare() {
   
@@ -19441,32 +19440,56 @@ body.apk-print-mode #apk-print-toolbar {
 </html>`;
   }
 
-  async function shareInvoice() {
+  async function openPrintPage() {
     var html = getHTML();
     if (!html) return showToast('فاکتور خالی است', 'warning');
 
-    // تبدیل HTML به فایل
     var blob = new Blob([html], { type: 'text/html' });
-    var file = new File([blob], 'Persia_Invoice.html', { type: 'text/html' });
+    
+    // ─── روش ۱: استفاده از پلاگین‌های Capacitor (اگر نصب باشن) ───
+    var CapFs = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
+    var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
 
-    // استفاده از منوی اشتراک‌گذاری نیتیو اندروید
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    if (CapFs && CapShare) {
       try {
-        await navigator.share({
-          files: [file],
-          title: 'فاکتور موبایل پرشیا',
-          text: 'برای مشاهده و پرینت، Chrome را انتخاب کنید'
+        var fileName = 'Print_Invoice_' + Date.now() + '.html';
+        await CapFs.writeFile({ path: fileName, data: html, directory: 'CACHE', encoding: 'utf8' });
+        var uriRes = await CapFs.getUri({ path: fileName, directory: 'CACHE' });
+        
+        await CapShare.share({
+          title: 'پیش‌نمایش فاکتور',
+          url: uriRes.uri,
+          dialogTitle: 'برای پرینت، Chrome را انتخاب کنید'
         });
-        showToast('💡 در منوی باز شده، Chrome را انتخاب کنید', 'info');
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.warn('Share failed:', err);
-          showToast('خطا در باز کردن منو', 'error');
-        }
-      }
-    } else {
-      // فال‌بک برای گوشی‌هایی که از ارسال فایل پشتیبانی نمی‌کنند
-      showToast('❌ گوشی شما از ارسال فایل پشتیبانی نمی‌کند', 'error');
+        return;
+      } catch(e) { console.warn('Filesystem/Share failed:', e); }
+    }
+
+    // ─── روش ۲: استفاده از پلاگین مرورگر Capacitor ───
+    var CapBrowser = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
+    if (CapBrowser) {
+      try {
+        var blobUrl = URL.createObjectURL(blob);
+        await CapBrowser.open({ url: blobUrl });
+        return;
+      } catch(e) { console.warn('CapBrowser failed:', e); }
+    }
+
+    // ─── روش ۳: باز کردن با Data URI در مرورگر پیش‌فرض ───
+    try {
+      var encoded = encodeURIComponent(html);
+      var dataUri = 'data:text/html;charset=utf-8,' + encoded;
+      var win = window.open(dataUri, '_blank');
+      if (!win) throw new Error('Popup blocked');
+    } catch(e) {
+      // ─── روش ۴: اگر هیچکدوم نشد، فایل رو دانلود کن ───
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'Persia_Invoice.html';
+      a.click();
+      setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+      showToast('فایل ذخیره شد. برای پرینت، آن را در Chrome باز کنید.', 'info');
     }
   }
 
@@ -19476,13 +19499,13 @@ body.apk-print-mode #apk-print-toolbar {
     var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
     
     if (isCapacitor) {
-      shareInvoice();
+      openPrintPage();
     } else {
       _originalWindowPrint.apply(this, arguments);
     }
   };
 
-  console.log('[native-print-share] Ready ✅');
+  console.log('[native-print-share-v2] Ready ✅');
 })();
 </script>
 </body>

@@ -19374,9 +19374,10 @@ body.apk-print-mode #apk-print-toolbar {
   console.log('[unified-orders-v4] Ready ✅');
 })();
 </script>
+
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ پرینت نهایی: باز کردن فاکتور در کروم (دور زدن محدودیت فایل)
+// 🖨️ پرینت نهایی: باز کردن فاکتور در کروم با روش Data URI
 // ═══════════════════════════════════════════════════════════════
 (function setupNativePrintShare() {
   
@@ -19440,56 +19441,32 @@ body.apk-print-mode #apk-print-toolbar {
 </html>`;
   }
 
-  async function openPrintPage() {
+  function openPrintPage() {
     var html = getHTML();
     if (!html) return showToast('فاکتور خالی است', 'warning');
 
-    var blob = new Blob([html], { type: 'text/html' });
-    
-    // ─── روش ۱: استفاده از پلاگین‌های Capacitor (اگر نصب باشن) ───
-    var CapFs = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
-    var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+    // تبدیل HTML به Base64 تا در URL استفاده شود
+    var base64 = btoa(unescape(encodeURIComponent(html)));
+    var dataUri = 'data:text/html;base64,' + base64;
 
-    if (CapFs && CapShare) {
-      try {
-        var fileName = 'Print_Invoice_' + Date.now() + '.html';
-        await CapFs.writeFile({ path: fileName, data: html, directory: 'CACHE', encoding: 'utf8' });
-        var uriRes = await CapFs.getUri({ path: fileName, directory: 'CACHE' });
-        
-        await CapShare.share({
-          title: 'پیش‌نمایش فاکتور',
-          url: uriRes.uri,
-          dialogTitle: 'برای پرینت، Chrome را انتخاب کنید'
-        });
-        return;
-      } catch(e) { console.warn('Filesystem/Share failed:', e); }
-    }
-
-    // ─── روش ۲: استفاده از پلاگین مرورگر Capacitor ───
-    var CapBrowser = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
-    if (CapBrowser) {
-      try {
-        var blobUrl = URL.createObjectURL(blob);
-        await CapBrowser.open({ url: blobUrl });
-        return;
-      } catch(e) { console.warn('CapBrowser failed:', e); }
-    }
-
-    // ─── روش ۳: باز کردن با Data URI در مرورگر پیش‌فرض ───
+    // باز کردن در مرورگر خارجی (کروم)
     try {
-      var encoded = encodeURIComponent(html);
-      var dataUri = 'data:text/html;charset=utf-8,' + encoded;
-      var win = window.open(dataUri, '_blank');
-      if (!win) throw new Error('Popup blocked');
+      var win = window.open(dataUri, '_system');
+      
+      if (!win) {
+        // اگر مرورگر باز نشد، با لینک دانلود باز کن
+        var link = document.createElement('a');
+        link.href = dataUri;
+        link.target = '_blank';
+        link.download = 'Persia_Invoice.html';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('فایل در کروم باز می‌شود...', 'info');
+      }
     } catch(e) {
-      // ─── روش ۴: اگر هیچکدوم نشد، فایل رو دانلود کن ───
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'Persia_Invoice.html';
-      a.click();
-      setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
-      showToast('فایل ذخیره شد. برای پرینت، آن را در Chrome باز کنید.', 'info');
+      console.error(e);
+      showToast('خطا در باز کردن مرورگر', 'error');
     }
   }
 
@@ -19498,6 +19475,7 @@ body.apk-print-mode #apk-print-toolbar {
   window.print = function() {
     var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
     
+    // در اپلیکیشن از روش Data URI استفاده کن
     if (isCapacitor) {
       openPrintPage();
     } else {
@@ -19505,7 +19483,7 @@ body.apk-print-mode #apk-print-toolbar {
     }
   };
 
-  console.log('[native-print-share-v2] Ready ✅');
+  console.log('[native-print-datauri] Ready ✅');
 })();
 </script>
 </body>

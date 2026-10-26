@@ -19554,5 +19554,67 @@ body.apk-print-mode #apk-print-toolbar {
 })();
 </script>
 
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🛒 ارتقای سیستم سفارشات: پرسیدن قیمت خرید هنگام تیک زدن (رسیدن کالا)
+// ═══════════════════════════════════════════════════════════════
+(function upgradeOrderPricing() {
+  
+  // بازنویسی تابع تغییر وضعیت سفارش
+  window.toggleOrderStatus = function(id) {
+    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
+    if (!o || o.transferredToInventory) return;
+
+    // ۱. اگر از "منتظر" به "رسید" تغییر می‌کند
+    if (o.status === 'PENDING') {
+      // پرسیدن قیمت خرید
+      var buyPriceStr = prompt('✅ کالا رسید!\n\nقیمت خرید «' + o.itemName + '» را وارد کنید (تومان):', o.buyPrice || '');
+      if (buyPriceStr === null) return; // اگر کاربر انصراف داد، تیک نخوره
+      
+      var buyPrice = Number(cleanNumber(buyPriceStr));
+      if (!buyPrice || buyPrice <= 0) {
+        return showToast('مبلغ خرید معتبر نیست. تیک زده نشد.', 'warning');
+      }
+
+      // پرسیدن قیمت فروش (اختیاری)
+      var sellPriceStr = prompt('قیمت فروش پیشنهادی (اختیاری):', o.sellPrice || Math.round(buyPrice * 1.3));
+      var sellPrice = sellPriceStr ? Number(cleanNumber(sellPriceStr)) : 0;
+
+      // ذخیره قیمت‌ها
+      o.buyPrice = buyPrice;
+      o.sellPrice = sellPrice;
+      o.status = 'ARRIVED';
+      
+      if (navigator.vibrate) navigator.vibrate([30, 50, 30]); // ویبره موفقیت
+      showToast('✅ قیمت ثبت شد و وضعیت به "رسید" تغییر یافت.', 'success');
+
+    } else {
+      // ۲. اگر تیک را برداشت (برگشت به حالت منتظر)
+      o.status = 'PENDING';
+      if (navigator.vibrate) navigator.vibrate(20);
+    }
+
+    o.updatedAt = Date.now();
+    saveAll().then(function() { 
+      if (typeof uploadToDrive === 'function') uploadToDrive(true); 
+    });
+    
+    window.renderOrders(); // رفرش لیست
+  };
+
+  // برای اینکه وقتی روی "انتقال" زد، قیمت‌ها توی مودال انتقال از قبل پر شده باشن
+  // (این بخش قبلاً توی کدت بود، ولی مطمئن میشیم درست کار می‌کنه)
+  var _baseOpenTransfer = window.openTransferModal;
+  window.openTransferModal = function(id) {
+    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
+    if (o) {
+      // اگر قیمت‌ها موقع تیک زدن ثبت شده بودن، اینجا به صورت خودکار میان
+      _baseOpenTransfer.apply(this, arguments);
+    }
+  };
+
+  console.log('[order-pricing] Ready ✅');
+})();
+</script>
 </body>
 </html>

@@ -2528,7 +2528,7 @@ body.dark-mode .expand-indicator {
   </div>
 </div>
 
-<button type="button" onclick="saveQuickSale()" style="background:var(--success);margin-top:16px;padding:12px;font-size:0.95rem;font-weight:800;">✓ ثبت فروش و دریافت وجه</button>
+
 </div>
 </div>
 </div>
@@ -19274,13 +19274,12 @@ body.apk-print-mode #apk-print-toolbar {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ نهایی‌ترین راه‌حل: عکس درست + دکمه ذخیره با پلاگین اشتراک
+// 🖨️ نهایی‌ترین راه‌حل: عکس از روی صفحه (بدون باگ، بدون برعکس شدن)
 // ═══════════════════════════════════════════════════════════════
-(function setupDirectImageModalFixed() {
+(function setupUltimatePrint() {
   
   var _originalWindowPrint = window.print;
 
-  // تابع نمایش عکس در مودال
   function showImageModal(dataUrl, blob) {
     var old = document.getElementById('invoice-image-modal');
     if (old) old.remove();
@@ -19303,11 +19302,9 @@ body.apk-print-mode #apk-print-toolbar {
     `;
     document.body.appendChild(overlay);
 
-    // اتصال دکمه ذخیره به پلاگین اشتراک‌گذاری اندروید
     document.getElementById('btn-save-invoice-img').onclick = async function() {
       var file = new File([blob], 'Persia_Invoice.png', { type: 'image/png' });
       
-      // روش اول: پلاگین Capacitor
       var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
       if (CapShare && typeof CapShare.share === 'function') {
         try {
@@ -19316,7 +19313,6 @@ body.apk-print-mode #apk-print-toolbar {
         } catch(e) { console.warn(e); }
       }
       
-      // روش دوم: Web Share API
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({ files: [file], title: 'ذخیره فاکتور' });
@@ -19324,13 +19320,12 @@ body.apk-print-mode #apk-print-toolbar {
         } catch(e) { console.warn(e); }
       }
       
-      // روش سوم: دانلود مستقیم
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
       a.href = url;
       a.download = 'Persia_Invoice.png';
       a.click();
-      showToast('اگر ذخیره نشد، از منوی باز شده "Save to Gallery" را بزنید', 'info');
+      showToast('اگر ذخیره نشد، از منوی باز شده "Save" را بزنید', 'info');
     };
   }
 
@@ -19350,62 +19345,49 @@ body.apk-print-mode #apk-print-toolbar {
       return showToast('فاکتور خالی است.', 'warning');
     }
 
+    // ⏳ نمایش پیام لودینگ
     showToast('⏳ در حال ساخت تصویر...', 'info');
 
-    // ذخیره وضعیت اولیه
-    var originalStyles = {
-      position: printArea.style.position,
-      left: printArea.style.left,
-      top: printArea.style.top,
-      width: printArea.style.width,
-      zIndex: printArea.style.zIndex,
-      background: printArea.style.background
-    };
+    // ۱. نمایش فاکتور روی صفحه (با کلاس apk-print-mode که از قبل ساختیم)
+    document.body.classList.add('apk-print-mode');
+    window.scrollTo(0, 0);
+
+    // صبر کوتاه تا مرورگر صفحه رو رندر کنه
+    await new Promise(r => setTimeout(r, 150));
+
+    // ۲. مخفی کردن موقت QR و واترمارک که باعث کرش html2canvas می‌شن
+    var hiddenElems = [];
+    printArea.querySelectorAll('.r-qr-box, .r-watermark').forEach(function(el) {
+      hiddenElems.push({ el: el, display: el.style.display });
+      el.style.display = 'none';
+    });
+
+    // حذف پس‌زمینه‌های گرادیانت
+    var gradientElems = [];
+    printArea.querySelectorAll('*').forEach(function(el) {
+      if (el.style.backgroundImage && el.style.backgroundImage.includes('gradient')) {
+        gradientElems.push({ el: el, bg: el.style.backgroundImage });
+        el.style.backgroundImage = 'none';
+      }
+    });
 
     try {
-      // ۱. آماده‌سازی: قرار دادن فاکتور در صفحه اصلی (اما مخفی شده)
-      // این کار باعث میشه html2canvas جهت RTL رو درست تشخیص بده و عکس برعکس نشه
-      printArea.style.position = 'absolute';
-      printArea.style.left = '0';
-      printArea.style.top = '0';
-      printArea.style.width = '600px';
-      printArea.style.zIndex = '-9999';
-      printArea.style.background = '#ffffff';
-
-      // حذف QR و واترمارک
-      var hiddenElems = [];
-      printArea.querySelectorAll('.r-qr-box, .r-watermark').forEach(function(el) {
-        hiddenElems.push({ el: el, display: el.style.display });
-        el.style.display = 'none';
-      });
-
-      // تبدیل به عکس با فیکس کردن مشکل RTL
+      // ۳. عکس گرفتن از فاکتور روی صفحه (نه از پشت صحنه)
       var canvas = await html2canvas(printArea, {
-        scale: 2,
+        scale: 2, // کیفیت بالا
         useCORS: true,
         backgroundColor: '#ffffff',
         logging: false,
-        onclone: function(clonedDoc) {
-          // فیکس قطعی مشکل برعکس شدن متن در حالت راست‌چین
-          var clonedPrintArea = clonedDoc.getElementById('print-section');
-          if (clonedPrintArea) {
-            clonedPrintArea.style.direction = 'rtl';
-            clonedPrintArea.style.transform = 'none'; // حذف هرگونه چرخش
-          }
-        }
+        scrollY: 0, // جلوگیری از برعکس شدن
+        scrollX: 0
       });
 
-      // بازگردانی استایل‌ها
-      printArea.style.position = originalStyles.position;
-      printArea.style.left = originalStyles.left;
-      printArea.style.top = originalStyles.top;
-      printArea.style.width = originalStyles.width;
-      printArea.style.zIndex = originalStyles.zIndex;
-      printArea.style.background = originalStyles.background;
-      
+      // ۴. بازگردانی صفحه به حالت اول
+      document.body.classList.remove('apk-print-mode');
       hiddenElems.forEach(function(item) { item.el.style.display = item.display; });
+      gradientElems.forEach(function(item) { item.el.style.backgroundImage = item.bg; });
 
-      // تبدیل به Blob و نمایش
+      // ۵. نمایش عکس نهایی در مودال
       canvas.toBlob(function(blob) {
         if (!blob) return showToast('خطا در ساخت تصویر', 'error');
         var dataUrl = URL.createObjectURL(blob);
@@ -19413,20 +19395,17 @@ body.apk-print-mode #apk-print-toolbar {
       }, 'image/png', 1.0);
 
     } catch (err) {
-      // بازگردانی در صورت خطا
-      printArea.style.position = originalStyles.position;
-      printArea.style.left = originalStyles.left;
-      printArea.style.top = originalStyles.top;
-      printArea.style.width = originalStyles.width;
-      printArea.style.zIndex = originalStyles.zIndex;
-      printArea.style.background = originalStyles.background;
+      // اگر خطایی رخ داد، صفحه رو به حالت عادی برگردون
+      document.body.classList.remove('apk-print-mode');
+      hiddenElems.forEach(function(item) { item.el.style.display = item.display; });
+      gradientElems.forEach(function(item) { item.el.style.backgroundImage = item.bg; });
       
       console.error('html2canvas error:', err);
-      showToast('❌ خطا در ساخت تصویر فاکتور.', 'error');
+      showToast('❌ خطا در ساخت تصویر فاکتور. صفحه را رفرش کنید.', 'error');
     }
   };
 
-  console.log('[direct-image-modal-fixed] Ready ✅');
+  console.log('[ultimate-print-v3] Ready ✅');
 })();
 </script>
 

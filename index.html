@@ -19271,141 +19271,286 @@ body.apk-print-mode #apk-print-toolbar {
 })();
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script>
-// ═══════════════════════════════════════════════════════════════
-// 🖨️ نهایی‌ترین راه‌حل: عکس از روی صفحه (بدون باگ، بدون برعکس شدن)
-// ═══════════════════════════════════════════════════════════════
-(function setupUltimatePrint() {
+
+<style>
+  /* ۱. رفع مشکل فونت و پس‌زمینه فیلدها در حالت تاریک (شب) */
+  body.dark-mode input:not([type="checkbox"]):not([type="radio"]), 
+  body.dark-mode select, 
+  body.dark-mode textarea {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #475569 !important;
+  }
+  body.dark-mode select option {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+  }
   
-  var _originalWindowPrint = window.print;
-
-  function showImageModal(dataUrl, blob) {
-    var old = document.getElementById('invoice-image-modal');
-    if (old) old.remove();
-
-    var overlay = document.createElement('div');
-    overlay.id = 'invoice-image-modal';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.95);z-index:9999999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:15px;';
-    
-    overlay.innerHTML = `
-      <div style="color:#fff;font-weight:900;margin-bottom:12px;text-align:center;font-size:0.95rem;flex-shrink:0;">
-        🧾 پیش‌نمایش فاکتور
-      </div>
-      <div style="flex:1;overflow:auto;width:100%;display:flex;justify-content:center;align-items:flex-start;border-radius:8px;background:#fff;max-height:65vh;">
-          <img src="${dataUrl}" style="width:100%;max-width:600px;display:block;">
-      </div>
-      <div style="display:flex;gap:8px;margin-top:16px;width:100%;max-width:400px;flex-shrink:0;">
-        <button type="button" id="btn-save-invoice-img" style="flex:1.5;background:#10b981;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:900;font-size:0.9rem;box-shadow:0 4px 15px rgba(16,185,129,0.4);">📥 ذخیره در گوشی</button>
-        <button type="button" onclick="document.getElementById('invoice-image-modal').remove()" style="flex:1;background:#ef4444;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:900;font-size:0.9rem;box-shadow:0 4px 15px rgba(239,68,68,0.4);">✕ بستن</button>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-
-    document.getElementById('btn-save-invoice-img').onclick = async function() {
-      var file = new File([blob], 'Persia_Invoice.png', { type: 'image/png' });
-      
-      var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
-      if (CapShare && typeof CapShare.share === 'function') {
-        try {
-          await CapShare.share({ files: [file], title: 'ذخیره فاکتور' });
-          return;
-        } catch(e) { console.warn(e); }
-      }
-      
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: 'ذخیره فاکتور' });
-          return;
-        } catch(e) { console.warn(e); }
-      }
-      
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'Persia_Invoice.png';
-      a.click();
-      showToast('اگر ذخیره نشد، از منوی باز شده "Save" را بزنید', 'info');
-    };
+  /* ۲. فاصله دادن به پایین فرم‌ها تا منوی ناوبری روی دکمه‌ها نیفته */
+  #tab-content-customers .container,
+  #view-details .container,
+  #tab-content-orders .container {
+    padding-bottom: 120px !important; /* ایجاد فضای خالی به اندازه منوی پایین */
   }
 
-  window.print = async function() {
-    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+  /* ۳. مخفی کردن اجباری دکمه مزاحم فروش سریع */
+  button[onclick="saveQuickSale()"] {
+    display: none !important;
+  }
+</style>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 💰 داشبورد تفکیک سود (اجرت / قطعه / هزینه همکار)
+// ═══════════════════════════════════════════════════════════════
+(function setupAdvancedAccounting() {
+  
+  function calculateDetailedProfit(fromJdn, toJdn) {
+    var stats = { totalWork: 0, laborProfit: 0, partsProfit: 0, outsourceCost: 0, totalExpenses: 0, netProfit: 0 };
+    var todayJdn = todayJDN();
     
-    if (!isCapacitor) {
-      return _originalWindowPrint.apply(this, arguments);
-    }
-
-    if (typeof html2canvas === 'undefined') {
-      return showToast('کتابخانه عکس‌برداری لود نشد.', 'error');
-    }
-
-    var printArea = document.getElementById('print-section');
-    if (!printArea || !printArea.innerHTML.trim()) {
-      return showToast('فاکتور خالی است.', 'warning');
-    }
-
-    // ⏳ نمایش پیام لودینگ
-    showToast('⏳ در حال ساخت تصویر...', 'info');
-
-    // ۱. نمایش فاکتور روی صفحه (با کلاس apk-print-mode که از قبل ساختیم)
-    document.body.classList.add('apk-print-mode');
-    window.scrollTo(0, 0);
-
-    // صبر کوتاه تا مرورگر صفحه رو رندر کنه
-    await new Promise(r => setTimeout(r, 150));
-
-    // ۲. مخفی کردن موقت QR و واترمارک که باعث کرش html2canvas می‌شن
-    var hiddenElems = [];
-    printArea.querySelectorAll('.r-qr-box, .r-watermark').forEach(function(el) {
-      hiddenElems.push({ el: el, display: el.style.display });
-      el.style.display = 'none';
-    });
-
-    // حذف پس‌زمینه‌های گرادیانت
-    var gradientElems = [];
-    printArea.querySelectorAll('*').forEach(function(el) {
-      if (el.style.backgroundImage && el.style.backgroundImage.includes('gradient')) {
-        gradientElems.push({ el: el, bg: el.style.backgroundImage });
-        el.style.backgroundImage = 'none';
-      }
-    });
-
-    try {
-      // ۳. عکس گرفتن از فاکتور روی صفحه (نه از پشت صحنه)
-      var canvas = await html2canvas(printArea, {
-        scale: 2, // کیفیت بالا
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        scrollY: 0, // جلوگیری از برعکس شدن
-        scrollX: 0
-      });
-
-      // ۴. بازگردانی صفحه به حالت اول
-      document.body.classList.remove('apk-print-mode');
-      hiddenElems.forEach(function(item) { item.el.style.display = item.display; });
-      gradientElems.forEach(function(item) { item.el.style.backgroundImage = item.bg; });
-
-      // ۵. نمایش عکس نهایی در مودال
-      canvas.toBlob(function(blob) {
-        if (!blob) return showToast('خطا در ساخت تصویر', 'error');
-        var dataUrl = URL.createObjectURL(blob);
-        showImageModal(dataUrl, blob);
-      }, 'image/png', 1.0);
-
-    } catch (err) {
-      // اگر خطایی رخ داد، صفحه رو به حالت عادی برگردون
-      document.body.classList.remove('apk-print-mode');
-      hiddenElems.forEach(function(item) { item.el.style.display = item.display; });
-      gradientElems.forEach(function(item) { item.el.style.backgroundImage = item.bg; });
+    transactions.forEach(function(t) {
+      if (t.deleted || t.type !== 'DEBT') return;
+      var tJdn = jalaliStrToJDN(t.date);
+      if (!tJdn) return;
       
-      console.error('html2canvas error:', err);
-      showToast('❌ خطا در ساخت تصویر فاکتور. صفحه را رفرش کنید.', 'error');
+      // فیلتر بازه زمانی (اگر بازه انتخاب نشده، همه را حساب کن)
+      var isInRange = true;
+      if (fromJdn && toJdn) {
+         isInRange = (tJdn >= fromJdn && tJdn <= toJdn);
+      }
+      if (!isInRange) return;
+      
+      stats.totalWork += Number(t.totalWork || t.amount || 0);
+      
+      // محاسبه سود اجرت و قطعه
+      if (t.items && Array.isArray(t.items)) {
+        t.items.forEach(function(it) {
+          var amt = Number(it.amount || 0);
+          if (it.partId) {
+            // این آیتم قطعه است (فروش - خرید = سود قطعه)
+            var buyPrice = Number(it.buyPrice);
+            if (!buyPrice) {
+              var p = parts.find(x => x.id === it.partId);
+              buyPrice = p ? Number(p.buyPrice || 0) : 0;
+            }
+            stats.partsProfit += (amt - buyPrice);
+          } else {
+            // این آیتم اجرت است
+            stats.laborProfit += amt;
+          }
+        });
+      }
+      
+      // کسر هزینه همکار (برون‌سپاری)
+      stats.outsourceCost += Number(t.collabCost || 0);
+    });
+    
+    // محاسبه هزینه‌های مغازه در بازه
+    expenses.forEach(function(e) {
+      if (e.deleted) return;
+      var eJdn = jalaliStrToJDN(e.date);
+      if (fromJdn && toJdn && (eJdn < fromJdn || eJdn > toJdn)) return;
+      stats.totalExpenses += Number(e.amount || 0);
+    });
+    
+    // سود نهایی
+    stats.netProfit = (stats.laborProfit + stats.partsProfit) - stats.outsourceCost - stats.totalExpenses;
+    
+    return stats;
+  }
+
+  function renderAccountingUI(stats, titleLabel) {
+    var repContainer = document.querySelector('#tab-content-reports .container');
+    if (!repContainer) return;
+    
+    var card = document.getElementById('advanced-accounting-card');
+    if (!card) {
+      card = document.createElement('div');
+      card.id = 'advanced-accounting-card';
+      card.className = 'card';
+      card.style.cssText = 'margin-top:10px; background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%); border:1.5px solid #86efac;';
+      
+      var statGrid = repContainer.querySelector('.stat-grid');
+      if (statGrid && statGrid.parentNode) {
+        statGrid.parentNode.insertBefore(card, statGrid.nextSibling);
+      } else {
+        repContainer.insertBefore(card, repContainer.firstChild.nextSibling);
+      }
+    }
+    
+    var isDark = document.body.classList.contains('dark-mode');
+    var bgCard = isDark ? '#1e293b' : '#fff';
+    var borderCol = isDark ? '#334155' : '#e2e8f0';
+    var textCol = isDark ? '#f8fafc' : '#1e293b';
+    var profitColor = stats.netProfit >= 0 ? '#10b981' : '#ef4444';
+    
+    card.innerHTML = 
+      '<div style="font-weight:900;font-size:1rem;color:#166534;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">' +
+        '<div>💰 تفکیک سود و زیان دقیق <span style="font-size:0.7rem;background:#bbf7d0;color:#065f46;padding:2px 6px;border-radius:4px;margin-right:6px;">' + titleLabel + '</span></div>' +
+      '</div>' +
+      
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">' +
+        '<div style="background:' + bgCard + ';border:1px solid ' + borderCol + ';border-radius:8px;padding:8px;text-align:center;">' +
+          '<div style="font-size:0.7rem;color:#64748b;">🔧 سود خالص اجرت</div>' +
+          '<div style="font-size:1rem;font-weight:900;color:#0284c7;">' + formatToman(stats.laborProfit) + '</div>' +
+        '</div>' +
+        '<div style="background:' + bgCard + ';border:1px solid ' + borderCol + ';border-radius:8px;padding:8px;text-align:center;">' +
+          '<div style="font-size:0.7rem;color:#64748b;">📦 سود خالص قطعات</div>' +
+          '<div style="font-size:1rem;font-weight:900;color:#ea580c;">' + formatToman(stats.partsProfit) + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">' +
+        '<div style="background:' + bgCard + ';border:1px solid ' + borderCol + ';border-radius:8px;padding:6px;text-align:center;">' +
+          '<div style="font-size:0.65rem;color:#64748b;">🔹 کل فاکتورها</div>' +
+          '<div style="font-size:0.85rem;font-weight:bold;color:' + textCol + ';">' + formatToman(stats.totalWork) + '</div>' +
+        '</div>' +
+        '<div style="background:' + bgCard + ';border:1px solid ' + borderCol + ';border-radius:8px;padding:6px;text-align:center;">' +
+          '<div style="font-size:0.65rem;color:#64748b;">🤝 هزینه همکار</div>' +
+          '<div style="font-size:0.85rem;font-weight:bold;color:#dc2626;">' + formatToman(stats.outsourceCost) + '</div>' +
+        '</div>' +
+        '<div style="background:' + bgCard + ';border:1px solid ' + borderCol + ';border-radius:8px;padding:6px;text-align:center;">' +
+          '<div style="font-size:0.65rem;color:#64748b;">💸 هزینه مغازه</div>' +
+          '<div style="font-size:0.85rem;font-weight:bold;color:#dc2626;">' + formatToman(stats.totalExpenses) + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div style="background:' + (stats.netProfit >= 0 ? (isDark ? '#064e3b' : '#ecfdf5') : (isDark ? '#450a0a' : '#fef2f2')) + ';padding:10px;border-radius:10px;border:1.5px solid ' + profitColor + ';display:flex;justify-content:space-between;align-items:center;">' +
+        '<span style="font-weight:900;color:' + profitColor + ';">' + (stats.netProfit >= 0 ? '💎 سود خالص نهایی:' : '📉 ضرر خالص:') + '</span>' +
+        '<span style="font-size:1.2rem;font-weight:900;color:' + profitColor + ';">' + formatToman(Math.abs(stats.netProfit)) + '</span>' +
+      '</div>';
+  }
+
+  // ۱. اتصال به رندر اصلی گزارشات (برای حالت پیش‌فرض: همه زمان‌ها)
+  var _baseRenderReports = window.renderReports;
+  window.renderReports = function() {
+    _baseRenderReports.apply(this, arguments);
+    setTimeout(function() {
+      var stats = calculateDetailedProfit(null, null); // بدون بازه = کل
+      renderAccountingUI(stats, 'کل دوره');
+    }, 200);
+  };
+
+  // ۲. اتصال به گزارش بازه‌ای (وقتی از تاریخ تا تاریخ می‌زنی)
+  var _baseApplyRange = window.applyRangeReport;
+  window.applyRangeReport = async function() {
+    await _baseApplyRange.apply(this, arguments);
+    
+    setTimeout(function() {
+      var fromStr = toEnglishDigits((document.getElementById('range-from').value || '')).trim();
+      var toStr = toEnglishDigits((document.getElementById('range-to').value || '')).trim();
+      if (!fromStr || !toStr) return;
+      
+      var fromJdn = jalaliStrToJDN(fromStr);
+      var toJdn = jalaliStrToJDN(toStr);
+      if (!fromJdn || !toJdn) return;
+      
+      var stats = calculateDetailedProfit(fromJdn, toJdn);
+      renderAccountingUI(stats, fromStr + ' تا ' + toStr);
+    }, 300);
+  };
+
+  console.log('[advanced-accounting] Ready ✅');
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🖨️ پرینت واقعی با باز کردن در کروم (راه‌حل نهایی و بدون خطا)
+// ═══════════════════════════════════════════════════════════════
+(function setupRealPrint() {
+  
+  function getHTML() {
+    var content = document.getElementById('print-section').innerHTML;
+    if (!content || content.trim() === '') return null;
+
+    return `<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>فاکتور موبایل پرشیا</title>
+  <style>
+    @page { size: A5; margin: 0; }
+    body { font-family: Tahoma; background: #525659; display: flex; justify-content: center; padding: 20px; margin: 0; }
+    #print-section { background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.5); zoom: 0.8; }
+    @media print { body { background: #fff; padding: 0; } #print-section { box-shadow: none; zoom: 1; } }
+    .print-page { width: 148mm; min-height: 210mm; padding: 2mm 3mm; display: flex; flex-direction: column; box-sizing: border-box; background: #fff; }
+    .print-half { flex: 1; overflow: hidden; box-sizing: border-box; padding: 3mm 4mm; border: 1.5px solid #333; border-radius: 4px; display: flex; flex-direction: column; min-height: 0; position: relative; }
+    .print-half.split { flex-direction: row; padding: 0; gap: 0; }
+    .workshop-col { flex: 2; padding: 3mm 3.5mm; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+    .notes-col { flex: 1; padding: 3mm 2.5mm; border-right: 1px dashed #333; display: flex; flex-direction: column; min-height: 0; background: #fdfdfd; }
+    .cut-line-mid { height: 5mm; display: flex; align-items: center; justify-content: center; font-size: 6.5pt; color: #666; flex: 0 0 auto; }
+    .r-header { text-align: center; margin-bottom: 1.5mm; border-bottom: 1px solid #444; padding-bottom: 1mm; position: relative; }
+    .r-title { font-size: 9.5pt; font-weight: bold; line-height: 1.2; }
+    .r-badge { font-size: 6.5pt; position: absolute; right: 0; top: 0; font-weight: bold; border: 1px solid #333; padding: 0.5px 3px; border-radius: 2px; }
+    .r-meta { font-size: 6.8pt; line-height: 1.45; }
+    .r-meta table { width: 100%; border-collapse: collapse; }
+    .r-meta td { padding: 0.4mm 0; vertical-align: top; }
+    .r-table { width: 100%; border-collapse: collapse; font-size: 6.8pt; margin-top: 1mm; }
+    .r-table td, .r-table th { padding: 0.9mm 1mm; vertical-align: top; border: 1px solid #888; }
+    .r-table th { background: #eee; font-weight: bold; font-size: 6.8pt; }
+    .r-totals { margin-top: 1.2mm; font-size: 7.2pt; line-height: 1.6; }
+    .r-totals > div { display: flex; justify-content: space-between; }
+    .r-total-final { border-top: 1px solid #333; margin-top: 0.8mm; padding-top: 0.8mm; font-weight: bold; font-size: 8.2pt; }
+    .r-law { font-size: 5.2pt; line-height: 1.3; text-align: justify; margin-top: 1.2mm; padding: 1mm 1.5mm; background: #fafafa; border: 1px solid #e0e0e0; border-radius: 2px; }
+    .r-sign { display: flex; justify-content: space-between; font-size: 6.5pt; margin-top: auto; padding-top: 1.5mm; gap: 2mm; }
+    .r-sign > div { flex: 1; }
+    .r-sign .line { border-bottom: 1px dotted #333; height: 6mm; }
+    .r-qr-box { position: absolute; left: 3mm; top: 3mm; text-align: center; }
+    .r-qr-box img { width: 36px; height: 36px; border: 1px solid #333; border-radius: 3px; display: block; }
+    .r-qr-caption { font-size: 4.5pt; color: #333; margin-top: 0.5px; }
+    .r-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 65pt; font-weight: 900; letter-spacing: 12px; text-transform: uppercase; color: rgba(0, 0, 0, 0.04); z-index: 0; pointer-events: none; font-family: Arial, sans-serif; }
+    .r-tech { font-size: 6.5pt; line-height: 1.55; background: #fafafa; padding: 1.5mm; border: 1px solid #e0e0e0; border-radius: 2px; margin-top: 1mm; }
+    .r-notes-title { font-size: 7pt; font-weight: bold; margin-bottom: 1mm; border-bottom: 1px solid #666; padding-bottom: 0.6mm; text-align: center; }
+    .r-notes-lines { flex: 1; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 5mm, #ccc 5mm, #ccc 5.05mm); min-height: 20mm; }
+  </style>
+</head>
+<body>
+  <div id="print-section">${content}</div>
+</body>
+</html>`;
+  }
+
+  async function openInChrome() {
+    var html = getHTML();
+    if (!html) return;
+
+    var CapFs = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
+    var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+
+    if (CapFs && CapShare) {
+      try {
+        var fileName = 'Print_Invoice.html';
+        await CapFs.writeFile({ path: fileName, data: html, directory: 'CACHE', encoding: 'utf8' });
+        var uriRes = await CapFs.getUri({ path: fileName, directory: 'CACHE' });
+        
+        // ارسال به منوی اشتراک‌گذاری (انتخاب کروم)
+        await CapShare.share({
+          title: 'پیش‌نمایش پرینت',
+          url: uriRes.uri,
+          dialogTitle: 'برای پرینت، Chrome را انتخاب کنید'
+        });
+        return;
+      } catch(e) { console.warn(e); }
+    }
+    
+    // اگر نشد
+    showToast('برای پرینت، فایل را در کروم باز کنید', 'info');
+    var blob = new Blob([html], { type: 'text/html' });
+    window.open(URL.createObjectURL(blob), '_system');
+  }
+
+  var _origPrint = window.print;
+  window.print = function() {
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      openInChrome();
+    } else {
+      _origPrint.apply(this, arguments);
     }
   };
 
-  console.log('[ultimate-print-v3] Ready ✅');
+  console.log('[real-print] Ready ✅');
 })();
 </script>
 

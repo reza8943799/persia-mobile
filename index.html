@@ -19456,10 +19456,75 @@ body.apk-print-mode #apk-print-toolbar {
 </script>
 
 <script>
+
+
+
+<script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ پرینت واقعی با باز کردن در کروم (راه‌حل نهایی و بدون خطا)
+// 🛒 ارتقای سفارشات: پرسیدن قیمت خرید هنگام کلیک روی "انتقال به انبار"
 // ═══════════════════════════════════════════════════════════════
-(function setupRealPrint() {
+(function fixOrderTransferPrompt() {
+  
+  // ۱. برگرداندن تابع تیک زدن به حالت عادی (بدون پرسیدن سوال)
+  window.toggleOrderStatus = function(id) {
+    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
+    if (!o || o.transferredToInventory) return;
+    
+    o.status = (o.status === 'PENDING') ? 'ARRIVED' : 'PENDING';
+    o.updatedAt = Date.now();
+    saveAll().then(function() { 
+      if (typeof uploadToDrive === 'function') uploadToDrive(true); 
+    });
+    window.renderOrders();
+    if (navigator.vibrate) navigator.vibrate(20);
+  };
+
+  // ۲. بازنویسی تابع باز کردن مودال انتقال
+  var _baseOpenTransfer = window.openTransferModal;
+  
+  window.openTransferModal = function(id) {
+    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
+    if (!o) return;
+
+    // اگر قبلاً قیمت خرید ثبت نشده بود، همینجا از کاربر می‌پرسیم
+    if (!o.buyPrice || o.buyPrice <= 0) {
+      var buyPriceStr = prompt('📦 انتقال به انبار\n\nقیمت خرید «' + o.itemName + '» را وارد کنید (تومان):', '');
+      
+      // اگر کاربر دکمه انصراف (Cancel) را زد، کل عملیات انتقال لغو می‌شود
+      if (buyPriceStr === null) return;
+      
+      var buyPrice = Number(cleanNumber(buyPriceStr));
+      if (!buyPrice || buyPrice <= 0) {
+        return showToast('مبلغ خرید معتبر نیست. انتقال لغو شد.', 'warning');
+      }
+
+      // پرسیدن قیمت فروش
+      var sellPriceStr = prompt('قیمت فروش پیشنهادی (اختیاری):', o.sellPrice || Math.round(buyPrice * 1.3));
+      var sellPrice = sellPriceStr ? Number(cleanNumber(sellPriceStr)) : 0;
+
+      // ذخیره قیمت‌ها در سفارش
+      o.buyPrice = buyPrice;
+      o.sellPrice = sellPrice;
+      o.updatedAt = Date.now();
+      
+      saveAll().then(function() { 
+        if (typeof uploadToDrive === 'function') uploadToDrive(true); 
+      });
+    }
+
+    // حالا مودال انتقال باز می‌شود (چون قیمت‌ها الان پر شده‌اند، فیلدهای مودال از قبل پر خواهند بود)
+    _baseOpenTransfer.apply(this, arguments);
+  };
+
+  console.log('[transfer-prompt-on-click] Ready ✅');
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🖨️ نسخه نهایی پرینت (با دکمه داخلی و پشتیبانی از PDF)
+// ═══════════════════════════════════════════════════════════════
+(function setupFinalPrint() {
   
   function getHTML() {
     var content = document.getElementById('print-section').innerHTML;
@@ -19469,12 +19534,28 @@ body.apk-print-mode #apk-print-toolbar {
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>فاکتور موبایل پرشیا</title>
   <style>
-    @page { size: A5; margin: 0; }
-    body { font-family: Tahoma; background: #525659; display: flex; justify-content: center; padding: 20px; margin: 0; }
-    #print-section { background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.5); zoom: 0.8; }
-    @media print { body { background: #fff; padding: 0; } #print-section { box-shadow: none; zoom: 1; } }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Tahoma, Arial, sans-serif; background: #525659; padding-top: 60px; }
+    
+    /* نوار ابزار بالای صفحه (فقط توی گوشی دیده میشه) */
+    .toolbar { 
+      position: fixed; top: 0; left: 0; right: 0; height: 55px; 
+      background: #0f172a; display: flex; align-items: center; justify-content: center; 
+      padding: 0 15px; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+    }
+    .toolbar button { 
+      background: #10b981; color: #fff; border: none; padding: 10px 20px; 
+      border-radius: 8px; font-weight: bold; font-size: 15px; width: 100%; max-width: 300px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer;
+    }
+
+    /* استایل فاکتور */
+    .print-wrapper { display: flex; justify-content: center; padding: 15px; }
+    #print-section { background: #fff; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+    
     .print-page { width: 148mm; min-height: 210mm; padding: 2mm 3mm; display: flex; flex-direction: column; box-sizing: border-box; background: #fff; }
     .print-half { flex: 1; overflow: hidden; box-sizing: border-box; padding: 3mm 4mm; border: 1.5px solid #333; border-radius: 4px; display: flex; flex-direction: column; min-height: 0; position: relative; }
     .print-half.split { flex-direction: row; padding: 0; gap: 0; }
@@ -19504,15 +19585,34 @@ body.apk-print-mode #apk-print-toolbar {
     .r-tech { font-size: 6.5pt; line-height: 1.55; background: #fafafa; padding: 1.5mm; border: 1px solid #e0e0e0; border-radius: 2px; margin-top: 1mm; }
     .r-notes-title { font-size: 7pt; font-weight: bold; margin-bottom: 1mm; border-bottom: 1px solid #666; padding-bottom: 0.6mm; text-align: center; }
     .r-notes-lines { flex: 1; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 5mm, #ccc 5mm, #ccc 5.05mm); min-height: 20mm; }
+
+    /* استایل‌های مخصوص پرینت (پنهان کردن نوار ابزار) */
+    @media print {
+      @page { size: A5 portrait; margin: 0; }
+      body { background: #fff; padding: 0; }
+      .toolbar { display: none !important; }
+      .print-wrapper { padding: 0; display: block; }
+      #print-section { box-shadow: none; max-width: none; width: 100%; }
+      .print-page { width: 148mm; height: 210mm; page-break-after: avoid; }
+    }
   </style>
 </head>
 <body>
-  <div id="print-section">${content}</div>
+  <!-- نوار ابزار اختصاصی -->
+  <div class="toolbar">
+    <button onclick="window.print()">🖨️ پرینت / ذخیره PDF</button>
+  </div>
+
+  <div class="print-wrapper">
+    <div id="print-section">
+      ${content}
+    </div>
+  </div>
 </body>
 </html>`;
   }
 
-  async function openInChrome() {
+  async function openPrintPage() {
     var html = getHTML();
     if (!html) return;
 
@@ -19521,100 +19621,61 @@ body.apk-print-mode #apk-print-toolbar {
 
     if (CapFs && CapShare) {
       try {
-        var fileName = 'Print_Invoice.html';
+        var fileName = 'Persia_Print_' + Date.now() + '.html';
         await CapFs.writeFile({ path: fileName, data: html, directory: 'CACHE', encoding: 'utf8' });
         var uriRes = await CapFs.getUri({ path: fileName, directory: 'CACHE' });
         
-        // ارسال به منوی اشتراک‌گذاری (انتخاب کروم)
         await CapShare.share({
-          title: 'پیش‌نمایش پرینت',
+          title: 'پیش‌نمایش فاکتور',
           url: uriRes.uri,
-          dialogTitle: 'برای پرینت، Chrome را انتخاب کنید'
+          dialogTitle: 'برای باز شدن، یک مرورگر (مثل Chrome) انتخاب کنید'
         });
         return;
       } catch(e) { console.warn(e); }
     }
     
-    // اگر نشد
-    showToast('برای پرینت، فایل را در کروم باز کنید', 'info');
+    // اگر پلاگین نبود
     var blob = new Blob([html], { type: 'text/html' });
-    window.open(URL.createObjectURL(blob), '_system');
+    window.open(URL.createObjectURL(blob), '_blank');
   }
 
   var _origPrint = window.print;
   window.print = function() {
     if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-      openInChrome();
+      openPrintPage();
     } else {
       _origPrint.apply(this, arguments);
     }
   };
 
-  console.log('[real-print] Ready ✅');
+  console.log('[final-print-with-button] Ready ✅');
 })();
 </script>
 
-<script>
-// ═══════════════════════════════════════════════════════════════
-// 🛒 ارتقای سیستم سفارشات: پرسیدن قیمت خرید هنگام تیک زدن (رسیدن کالا)
-// ═══════════════════════════════════════════════════════════════
-(function upgradeOrderPricing() {
-  
-  // بازنویسی تابع تغییر وضعیت سفارش
-  window.toggleOrderStatus = function(id) {
-    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
-    if (!o || o.transferredToInventory) return;
 
-    // ۱. اگر از "منتظر" به "رسید" تغییر می‌کند
-    if (o.status === 'PENDING') {
-      // پرسیدن قیمت خرید
-      var buyPriceStr = prompt('✅ کالا رسید!\n\nقیمت خرید «' + o.itemName + '» را وارد کنید (تومان):', o.buyPrice || '');
-      if (buyPriceStr === null) return; // اگر کاربر انصراف داد، تیک نخوره
-      
-      var buyPrice = Number(cleanNumber(buyPriceStr));
-      if (!buyPrice || buyPrice <= 0) {
-        return showToast('مبلغ خرید معتبر نیست. تیک زده نشد.', 'warning');
-      }
 
-      // پرسیدن قیمت فروش (اختیاری)
-      var sellPriceStr = prompt('قیمت فروش پیشنهادی (اختیاری):', o.sellPrice || Math.round(buyPrice * 1.3));
-      var sellPrice = sellPriceStr ? Number(cleanNumber(sellPriceStr)) : 0;
 
-      // ذخیره قیمت‌ها
-      o.buyPrice = buyPrice;
-      o.sellPrice = sellPrice;
-      o.status = 'ARRIVED';
-      
-      if (navigator.vibrate) navigator.vibrate([30, 50, 30]); // ویبره موفقیت
-      showToast('✅ قیمت ثبت شد و وضعیت به "رسید" تغییر یافت.', 'success');
+<style>
+  /* رفع مشکل رنگ لیست کشویی مشتری در سفارشات (حالت شب) */
+  body.dark-mode #order-cust-results {
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+  }
+  body.dark-mode #order-cust-results > div {
+    color: #f8fafc !important;
+    border-bottom-color: #334155 !important;
+  }
+  body.dark-mode #order-cust-results .part-search-item {
+    background-color: #1e293b !important;
+  }
+  body.dark-mode #order-cust-results .part-search-item:hover,
+  body.dark-mode #order-cust-results .part-search-item:active {
+    background-color: #334155 !important;
+  }
+  body.dark-mode #order-cust-results span {
+    color: #94a3b8 !important;
+  }
+</style>
 
-    } else {
-      // ۲. اگر تیک را برداشت (برگشت به حالت منتظر)
-      o.status = 'PENDING';
-      if (navigator.vibrate) navigator.vibrate(20);
-    }
-
-    o.updatedAt = Date.now();
-    saveAll().then(function() { 
-      if (typeof uploadToDrive === 'function') uploadToDrive(true); 
-    });
-    
-    window.renderOrders(); // رفرش لیست
-  };
-
-  // برای اینکه وقتی روی "انتقال" زد، قیمت‌ها توی مودال انتقال از قبل پر شده باشن
-  // (این بخش قبلاً توی کدت بود، ولی مطمئن میشیم درست کار می‌کنه)
-  var _baseOpenTransfer = window.openTransferModal;
-  window.openTransferModal = function(id) {
-    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
-    if (o) {
-      // اگر قیمت‌ها موقع تیک زدن ثبت شده بودن، اینجا به صورت خودکار میان
-      _baseOpenTransfer.apply(this, arguments);
-    }
-  };
-
-  console.log('[order-pricing] Ready ✅');
-})();
-</script>
 </body>
 </html>

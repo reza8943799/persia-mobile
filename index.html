@@ -15356,98 +15356,6 @@ window.showCustomerList = function() {
   console.log('[glass-ref-tab] Ready ✅');
 })();
 </script>
-<script>
-  // ─── ۲. کدهای سیستم سفارشات (چون در نسخه اصلی ناقص بود) ───
-  if (!window.orders) window.orders = [];
-
-  window.renderOrders = function() {
-    var container = document.getElementById('orders-container');
-    if (!container) return;
-
-    var activeOrders = window.orders.filter(function(o) { return !o.deleted; });
-    
-    var html = `
-      <div class="card" style="background:#eff6ff;border:1.5px solid #93c5fd;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-weight:800;font-size:1rem;color:#1e40af;">🛒 سفارشات قطعات</div>
-          <div style="font-size:0.78rem;color:#475569;margin-top:2px;">لیست خرید و تهیه قطعات</div>
-        </div>
-        <button type="button" onclick="openAddOrderModal()" style="background:#2563eb;width:auto;padding:8px 14px;font-size:0.82rem;margin:0;border-radius:8px;">➕ سفارش جدید</button>
-      </div>
-    `;
-
-    if (activeOrders.length === 0) {
-      html += `<div class="card" style="text-align:center;padding:40px 20px;">
-          <div style="font-size:3.5rem;margin-bottom:12px;animation:emptyFloat 3s infinite;display:inline-block;">🛒</div>
-          <div style="font-weight:900;font-size:1.1rem;color:#1e293b;margin-bottom:6px;">سفارشی ثبت نشده</div>
-          <div style="font-size:0.85rem;color:#64748b;">برای خرید قطعه، از دکمه بالا استفاده کن.</div>
-        </div>`;
-    } else {
-      activeOrders.forEach(function(o) {
-        var isArrived = (o.status === 'ARRIVED');
-        var c = o.customerId ? customers.find(function(x) { return x.id === o.customerId; }) : null;
-        var customerLine = o.isShortage ? '<span class="badge badge-orange">کسری انبار</span>' : '👤 ' + (c ? c.name : 'نامشخص');
-        
-        html += `
-          <div class="card" style="padding:12px;margin-bottom:8px;background:${isArrived ? '#f0fdf4' : '#fffbeb'};">
-            <div style="display:flex;align-items:flex-start;gap:10px;">
-              <div onclick="toggleOrderStatus(${o.id})" style="cursor:pointer;margin-top:2px;">
-                <div style="width:24px;height:24px;border-radius:6px;border:2px solid ${isArrived ? '#10b981' : '#cbd5e1'};background:${isArrived ? '#10b981' : '#fff'};display:flex;justify-content:center;align-items:center;color:#fff;font-size:1rem;">${isArrived ? '✓' : ''}</div>
-              </div>
-              <div style="flex:1;">
-                <div style="font-weight:800;font-size:0.95rem;color:#1e293b;">${o.itemName}</div>
-                <div style="font-size:0.78rem;color:#475569;margin-top:4px;">${customerLine}</div>
-                <div style="font-size:0.75rem;color:#64748b;margin-top:2px;">📅 ${o.date}</div>
-              </div>
-              <button type="button" onclick="deleteOrder(${o.id})" style="background:none;border:none;color:#ef4444;font-size:1rem;cursor:pointer;">🗑️</button>
-            </div>
-          </div>
-        `;
-      });
-    }
-    container.innerHTML = html;
-  };
-
-  window.openAddOrderModal = function() {
-    var item = prompt('نام قطعه / کالا را وارد کنید:');
-    if (!item) return;
-    window.orders.unshift({
-      id: Date.now(), itemName: item, customerId: null, isShortage: true, status: 'PENDING', date: getTodayJalali(), deleted: false
-    });
-    saveAll();
-    window.renderOrders();
-    showToast('✅ سفارش ثبت شد', 'success');
-  };
-
-  window.toggleOrderStatus = function(id) {
-    var o = window.orders.find(function(x) { return x.id === id; });
-    if (o) { o.status = (o.status === 'PENDING') ? 'ARRIVED' : 'PENDING'; saveAll(); window.renderOrders(); }
-  };
-
-  window.deleteOrder = function(id) {
-    if (!confirm('حذف شود؟')) return;
-    var o = window.orders.find(function(x) { return x.id === id; });
-    if (o) { o.deleted = true; saveAll(); window.renderOrders(); }
-  };
-
-  // دانلود سفارشات از دیتابیس هنگام لود (اگر از قبل داشتید)
-  setTimeout(function() {
-    if (typeof openAppDB === 'function') {
-      openAppDB().then(function(db) {
-        var req = db.transaction('store', 'readonly').objectStore('store').get('db_orders');
-        req.onsuccess = function(e) {
-          if (e.target.result && Array.isArray(e.target.result)) {
-            window.orders = e.target.result;
-            window.renderOrders();
-          }
-        };
-      });
-    }
-  }, 1000);
-
-  console.log('[Orders & Glass] Ready ✅');
-})();
-</script>
 
 <script>
 (function fixGlassRefStuck() {
@@ -16903,7 +16811,20 @@ window.showCustomerList = function() {
     document.getElementById('dp-lbl-vat-' + selectId).innerText = formatToman(calc.vat);
     document.getElementById('dp-lbl-gross-' + selectId).innerText = formatToman(calc.gross);
     document.getElementById('dp-lbl-net-' + selectId).innerText = formatToman(calc.net);
-  };
+      document.getElementById('dp-lbl-net-' + selectId).innerText = formatToman(calc.net);
+
+  // 🆕 سینک خودکار با اینپوت پرداخت اصلی (فقط برای مودال تحویل)
+  if (selectId === 'del-payment-method' && calc.net > 0) {
+    var delMethod = document.getElementById('del-payment-method');
+    if (delMethod && delMethod.value === 'DIGIPAY') {
+      var payAmtInput = document.getElementById('del-payment-amount');
+      if (payAmtInput) {
+        payAmtInput.value = Number(calc.net).toLocaleString('en-US');
+        if (typeof updateDeliveryFinalRemaining === 'function') updateDeliveryFinalRemaining();
+      }
+    }
+  }
+};
 
   // ─── ۵. متن پیام ───
   function buildDPText(selectId) {
@@ -16951,21 +16872,25 @@ window.showCustomerList = function() {
     }
   };
 
-  // ─── ۶. ذخیره هنگام تحویل نهایی ───
-  var _baseConvertQuote = window.convertQuoteToDebt;
-  if (typeof _baseConvertQuote === 'function') {
-    window.convertQuoteToDebt = function(qId, deliverySignature, deliverySignatureDbId, newPayment, payMethod) {
-      if (payMethod === 'DIGIPAY') {
-        var amtEl = document.getElementById('dp-input-amount-del-payment-method');
-        var typeEl = document.getElementById('dp-select-type-del-payment-method');
-        if (amtEl && typeEl) {
-          var baseAmount = Number(amtEl.value.replace(/[^\d]/g, '')) || 0;
-          var method = typeEl.value;
-          var calc = calcDP(baseAmount, method);
-          
+// ─── ۶. ذخیره هنگام تحویل نهایی (نسخه اصلاح‌شده) ───
+var _baseConvertQuote = window.convertQuoteToDebt;
+if (typeof _baseConvertQuote === 'function') {
+  window.convertQuoteToDebt = function(qId, deliverySignature, deliverySignatureDbId, newPayment, payMethod) {
+    if (payMethod === 'DIGIPAY') {
+      var amtEl = document.getElementById('dp-input-amount-del-payment-method');
+      var typeEl = document.getElementById('dp-select-type-del-payment-method');
+      if (amtEl && typeEl) {
+        var baseAmount = Number(amtEl.value.replace(/[^\d]/g, '')) || 0;
+        var method = typeEl.value;
+        var calc = calcDP(baseAmount, method);
+
+        if (calc.net > 0) {
+          // 🔑 فیکس اصلی: override کردن newPayment با مبلغ خالص دیجی‌پی
+          newPayment = calc.net;
+
           var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
           var c = q ? customers.find(function(x) { return x.id === q.customerId && !x.deleted; }) : null;
-          
+
           digipayTxs.unshift({
             id: Date.now(),
             customerId: q ? q.customerId : null,
@@ -16973,8 +16898,8 @@ window.showCustomerList = function() {
             invoiceTitle: q ? (q.model || 'تحویل دستگاه') : 'تحویل',
             invoiceDate: (typeof getTodayJalali === 'function') ? getTodayJalali() : '',
             settlementDate: getNextSettlementDate(),
-            net: calc.net,       // دریافتی فروشنده
-            gross: calc.gross,   // پرداختی مشتری
+            net: calc.net,
+            gross: calc.gross,
             method: method,
             rate: calc.rate,
             commission: calc.commission,
@@ -16985,17 +16910,13 @@ window.showCustomerList = function() {
             createdAt: Date.now()
           });
           saveDPTxs();
-          
-          // اینجا مبلغی که از بدهی مشتری کم میشه همون مبلغ خالص (calc.net) هست
-          var payAmtInput = document.getElementById('del-payment-amount');
-          if (payAmtInput) {
-            payAmtInput.value = Number(calc.net).toLocaleString('en-US');
-          }
         }
       }
-      return _baseConvertQuote.apply(this, arguments);
-    };
-  }
+    }
+    // 👇 newPayment اصلاح‌شده رو پاس بده (با .call نه .apply)
+    return _baseConvertQuote.call(this, qId, deliverySignature, deliverySignatureDbId, newPayment, payMethod);
+  };
+}
 
   // ─── ۷. تب دیجی‌پی ───
   function injectDPTab() {
@@ -19377,11 +19298,11 @@ body.apk-print-mode #apk-print-toolbar {
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ پرینت نهایی: باز کردن فاکتور در کروم با روش Data URI
+// 🖨️ پرینت پیشرفته با Capacitor (Browser + Share)
 // ═══════════════════════════════════════════════════════════════
-(function setupNativePrintShare() {
+(function setupAdvancedPrint() {
   
-  function getHTML() {
+  function getPrintHTML() {
     var content = document.getElementById('print-section').innerHTML;
     if (!content || content.trim() === '') return null;
 
@@ -19389,12 +19310,23 @@ body.apk-print-mode #apk-print-toolbar {
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>فاکتور موبایل پرشیا</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Tahoma, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; padding: 15px; }
-    #print-section { background: #fff; width: 100%; max-width: 148mm; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    body { font-family: Tahoma, Arial, sans-serif; background: #525659; padding-top: 60px; }
+    .toolbar { 
+      position: fixed; top: 0; left: 0; right: 0; height: 55px; 
+      background: #0f172a; display: flex; align-items: center; justify-content: center; 
+      padding: 0 15px; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+    }
+    .toolbar button { 
+      background: #10b981; color: #fff; border: none; padding: 10px 20px; 
+      border-radius: 8px; font-weight: bold; font-size: 15px; width: 100%; max-width: 300px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer;
+    }
+    .print-wrapper { display: flex; justify-content: center; padding: 15px; }
+    #print-section { background: #fff; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
     .print-page { width: 148mm; min-height: 210mm; padding: 2mm 3mm; display: flex; flex-direction: column; box-sizing: border-box; background: #fff; }
     .print-half { flex: 1; overflow: hidden; box-sizing: border-box; padding: 3mm 4mm; border: 1.5px solid #333; border-radius: 4px; display: flex; flex-direction: column; min-height: 0; position: relative; }
     .print-half.split { flex-direction: row; padding: 0; gap: 0; }
@@ -19424,67 +19356,87 @@ body.apk-print-mode #apk-print-toolbar {
     .r-tech { font-size: 6.5pt; line-height: 1.55; background: #fafafa; padding: 1.5mm; border: 1px solid #e0e0e0; border-radius: 2px; margin-top: 1mm; }
     .r-notes-title { font-size: 7pt; font-weight: bold; margin-bottom: 1mm; border-bottom: 1px solid #666; padding-bottom: 0.6mm; text-align: center; }
     .r-notes-lines { flex: 1; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 5mm, #ccc 5mm, #ccc 5.05mm); min-height: 20mm; }
-    
     @media print {
       @page { size: A5 portrait; margin: 0; }
-      body { background: #fff; padding: 0; display: block; }
-      #print-section { box-shadow: none; max-width: none; }
+      body { background: #fff; padding: 0; }
+      .toolbar { display: none !important; }
+      .print-wrapper { padding: 0; display: block; }
+      #print-section { box-shadow: none; max-width: none; width: 100%; }
       .print-page { width: 148mm; height: 210mm; page-break-after: avoid; }
     }
   </style>
 </head>
 <body>
-  <div id="print-section">
-    ${content}
+  <div class="toolbar">
+    <button onclick="window.print()">🖨️ پرینت / ذخیره PDF</button>
+  </div>
+  <div class="print-wrapper">
+    <div id="print-section">
+      ${content}
+    </div>
   </div>
 </body>
 </html>`;
   }
 
-  function openPrintPage() {
-    var html = getHTML();
-    if (!html) return showToast('فاکتور خالی است', 'warning');
+  async function openPrintPage() {
+    var html = getPrintHTML();
+    if (!html) return;
 
-    // تبدیل HTML به Base64 تا در URL استفاده شود
-    var base64 = btoa(unescape(encodeURIComponent(html)));
-    var dataUri = 'data:text/html;base64,' + base64;
-
-    // باز کردن در مرورگر خارجی (کروم)
-    try {
-      var win = window.open(dataUri, '_system');
-      
-      if (!win) {
-        // اگر مرورگر باز نشد، با لینک دانلود باز کن
-        var link = document.createElement('a');
-        link.href = dataUri;
-        link.target = '_blank';
-        link.download = 'Persia_Invoice.html';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        showToast('فایل در کروم باز می‌شود...', 'info');
-      }
-    } catch(e) {
-      console.error(e);
-      showToast('خطا در باز کردن مرورگر', 'error');
+    // ─── روش ۱: Capacitor Browser Plugin ───
+    var CapBrowser = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
+    if (CapBrowser) {
+      try {
+        var dataUrl = 'data:text/html;charset=utf-8;base64,' + btoa(unescape(encodeURIComponent(html)));
+        await CapBrowser.open({ url: dataUrl });
+        return;
+      } catch(e) { console.warn('[print] Browser plugin failed:', e); }
     }
+
+    // ─── روش ۲: Filesystem + Share ───
+    var CapFs = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
+    var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+
+    if (CapFs && CapShare) {
+      try {
+        var fileName = 'Persia_Faktur_' + Date.now() + '.html';
+        await CapFs.writeFile({ 
+          path: fileName, 
+          data: html, 
+          directory: 'CACHE', 
+          encoding: 'utf8' 
+        });
+        var uriRes = await CapFs.getUri({ path: fileName, directory: 'CACHE' });
+        
+        await CapShare.share({
+          title: 'فاکتور موبایل پرشیا',
+          url: uriRes.uri,
+          dialogTitle: '⚠️ از لیست، «Chrome» را انتخاب کن (نه اپ دیگر)'
+        });
+        return;
+      } catch(e) { console.warn('[print] Share failed:', e); }
+    }
+
+    // ─── روش ۳: Blob (وب) ───
+    try {
+      var blob = new Blob([html], { type: 'text/html' });
+      window.open(URL.createObjectURL(blob), '_blank');
+    } catch(e) { console.warn('[print] Blob failed:', e); }
   }
 
-  // هوک کردن تابع پرینت اصلی
-  var _originalWindowPrint = window.print;
+  // Override window.print to use advanced print on Capacitor
+  var _origPrint = window.print;
   window.print = function() {
-    var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
-    
-    // در اپلیکیشن از روش Data URI استفاده کن
-    if (isCapacitor) {
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
       openPrintPage();
     } else {
-      _originalWindowPrint.apply(this, arguments);
+      _origPrint.apply(this, arguments);
     }
   };
 
-  console.log('[native-print-datauri] Ready ✅');
+  console.log('[advanced-print] Ready ✅');
 })();
 </script>
+
 </body>
 </html>

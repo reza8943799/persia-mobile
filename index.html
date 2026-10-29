@@ -1799,6 +1799,140 @@ body.dark-mode select#cust-sort-order option {
 }
 </style>
 
+<style>
+/* ═══════════════════════════════════════════════════════════════════ */
+/* 🎯 FINAL CONTRAST FIX — همه‌ی نقاطی که کنتراست خرابه                  */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── ۱. غیرفعال کردن پچ قدیمی که رنگ‌های سمنتیک رو می‌کشه ─── */
+body.dark-mode .stat-card div {
+  color: inherit !important;
+}
+body.dark-mode .stat-card .stat-val {
+  color: inherit !important;
+  font-weight: 800 !important;
+}
+
+/* ─── ۲. summary-box: هم روشن، هم تیره ─── */
+.summary-box {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.summary-box b, .summary-box strong {
+  color: var(--text) !important;
+}
+body.dark-mode .summary-box {
+  background: #1e293b !important;
+  color: #cbd5e1 !important;
+}
+
+/* ─── ۳. quote-box: هم روشن، هم تیره ─── */
+.quote-box {
+  background: var(--card) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.quote-box * {
+  color: inherit;
+}
+body.dark-mode .quote-box {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+body.dark-mode .quote-box .badge {
+  /* حفظ رنگ badge */
+}
+
+/* ─── ۴. stat-card: پس‌زمینه در هر دو حالت ─── */
+.stat-card {
+  background: var(--bg) !important;
+  border-color: var(--border) !important;
+}
+body.dark-mode .stat-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* ─── ۵. note-cat-btn: در حالت شب تیره بشه ─── */
+body.dark-mode .note-cat-btn:not(.active) {
+  background: #0f172a !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+body.dark-mode .note-cat-btn.active {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  color: #fff !important;
+  border-color: #1d4ed8 !important;
+}
+
+/* ─── ۶. کادرهای شفاف سفید در renderNewIntakeSummary (خلاصه‌ی فرم) ─── */
+/* این کادرها توی حالت روز روی کارت‌های رنگی روشن هستن (OK) */
+/* توی حالت شب روی کارت‌های تیره کارت‌های رنگیشون تیره می‌شن و کادر باید قهوه‌ای/سرمه‌ای بشه */
+body.dark-mode [style*="background:rgba(255,255,255,0.6)"],
+body.dark-mode [style*="background: rgba(255,255,255,0.6)"] {
+  background: rgba(0, 0, 0, 0.3) !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ─── ۷. filter-btn غیرفعال: متن واضح‌تر در حالت شب ─── */
+body.dark-mode .filter-btn:not(.active) {
+  color: #cbd5e1 !important;
+}
+body.dark-mode .filter-btn:not(.active) .filter-badge {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #e2e8f0 !important;
+}
+
+/* ─── ۸. ورودی‌ها: تضمین خوانایی در هر دو حالت ─── */
+input:not([type="checkbox"]):not([type="radio"]):not([style*="background"]),
+textarea:not([style*="background"]),
+select:not([style*="background"]) {
+  background: var(--card) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+body.dark-mode input:not([type="checkbox"]):not([type="radio"]):not([style*="background"]),
+body.dark-mode textarea:not([style*="background"]),
+body.dark-mode select:not([style*="background"]) {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+/* ─── ۹. حفظ رنگ‌های سمنتیک در حالت شب (سود/ضرر/موفق/خطا) ─── */
+body.dark-mode .stat-val[style*="color:#15803d"],
+body.dark-mode .stat-val[style*="color: #15803d"] { color: #86efac !important; }
+
+body.dark-mode .stat-val[style*="color:#dc2626"],
+body.dark-mode .stat-val[style*="color: #dc2626"] { color: #fca5a5 !important; }
+
+/* ─── ۱۰. رفع مشکل کادر آمار سود که با aurora تداخل داره ─── */
+.aurora-bg .stat-card {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+.aurora-bg .stat-card > div:first-child {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* ─── ۱۱. کادرهای یادآور معوق‌ها و فیش‌ها در حالت شب ─── */
+body.dark-mode #overdue-alert-banner {
+  background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%) !important;
+  border-color: #fca5a5 !important;
+  color: #fecaca !important;
+}
+body.dark-mode #overdue-alert-banner [style*="color:#991b1b"],
+body.dark-mode #overdue-alert-banner [style*="color: #991b1b"] {
+  color: #fca5a5 !important;
+}
+body.dark-mode #overdue-alert-banner [style*="color:#7f1d1d"],
+body.dark-mode #overdue-alert-banner [style*="color: #7f1d1d"] {
+  color: #fecaca !important;
+}
+</style>
 </head>
 
 <body>
@@ -1848,6 +1982,8 @@ body.dark-mode select#cust-sort-order option {
       <span class="text-wave" style="font-size: 0.7rem; font-family: 'Segoe UI', Tahoma, sans-serif; letter-spacing: 2.5px; text-transform: uppercase; margin-top: 5px; font-weight: bold;">Persia Mobile</span>
     </div>
   </div>
+  
+  
 </header>
 
 <!-- 📌 بنر یادآور روزانه (شناور و لوکس) -->
@@ -2471,7 +2607,46 @@ body.dark-mode .expand-indicator {
 <div id="tx-list"></div>
 </div>
 </div>
+<!-- ═══════════ 🛒 بخش فروش سریع ═══════════ -->
+<div id="cust-sec-quick" style="display:none;">
+  <div class="card" style="border:1.5px solid #c4b5fd;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#8b5cf6 0%,#6d28d9 100%);display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 4px 12px rgba(139,92,246,0.35);flex-shrink:0;">🛒</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:900;font-size:1rem;color:#7c3aed;">فروش سریع</div>
+        <div style="font-size:0.75rem;color:#64748b;margin-top:2px;line-height:1.5;">فروش لوازم جانبی یا خدمات کوچک بدون ثبت پذیرش دستگاه</div>
+      </div>
+    </div>
 
+    <label class="field-label" style="color:#7c3aed;">📦 انتخاب قطعه از انبار (اختیاری):</label>
+    <div style="position:relative;">
+      <input type="text" id="qs-part-search" placeholder="🔍 نام قطعه رو تایپ کن یا خالی بگذار..." oninput="searchPartsForQuickSale(this.value)" autocomplete="off" style="border-color:#c4b5fd;">
+      <div id="qs-part-search-results" class="part-search-results" style="display:none;"></div>
+    </div>
+    <div style="font-size:0.72rem;color:#64748b;margin-top:4px;">💡 اگه از انبار انتخاب کنی، موجودی خودکار کسر می‌شه.</div>
+
+    <input type="hidden" id="qs-part-id" value="">
+    <input type="hidden" id="qs-buy-price" value="0">
+
+    <label class="field-label" style="color:#7c3aed;">عنوان کالا / خدمات:</label>
+    <input type="text" id="qs-title" placeholder="مثال: گلس A54، شارژر تایپ سی" style="border-color:#c4b5fd;">
+
+    <label class="field-label" style="color:#059669;">مبلغ فروش (تومان):</label>
+    <input type="text" id="qs-amount" placeholder="مبلغ" oninput="formatAmountInput(this)" style="border-color:#86efac;background:#f0fdf4;font-weight:bold;font-size:1.05rem;">
+
+    <label class="field-label">روش دریافت:</label>
+    <select id="qs-pay-method" style="border-color:#10b981;font-weight:bold;">
+      <option value="POS">💳 کارت‌خوان پوز</option>
+      <option value="CARD">📲 کارت‌به‌کارت</option>
+      <option value="CASH">💵 نقدی</option>
+      <option value="NONE">📝 بدون دریافت (ثبت به عنوان بدهی)</option>
+    </select>
+
+    <button type="button" onclick="saveQuickSale()" style="margin-top:14px;background:linear-gradient(135deg,#8b5cf6 0%,#6d28d9 100%);padding:13px;font-size:1rem;font-weight:900;box-shadow:0 4px 15px rgba(139,92,246,0.35);">
+      ✓ ثبت فروش
+    </button>
+  </div>
+</div>
 <!-- ═══════════ 🏪 بخش تامین‌کننده ═══════════ -->
 <div class="cust-sub-nav" id="supplier-sub-nav" style="display:none;">
   <button type="button" class="cust-sub-tab active" id="btn-sup-tab-purchases" onclick="switchSupplierTab('purchases')">📜 سوابق خرید (<span id="count-supplier-purchases">0</span>)</button>
@@ -2528,9 +2703,6 @@ body.dark-mode .expand-indicator {
   </div>
 </div>
 
-
-</div>
-</div>
 </div>
 </div>
 <!-- ===== تب واریزی‌ها ===== -->
@@ -5088,73 +5260,164 @@ function addCustomer() {
 
 function searchPartsForQuickSale(keyword) {
   var box = document.getElementById('qs-part-search-results');
+  if (!box) return;
+
   var q = (keyword || '').trim().toLowerCase();
-  if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
-  var available = parts.filter(p => !p.deleted && (p.model || '').toLowerCase().indexOf(q) !== -1);
-  if (available.length === 0) {
-    box.innerHTML = '<div style="padding:10px;color:#94a3b8;font-size:.8rem;text-align:center;">در انبار یافت نشد</div>';
-    box.style.display = 'block'; return;
+  if (!q) {
+    box.style.display = 'none';
+    box.innerHTML = '';
+    return;
   }
-  var html = '';
-  available.forEach(item => {
-    var inStock = (Number(item.qty) || 0) > 0;
-    html += '<div class="part-search-item" onclick="selectPartForQuickSale(' + item.id + ')">' +
-      '<div><b>' + esc(item.model) + '</b><div style="font-size:.75rem;color:' + (inStock ? '#10b981' : '#ef4444') + ';">موجودی: ' + (item.qty || 0) + '</div></div>' +
-      '<div style="font-weight:bold;color:var(--primary);">' + formatToman(item.sellPrice || item.buyPrice) + '</div></div>';
+
+  var available = parts.filter(function(p) {
+    return !p.deleted && (p.model || '').toLowerCase().indexOf(q) !== -1;
   });
-  box.innerHTML = html; box.style.display = 'block';
+
+  if (available.length === 0) {
+    box.innerHTML = '<div style="padding:10px;color:#94a3b8;font-size:.8rem;text-align:center;">در انبار یافت نشد — می‌تونی دستی پر کنی</div>';
+    box.style.display = 'block';
+    return;
+  }
+
+  var html = '';
+  available.forEach(function(item) {
+    var inStock = (Number(item.qty) || 0) > 0;
+    var stockColor = inStock ? '#10b981' : '#ef4444';
+    html += '<div class="part-search-item" onclick="selectPartForQuickSale(' + item.id + ')" style="cursor:pointer;">' +
+      '<div><b>' + esc(item.model) + '</b>' +
+        '<div style="font-size:.75rem;color:' + stockColor + ';">موجودی: ' + (item.qty || 0) + '</div>' +
+      '</div>' +
+      '<div style="font-weight:bold;color:var(--primary);">' + formatToman(item.sellPrice || item.buyPrice) + '</div>' +
+    '</div>';
+  });
+  box.innerHTML = html;
+  box.style.display = 'block';
 }
 
 function selectPartForQuickSale(partId) {
-  var item = parts.find(p => p.id === partId && !p.deleted); if (!item) return;
-  if ((Number(item.qty) || 0) <= 0 && !confirm('موجودی این کالا در انبار صفر است. آیا ادامه می‌دهید؟')) return;
-  document.getElementById('qs-title').value = 'فروش: ' + item.model;
+  var item = parts.find(function(p) { return p.id === partId && !p.deleted; });
+  if (!item) return;
+
+  if ((Number(item.qty) || 0) <= 0) {
+    if (!confirm('⚠️ موجودی این کالا در انبار صفر است.\nآیا ادامه می‌دهید؟')) return;
+  }
+
+  document.getElementById('qs-title').value = item.model + (item.quality ? ' (' + item.quality + ')' : '');
   document.getElementById('qs-amount').value = Number(item.sellPrice || item.buyPrice || 0).toLocaleString('en-US');
   document.getElementById('qs-part-id').value = item.id;
   document.getElementById('qs-buy-price').value = item.buyPrice || 0;
   document.getElementById('qs-part-search').value = '';
   document.getElementById('qs-part-search-results').style.display = 'none';
+
+  if (navigator.vibrate) navigator.vibrate(20);
+  showToast('✅ قطعه انتخاب شد', 'success');
 }
 
 function saveQuickSale() {
+  if (!activeCustomerId) {
+    return showToast('مشتری انتخاب نشده است', 'warning');
+  }
+
   var title = (document.getElementById('qs-title').value || '').trim();
   var amount = Number(cleanNumber(document.getElementById('qs-amount').value)) || 0;
-  var payMethod = document.getElementById('qs-pay-method').value;
+  var payMethod = document.getElementById('qs-pay-method').value || 'POS';
   var partId = document.getElementById('qs-part-id').value;
   var buyPrice = Number(document.getElementById('qs-buy-price').value) || 0;
-  
+
   if (!title) return showToast('عنوان کالا یا خدمات را وارد کنید', 'warning');
   if (amount <= 0) return showToast('مبلغ فروش معتبر نیست', 'warning');
 
+  // 🛡️ اگه از انبار انتخاب شده ولی مبلغ خالی مونده، خودکار پر کن
+  if (partId && amount <= 0) {
+    var p = parts.find(function(x) { return x.id === Number(partId) && !x.deleted; });
+    if (p) { amount = Number(p.sellPrice || p.buyPrice || 0); }
+  }
+
   var items = [];
-  if (partId) { items.push({ title: title, amount: amount, partId: Number(partId), buyPrice: buyPrice }); deductPartsStock(items); }
+  if (partId) {
+    items.push({ title: title, amount: amount, partId: Number(partId), buyPrice: buyPrice });
+    deductPartsStock(items);
+  }
 
   var deposit = (payMethod === 'NONE') ? 0 : amount;
   var actualPayMethod = (payMethod === 'NONE') ? 'POS' : payMethod;
-  var date = getTodayJalali(); var trackCode = generateRandom6Digit();
+  var date = getTodayJalali();
+  var trackCode = generateRandom6Digit();
 
   transactions.unshift({
-    id: Date.now(), customerId: activeCustomerId, intakeCode: '', trackCode: trackCode,
-    title: 'فروش سریع: ' + title, workType: 'NORMAL', collabName: '', collabCost: 0, items: items,
-    totalWork: amount, rawAmount: amount, loyaltyTier: '', loyaltyDiscountPercent: 0, loyaltyDiscountAmount: 0,
-    deposit: deposit, cashDeposit: deposit, onlineDeposit: 0, requestedDeposit: 0, payMethod: actualPayMethod, dueDate: '', amount: amount,
-    type: 'DEBT', warranty: 'فروشگاهی (بدون مهلت تست)', deliveredTimestamp: Date.now(), oldPartDelivered: false, deliverySignature: null, deliverySignatureDbId: null, qcSummary: null,
-    internalDiagnosis: '', internalNotes: '', stockRestored: false, date: date, deleted: false, updatedAt: Date.now()
+    id: Date.now(),
+    customerId: activeCustomerId,
+    intakeCode: '',
+    trackCode: trackCode,
+    title: 'فروش سریع: ' + title,
+    workType: 'NORMAL',
+    collabName: '',
+    collabCost: 0,
+    items: items,
+    totalWork: amount,
+    rawAmount: amount,
+    loyaltyTier: '',
+    loyaltyDiscountPercent: 0,
+    loyaltyDiscountAmount: 0,
+    deposit: deposit,
+    cashDeposit: deposit,
+    onlineDeposit: 0,
+    requestedDeposit: 0,
+    payMethod: actualPayMethod,
+    dueDate: '',
+    amount: amount,
+    type: 'DEBT',
+    warranty: 'فروشگاهی (بدون مهلت تست)',
+    deliveredTimestamp: Date.now(),
+    oldPartDelivered: false,
+    deliverySignature: null,
+    deliverySignatureDbId: null,
+    qcSummary: null,
+    internalDiagnosis: '',
+    internalNotes: '',
+    stockRestored: false,
+    date: date,
+    deleted: false,
+    updatedAt: Date.now()
   });
 
   if (deposit > 0) {
     transactions.unshift({
-      id: Date.now() + 1, customerId: activeCustomerId, intakeCode: '', trackCode: trackCode,
-      title: 'دریافتی بابت فروش (' + title + ')', amount: deposit, payMethod: actualPayMethod, type: 'PAY', date: date, deleted: false, updatedAt: Date.now()
+      id: Date.now() + 1,
+      customerId: activeCustomerId,
+      intakeCode: '',
+      trackCode: trackCode,
+      title: 'دریافتی بابت فروش (' + title + ')',
+      amount: deposit,
+      payMethod: actualPayMethod,
+      type: 'PAY',
+      date: date,
+      deleted: false,
+      updatedAt: Date.now()
     });
   }
 
-  saveAll(); uploadToDrive(true);
-  document.getElementById('qs-title').value = ''; document.getElementById('qs-amount').value = '';
-  document.getElementById('qs-part-id').value = ''; document.getElementById('qs-buy-price').value = '0';
+  saveAll();
+  if (typeof uploadToDrive === 'function') uploadToDrive(true);
+
+  // ریست فرم
+  document.getElementById('qs-title').value = '';
+  document.getElementById('qs-amount').value = '';
+  document.getElementById('qs-part-id').value = '';
+  document.getElementById('qs-buy-price').value = '0';
+  document.getElementById('qs-part-search').value = '';
   document.getElementById('qs-pay-method').value = 'POS';
-  renderParts(); renderTransactions(); switchCustTab('history');
-  showToast('✅ فروش سریع ثبت شد و در دخل امروز قرار گرفت.', 'success');
+  document.getElementById('qs-part-search-results').style.display = 'none';
+  document.getElementById('qs-part-search-results').innerHTML = '';
+
+  if (typeof renderParts === 'function') renderParts();
+  if (typeof renderTransactions === 'function') renderTransactions();
+  if (typeof renderCustomerLoyaltyBanner === 'function') renderCustomerLoyaltyBanner();
+
+  switchCustTab('history');
+  showToast('✅ فروش سریع ثبت شد و به دخل امروز اضافه شد', 'success');
+
+  if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
 }
 
 function openEditCustomerModal() {
@@ -5370,12 +5633,25 @@ function openCustomer(id) {
   var btnSummary = document.getElementById('btn-collab-summary-print');
   if (btnSummary) btnSummary.style.display = c.isCollab ? 'inline-block' : 'none';
   
-  resetInvoiceForm(); 
+  resetInvoiceForm();
+  
+  // 🛒 ریست کامل فرم فروش سریع (برای جلوگیری از نشتی بین مشتریان)
+  ['qs-title','qs-amount','qs-part-search','qs-part-id'].forEach(function(elId) {
+    var el = document.getElementById(elId);
+    if (el) el.value = '';
+  });
+  var qsbp = document.getElementById('qs-buy-price');
+  if (qsbp) qsbp.value = '0';
+  var qsr = document.getElementById('qs-part-search-results');
+  if (qsr) { qsr.style.display = 'none'; qsr.innerHTML = ''; }
+  var qspm = document.getElementById('qs-pay-method');
+  if (qspm) qspm.value = 'POS';
+  
   renderCustomerLoyaltyBanner();
   document.getElementById('view-customers').style.display = 'none';
   document.getElementById('view-details').style.display = 'block';
 
-  // ⭐ تغییرات جدید برای تامین‌کننده ⭐
+  // ⭐ تغییرات برای تامین‌کننده ⭐
   var isSupplier = c.isSupplier === true;
   var custNav = document.querySelector('.cust-sub-nav');
   var supNav = document.getElementById('supplier-sub-nav');
@@ -5383,7 +5659,6 @@ function openCustomer(id) {
   var supSecs = ['sup-sec-purchases', 'sup-sec-new'];
 
   if (isSupplier) {
-    // حالت تامین‌کننده
     if (custNav) custNav.style.display = 'none';
     custSecs.forEach(function(s) { var el = document.getElementById(s); if (el) el.style.display = 'none'; });
     if (supNav) supNav.style.display = 'flex';
@@ -5392,7 +5667,6 @@ function openCustomer(id) {
     switchSupplierTab('purchases');
     renderSupplierBalance();
   } else {
-    // حالت مشتری عادی
     if (custNav) custNav.style.display = 'flex';
     if (supNav) supNav.style.display = 'none';
     supSecs.forEach(function(s) { var el = document.getElementById(s); if (el) el.style.display = 'none'; });
@@ -8497,48 +8771,6 @@ openTab = function(tabName) {
   }
 };
 
-
-// ۳. چاپگر مینیاتوریِ سه‌بعدی
-// ساخت HTML پرینتر در صفحه
-if(!document.getElementById('printer-modal')) {
-   var printerHtml = `
-     <div class="printer-overlay" id="printer-modal">
-        <div class="printer-box"></div>
-        <div class="printer-paper" id="printer-paper">
-           <div class="printer-line" style="background:var(--primary); width:35px; margin-bottom:8px;"></div>
-           <div class="printer-line"></div>
-           <div class="printer-line"></div>
-           <div class="printer-line" style="width:25px;"></div>
-           <div class="printer-line" style="margin-top:12px; width:45px; height:8px; border-radius:0;"></div>
-        </div>
-        <div class="printing-text">در حال چاپ فاکتور...</div>
-     </div>
-   `;
-   document.body.insertAdjacentHTML('beforeend', printerHtml);
-}
-
-// کلک زدن به مرورگر: بازنویسی تابع پرینت تا اول انیمیشن ما را نشان دهد
-var originalWindowPrint = window.print;
-window.print = function() {
-   var modal = document.getElementById('printer-modal');
-   if(modal) {
-      modal.style.display = 'flex';
-      modal.classList.add('printing');
-      
-      // شبیه‌سازی صدای لرزش پرینتر سوزنی با ویبره!
-      if(navigator.vibrate) navigator.vibrate([60, 40, 60, 40, 80, 50, 100]); 
-      
-      // بعد از 1.8 ثانیه، چاپگر غیب می‌شود و دیالوگ اصلی پرینت باز می‌شود
-      setTimeout(function() {
-         modal.classList.remove('printing');
-         modal.style.display = 'none';
-         originalWindowPrint(); 
-      }, 1800);
-   } else {
-      originalWindowPrint();
-   }
-};
-
 // ═══════════════════════════════════════════════
 // 🎨 زیباسازی: Toast پیشرفته + Empty States
 // (این بلوک قبلاً اشتباهاً داخل <style> بود و اجرا نمی‌شد)
@@ -8799,7 +9031,7 @@ div.innerHTML =
         (q.timeline && q.timeline.length > 0 ? '<button type="button" onclick="viewTimeline(' + q.id + ', event)" style="background:#f5f3ff;color:#7c3aed;border:1px dashed #c4b5fd;padding:6px 10px;font-size:0.78rem;border-radius:8px;width:100%;font-weight:bold;margin:8px 0 0 0;box-shadow:none;">📋 مشاهده تایملاین (' + q.timeline.length + ' رویداد)</button>' : '') +
       '</div>' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">' +
-        '<span style="font-size:.92rem;font-weight:800;color:var(--primary);">' + formatToman(q.amount) + (totalDep > 0 ? ' (بیعانه: ' + formatToman(totalDep) + ' | مانده: ' + formatToman(remain) + ')' : '') + '</span>' +
+        '<span style="font-size:.92rem;font-weight:800;color:' + (Number(q.amount) > 0 ? 'var(--primary)' : '#f59e0b') + ';">' + (Number(q.amount) > 0 ? formatToman(q.amount) : '⚠️ در انتظار قیمت‌گذاری') + (totalDep > 0 ? ' (بیعانه: ' + formatToman(totalDep) + ' | مانده: ' + formatToman(remain) + ')' : '') + '</span>' +
         '<select onchange="updateQuoteStatus(' + q.id + ', this.value)" class="smart-dropdown ' + getDropdownColorClass(st) + '" style="width:auto;padding:6px 10px;font-size:.8rem;margin:0;border-radius:8px;font-weight:bold;">' +
           '<option value="QUEUE"' + (st === 'QUEUE' ? ' selected' : '') + '>در نوبت</option>' +
           '<option value="WAIT_APPROVAL"' + (st === 'WAIT_APPROVAL' ? ' selected' : '') + '>⏳ منتظر تایید هزینه</option>' +
@@ -8917,65 +9149,83 @@ function renderReminderBanner() {
 })();
 
 // ═══════════════════════════════════════════════════════════════
-// 🔧 پچ: رفع خطای renderBrandChips در ویرایش فاکتور
+// 🔧 پچ v2: امن‌سازی openEditQuoteModal با try-catch
+// (نسخه قبلی ناقص بود و اقلام رو لود نمی‌کرد)
 // ═══════════════════════════════════════════════════════════════
 (function patchOpenEditQuoteModal() {
   var _baseOpenEdit = openEditQuoteModal;
   
   openEditQuoteModal = function(qId, event) {
+    // تلاش می‌کنیم نسخه اصلی رو اجرا کنیم (که کامله)
+    try {
+      _baseOpenEdit.call(this, qId, event);
+      return;
+    } catch(e) {
+      console.warn('[patch] base openEditQuoteModal failed, using fallback:', e);
+    }
+    
+    // ─── Fallback: نسخه‌ی حداقلی امن (اگه نسخه اصلی fail کرد) ───
     if (event) event.stopPropagation();
     var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
     if (!q) return showToast('فاکتور یافت نشد', 'error');
     
-    // ── پر کردن فیلدهای اصلی (بدون برند)
-    var eqQuoteId = document.getElementById('eq-quote-id');
-    if (eqQuoteId) eqQuoteId.value = qId;
+    var setVal = function(id, val) {
+      var el = document.getElementById(id);
+      if (el) el.value = val || '';
+    };
+    var setChk = function(id, val) {
+      var el = document.getElementById(id);
+      if (el) el.checked = !!val;
+    };
     
-    var eqModel = document.getElementById('eq-model');
-    if (eqModel) eqModel.value = q.model || '';
-    var eqColor = document.getElementById('eq-color');
-    if (eqColor) eqColor.value = q.color || '';
-    var eqMarker = document.getElementById('eq-marker');
-    if (eqMarker) eqMarker.value = q.marker || '';
-    var eqProblem = document.getElementById('eq-problem');
-    if (eqProblem) eqProblem.value = q.problem || '';
-    var eqAmount = document.getElementById('eq-amount');
-    if (eqAmount) eqAmount.value = q.amount ? Number(q.amount).toLocaleString('en-US') : '';
+    setVal('eq-quote-id', qId);
+    setVal('eq-model', q.model);
+    setVal('eq-color', q.color);
+    setVal('eq-marker', q.marker);
+    setVal('eq-problem', q.problem);
+    setVal('eq-imei', q.imei);
+    setVal('eq-acc', q.acc);
+    setVal('eq-brand', q.brand);
+    
+    setVal('eq-work-type', q.workType || 'NORMAL');
+    setVal('eq-collab-name', q.collabName);
+    setVal('eq-collab-cost', q.collabCost ? Number(q.collabCost).toLocaleString('en-US') : '');
+    
+    setVal('eq-lock-type', q.lockType || 'NONE');
+    setVal('eq-lock-val', q.lockVal || q.patternPath || '');
+    
+    setChk('eq-chk-dead', q.isDead);
+    setChk('eq-chk-water', q.isWater);
+    setChk('eq-chk-lcdrisk', q.isLcdRisk);
+    setChk('eq-chk-scratch', q.isScratch);
+    setChk('eq-chk-opened', q.isOpened);
+    setChk('eq-chk-sim', q.hasSim);
+    
+    setVal('eq-status', q.deviceStatus || 'QUEUE');
     
     var cashDep = Number(q.cashDeposit != null ? q.cashDeposit : (q.deposit || 0));
-    var eqDeposit = document.getElementById('eq-deposit');
-    if (eqDeposit) eqDeposit.value = cashDep ? Number(cashDep).toLocaleString('en-US') : '';
+    setVal('eq-deposit', cashDep ? Number(cashDep).toLocaleString('en-US') : '');
+    setVal('eq-requested-deposit', q.requestedDeposit ? Number(q.requestedDeposit).toLocaleString('en-US') : '');
+    setVal('eq-due-date', q.dueDate);
+    setVal('eq-warranty', q.warranty || '48 ساعت مهلت تست');
     
-    var eqDue = document.getElementById('eq-due-date');
-    if (eqDue) eqDue.value = q.dueDate || '';
-    var eqWarranty = document.getElementById('eq-warranty');
-    if (eqWarranty) eqWarranty.value = q.warranty || '48 ساعت مهلت تست';
-    var eqAcc = document.getElementById('eq-acc');
-    if (eqAcc) eqAcc.value = q.acc || '';
+    setVal('eq-internal-diagnosis', q.internalDiagnosis);
+    setVal('eq-internal-notes', q.internalNotes);
+    setVal('eq-qc-summary', q.qcSummary);
     
-    // ── تلاش برای پر کردن برند (اگه توابع موجود بودن)
-    try {
-      var eqBrand = document.getElementById('eq-brand');
-      if (eqBrand) eqBrand.value = q.brand || '';
-      
-      if (typeof renderBrandChips === 'function') {
-        var selectFn = (typeof selectEqBrand === 'function') ? selectEqBrand : function() {};
-        renderBrandChips('eq-brand-chips', q.brand || '', selectFn);
-      } else {
-        // اگه تابع نبود، حداقل چیپ‌ها رو پاک کن
-        var chipsBox = document.getElementById('eq-brand-chips');
-        if (chipsBox) chipsBox.innerHTML = '';
-      }
-    } catch(e) {
-      console.warn('[patch] brand chips failed:', e);
-    }
+    // ✅ حیاتی: لود اقلام
+    if (typeof renderEditItems === 'function') renderEditItems(q);
     
-    // ── نمایش مودال
+    // ✅ حیاتی: ذخیره اسنپ‌شات برای بازگرداندن موجودی
+    window._editQuoteOriginalItems = JSON.parse(JSON.stringify(q.items || []));
+    
+    // ✅ حیاتی: باز کردن مودال و محاسبه totals
     var modal = document.getElementById('modal-quote-edit');
     if (modal) modal.style.display = 'flex';
+    if (typeof updateEqTotals === 'function') setTimeout(updateEqTotals, 50);
   };
   
-  console.log('[patch] openEditQuoteModal patched ✅');
+  console.log('[patch] openEditQuoteModal patched (safe v2) ✅');
 })();
 
 // ═══════════════════════════════════════════════════════════════
@@ -9537,403 +9787,6 @@ iconGroup.appendChild(bDel);
   
   console.log('[loyalty-bar] Ready ✅');
 })();
-
-
-
-
-// ═══════════════════════════════════════════════════════════════
-// ↩️ سیستم Undo برای حذف‌ها
-// ═══════════════════════════════════════════════════════════════
-(function setupUndoSystem() {
-  var UNDO_TIMEOUT = 10000;
-  var _undoSnapshot = null;
-  var _undoTimer = null;
-var _undoCountdownTimer = null;
-  var _undoToast = null;
-  
-  // ─── ساخت toast مخصوص Undo
- function showUndoToast(message, undoFn) {
-  if (_undoToast) { _undoToast.remove(); _undoToast = null; }
-  clearTimeout(_undoTimer);
-  if (_undoCountdownTimer) { clearInterval(_undoCountdownTimer); _undoCountdownTimer = null; }
-
-  _undoSnapshot = undoFn;
-
-  var totalSeconds = 10;
-  var remaining = totalSeconds;
-
-  var toast = document.createElement('div');
-  toast.id = 'undo-toast';
-  toast.style.cssText =
-    'position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(30px);' +
-    'opacity:0;padding:12px 16px;border-radius:14px;' +
-    'background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%);' +
-    'color:#fff;display:flex;align-items:center;gap:12px;' +
-    'box-shadow:0 12px 35px rgba(0,0,0,0.35);z-index:999999;' +
-    'max-width:92%;min-width:280px;justify-content:space-between;' +
-    'border:1px solid rgba(255,255,255,0.1);' +
-    'transition:all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);' +
-    'overflow:hidden;';
-
-  var textWrap = document.createElement('div');
-  textWrap.style.cssText = 'flex:1;min-width:0;';
-  textWrap.innerHTML =
-    '<div style="font-size:0.78rem;color:#94a3b8;margin-bottom:2px;">' + message + '</div>' +
-    '<div style="font-size:0.72rem;color:#cbd5e1;display:flex;align-items:center;gap:6px;">' +
-      'تا ' +
-      '<span id="undo-countdown" style="font-weight:900;color:#fbbf24;font-size:0.9rem;min-width:22px;text-align:center;font-variant-numeric:tabular-nums;">' + remaining + '</span>' +
-      'ثانیه می‌تونی برگردونی' +
-    '</div>';
-  toast.appendChild(textWrap);
-
-  var progressBar = document.createElement('div');
-  progressBar.style.cssText =
-    'position:absolute;bottom:0;right:0;left:0;height:3px;' +
-    'background:rgba(255,255,255,0.1);';
-  var progressFill = document.createElement('div');
-  progressFill.id = 'undo-progress-fill';
-  progressFill.style.cssText =
-    'height:100%;width:100%;' +
-    'background:linear-gradient(90deg,#fbbf24,#f59e0b);' +
-    'transition:width 1s linear;';
-  progressBar.appendChild(progressFill);
-  toast.appendChild(progressBar);
-
-  var btn = document.createElement('button');
-  btn.type = 'button';
-  btn.style.cssText =
-    'background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:#fff;' +
-    'border:none;padding:8px 14px;border-radius:10px;font-size:0.8rem;' +
-    'font-weight:800;cursor:pointer;white-space:nowrap;' +
-    'box-shadow:0 4px 12px rgba(245,158,11,0.4);width:auto;margin:0;' +
-    'transition:transform 0.2s;flex-shrink:0;';
-  btn.innerHTML = '↩️ برگردون';
-  btn.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    performUndo();
-  });
-  toast.appendChild(btn);
-
-  document.body.appendChild(toast);
-  _undoToast = toast;
-
-  requestAnimationFrame(function() {
-    toast.style.transform = 'translateX(-50%) translateY(0)';
-    toast.style.opacity = '1';
-  });
-
-  _undoCountdownTimer = setInterval(function() {
-    remaining--;
-    var el = document.getElementById('undo-countdown');
-    if (el) {
-      el.innerText = remaining;
-      if (remaining <= 3) {
-        el.style.color = '#ef4444';
-        el.style.animation = 'pulseText 0.5s ease-in-out infinite';
-      }
-    }
-    var fill = document.getElementById('undo-progress-fill');
-    if (fill) fill.style.width = (remaining / totalSeconds * 100) + '%';
-
-    if (remaining <= 0) {
-      clearInterval(_undoCountdownTimer);
-      _undoCountdownTimer = null;
-      dismissUndoToast();
-    }
-  }, 1000);
-
-  _undoTimer = setTimeout(function() { dismissUndoToast(); }, (totalSeconds + 1) * 1000);
-
-  if (navigator.vibrate) navigator.vibrate(20);
-}
-  
-  function dismissUndoToast() {
-  if (!_undoToast) return;
-  var toast = _undoToast;
-  _undoToast = null;
-  _undoSnapshot = null;
-  if (_undoCountdownTimer) { clearInterval(_undoCountdownTimer); _undoCountdownTimer = null; }
-  clearTimeout(_undoTimer);
-  toast.style.transform = 'translateX(-50%) translateY(30px)';
-  toast.style.opacity = '0';
-  setTimeout(function() { toast.remove(); }, 350);
-}
-
-  function performUndo() {
-    if (!_undoSnapshot) return;
-    try {
-      _undoSnapshot();
-      if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
-    } catch(e) {
-      console.error('[undo]', e);
-    }
-    dismissUndoToast();
-  }
-  
-  // ═══════════════════════════════════════════════════════════════
-  // 🔄 Override توابع حذف
-  // ═══════════════════════════════════════════════════════════════
-  
-  // ─── ۱. حذف مشتری
-  var _baseDeleteCustomer = deleteCustomer;
-  deleteCustomer = function() {
-    if (!activeCustomerId) return;
-    var deletedCustId = activeCustomerId;
-    var c = customers.find(function(x) { return x.id === deletedCustId && !x.deleted; });
-    if (!c) return;
-    
-    if (!confirm('پرونده و تمام سوابق حذف شوند؟')) return;
-    
-    var now = Date.now();
-    // ذخیره لیست آیتم‌های حذف‌شده برای بازگردانی
-    var affectedCustomers = [];
-    var affectedTransactions = [];
-    var affectedQuotes = [];
-    
-    transactions.forEach(function(t) {
-      if (t.customerId === deletedCustId && !t.deleted) {
-        if (t.type === 'DEBT' && !t.stockRestored) { restorePartsStock(t.items); t.stockRestored = true; }
-        if (t.deliverySignatureDbId) deleteImageFromDB(t.deliverySignatureDbId);
-        affectedTransactions.push(t.id);
-        t.deleted = true;
-        t.updatedAt = now;
-      }
-    });
-    quotes.forEach(function(q) {
-      if (q.customerId === deletedCustId && !q.deleted) {
-        restorePartsStock(q.items);
-        if (q.evidenceList && q.evidenceList.length > 0) deleteImagesFromList(q.evidenceList);
-        affectedQuotes.push(q.id);
-        q.deleted = true;
-        q.updatedAt = now;
-      }
-    });
-    customers.forEach(function(cu) {
-      if (cu.id === deletedCustId) {
-        cu.deleted = true;
-        cu.updatedAt = now;
-        affectedCustomers.push(cu.id);
-      }
-    });
-    
-    saveAll();
-    if (typeof uploadToDrive === 'function') uploadToDrive(true);
-    if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
-    if (typeof renderDepositsStream === 'function') renderDepositsStream();
-    if (typeof renderParts === 'function') renderParts();
-    if (typeof renderReports === 'function') renderReports();
-    if (typeof showCustomerList === 'function') showCustomerList();
-    
-    // Undo
-    showUndoToast('مشتری «' + (c.name || '') + '» حذف شد', function() {
-      customers.forEach(function(cu) {
-        if (affectedCustomers.indexOf(cu.id) !== -1) {
-          cu.deleted = false;
-          cu.updatedAt = Date.now();
-        }
-      });
-      transactions.forEach(function(t) {
-        if (affectedTransactions.indexOf(t.id) !== -1) {
-          t.deleted = false;
-          t.stockRestored = false;
-          t.updatedAt = Date.now();
-        }
-      });
-      quotes.forEach(function(q) {
-        if (affectedQuotes.indexOf(q.id) !== -1) {
-          q.deleted = false;
-          q.updatedAt = Date.now();
-        }
-      });
-      saveAll();
-      if (typeof uploadToDrive === 'function') uploadToDrive(true);
-      if (typeof renderCustomers === 'function') renderCustomers();
-      if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
-      if (typeof renderParts === 'function') renderParts();
-      if (typeof renderReports === 'function') renderReports();
-      if (typeof showToast === 'function') showToast('✅ مشتری برگشت', 'success');
-    });
-  };
-  
-  // ─── ۲. حذف فاکتور در حال تعمیر
-  var _baseDeleteQuote = deleteQuote;
-  deleteQuote = function(qId) {
-    var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
-    if (!q) return;
-    if (!confirm('این فاکتور در حال تعمیر حذف شود؟\n(قطعات کسرشده به انبار برمی‌گردند)')) return;
-    
-    var title = q.title || q.model || 'فاکتور';
-    
-    // ذخیره وضعیت تراکنش‌های مرتبط
-    var affectedPayments = [];
-    if (q.depositPayId) {
-      for (var i = 0; i < transactions.length; i++) {
-        if (transactions[i].id === q.depositPayId) {
-          transactions[i].deleted = true;
-          transactions[i].updatedAt = Date.now();
-          affectedPayments.push(transactions[i].id);
-          break;
-        }
-      }
-    } else {
-      var cashPay = transactions.find(function(t) { return !t.deleted && t.customerId === q.customerId && t.intakeCode === q.intakeCode && t.type === 'PAY' && t.title && t.title.indexOf('بیعانه نقدی مغازه') !== -1; });
-      if (cashPay) { cashPay.deleted = true; cashPay.updatedAt = Date.now(); affectedPayments.push(cashPay.id); }
-      var onlinePay = transactions.find(function(t) { return !t.deleted && t.customerId === q.customerId && t.intakeCode === q.intakeCode && t.type === 'PAY' && t.title && t.title.indexOf('واریز بیعانه تاییدشده') !== -1; });
-      if (onlinePay) { onlinePay.deleted = true; onlinePay.updatedAt = Date.now(); affectedPayments.push(onlinePay.id); }
-    }
-    
-    var itemsSnapshot = JSON.parse(JSON.stringify(q.items || []));
-    
-    restorePartsStock(q.items);
-    if (q.evidenceList && q.evidenceList.length > 0) deleteImagesFromList(q.evidenceList);
-    
-    q.deleted = true;
-    q.updatedAt = Date.now();
-    
-    saveAll();
-    if (typeof uploadToDrive === 'function') uploadToDrive(true);
-    if (typeof renderCustomerLoyaltyBanner === 'function') renderCustomerLoyaltyBanner();
-    if (typeof renderQuotes === 'function') renderQuotes();
-    if (typeof renderTransactions === 'function') renderTransactions();
-    if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
-    if (typeof renderDepositsStream === 'function') renderDepositsStream();
-    if (typeof renderParts === 'function') renderParts();
-    if (typeof renderReports === 'function') renderReports();
-    
-    showUndoToast('فاکتور در حال تعمیر حذف شد', function() {
-      q.deleted = false;
-      q.updatedAt = Date.now();
-      q.items = itemsSnapshot;
-      // کم کردن موجودی دوباره
-      itemsSnapshot.forEach(function(it) {
-        if (it && it.partId) {
-          var p = parts.find(function(item) { return item.id === it.partId && !item.deleted; });
-          if (p) { p.qty = Math.max(0, (Number(p.qty) || 0) - 1); p.updatedAt = Date.now(); }
-        }
-      });
-      affectedPayments.forEach(function(pid) {
-        transactions.forEach(function(t) {
-          if (t.id === pid) { t.deleted = false; t.updatedAt = Date.now(); }
-        });
-      });
-      saveAll();
-      if (typeof uploadToDrive === 'function') uploadToDrive(true);
-      if (typeof renderQuotes === 'function') renderQuotes();
-      if (typeof renderTransactions === 'function') renderTransactions();
-      if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
-      if (typeof renderParts === 'function') renderParts();
-      if (typeof renderReports === 'function') renderReports();
-      if (typeof showToast === 'function') showToast('✅ فاکتور برگشت', 'success');
-    });
-  };
-  
-  // ─── ۳. حذف تراکنش (فاکتور قطعی / دریافتی)
-  var _baseDeleteTransaction = deleteTransaction;
-  deleteTransaction = function(txId) {
-    var t = transactions.find(function(x) { return x.id === txId && !x.deleted; });
-    if (!t) return;
-    if (!confirm('این آیتم حذف شود؟')) return;
-    
-    var label = t.type === 'DEBT' ? 'فاکتور قطعی' : 'دریافتی';
-    var itemsSnapshot = t.type === 'DEBT' ? JSON.parse(JSON.stringify(t.items || [])) : null;
-    
-    if (t.type === 'DEBT' && !t.stockRestored) {
-      restorePartsStock(t.items);
-      t.stockRestored = true;
-    }
-    if (t.deliverySignatureDbId) deleteImageFromDB(t.deliverySignatureDbId);
-    t.deleted = true;
-    t.updatedAt = Date.now();
-    
-    saveAll();
-    if (typeof uploadToDrive === 'function') uploadToDrive(true);
-    if (typeof renderCustomerLoyaltyBanner === 'function') renderCustomerLoyaltyBanner();
-    if (typeof renderTransactions === 'function') renderTransactions();
-    if (typeof renderParts === 'function') renderParts();
-    if (typeof renderReports === 'function') renderReports();
-    
-    showUndoToast(label + ' حذف شد', function() {
-      t.deleted = false;
-      t.updatedAt = Date.now();
-      if (itemsSnapshot) {
-        t.items = itemsSnapshot;
-        itemsSnapshot.forEach(function(it) {
-          if (it && it.partId) {
-            var p = parts.find(function(item) { return item.id === it.partId && !item.deleted; });
-            if (p) { p.qty = Math.max(0, (Number(p.qty) || 0) - 1); p.updatedAt = Date.now(); }
-          }
-        });
-      }
-      t.stockRestored = false;
-      saveAll();
-      if (typeof uploadToDrive === 'function') uploadToDrive(true);
-      if (typeof renderTransactions === 'function') renderTransactions();
-      if (typeof renderParts === 'function') renderParts();
-      if (typeof renderReports === 'function') renderReports();
-      if (typeof showToast === 'function') showToast('✅ ' + label + ' برگشت', 'success');
-    });
-  };
-  
-  // ─── ۴. حذف قطعه
-  var _baseDeletePart = deletePart;
-  deletePart = function(id) {
-    var item = parts.find(function(p) { return p.id === id && !p.deleted; });
-    if (!item) return;
-    if (!confirm('این قطعه از انبار حذف شود؟')) return;
-    
-    var name = item.model || 'قطعه';
-    
-    item.deleted = true;
-    item.updatedAt = Date.now();
-    
-    saveAll();
-    if (typeof uploadToDrive === 'function') uploadToDrive(true);
-    if (typeof renderParts === 'function') renderParts();
-    if (typeof renderReports === 'function') renderReports();
-    
-    showUndoToast('قطعه «' + name + '» حذف شد', function() {
-      item.deleted = false;
-      item.updatedAt = Date.now();
-      saveAll();
-      if (typeof uploadToDrive === 'function') uploadToDrive(true);
-      if (typeof renderParts === 'function') renderParts();
-      if (typeof renderReports === 'function') renderReports();
-      if (typeof showToast === 'function') showToast('✅ قطعه برگشت', 'success');
-    });
-  };
-  
-  // ─── ۵. حذف هزینه
-  var _baseDeleteExpense = deleteExpense;
-  deleteExpense = function(expId) {
-    var exp = expenses.find(function(x) { return x.id === expId && !x.deleted; });
-    if (!exp) return;
-    if (!confirm('این هزینه حذف شود؟')) return;
-    
-    var title = exp.title || 'هزینه';
-    
-    exp.deleted = true;
-    exp.updatedAt = Date.now();
-    
-    saveAll();
-    if (typeof uploadToDrive === 'function') uploadToDrive(true);
-    if (typeof renderExpenses === 'function') renderExpenses();
-    if (typeof renderReports === 'function') renderReports();
-    
-    showUndoToast('هزینه «' + title + '» حذف شد', function() {
-      exp.deleted = false;
-      exp.updatedAt = Date.now();
-      saveAll();
-      if (typeof uploadToDrive === 'function') uploadToDrive(true);
-      if (typeof renderExpenses === 'function') renderExpenses();
-      if (typeof renderReports === 'function') renderReports();
-      if (typeof showToast === 'function') showToast('✅ هزینه برگشت', 'success');
-    });
-  };
-  
-  console.log('[undo] Undo system ready ✅');
-})();
-
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -10950,97 +10803,6 @@ var _undoCountdownTimer = null;
     return buildConfirmModal(opts);
   };
   
-  // ─── جایگزین کردن confirm() توی توابع مهم
-  function wrapConfirm(fn, optsFn) {
-    return async function() {
-      var args = arguments;
-      var opts = typeof optsFn === 'function' ? optsFn.apply(this, args) : optsFn;
-      var ok = await buildConfirmModal(opts);
-      if (!ok) return;
-      return fn.apply(this, args);
-    };
-  }
-  
-  // deleteQuote
-  if (typeof deleteQuote === 'function') {
-    var _deleteQuote = deleteQuote;
-    deleteQuote = async function(qId) {
-      var ok = await buildConfirmModal({
-        title: 'حذف فاکتور در حال تعمیر',
-        message: 'آیا مطمئنید؟\n(قطعات کسرشده به انبار برمی‌گردند)',
-        icon: '🗑️',
-        confirmText: '✓ بله، حذف کن',
-        danger: true
-      });
-      if (!ok) return;
-      return _deleteQuote(qId);
-    };
-  }
-  
-  // deleteCustomer
-  if (typeof deleteCustomer === 'function') {
-    var _deleteCustomer = deleteCustomer;
-    deleteCustomer = async function() {
-      var ok = await buildConfirmModal({
-        title: 'حذف کامل پرونده مشتری',
-        message: 'تمام سوابق، فاکتورها و مستندات این مشتری حذف می‌شوند.\nآیا مطمئنید؟',
-        icon: '🗑️',
-        confirmText: '✓ بله، همه رو حذف کن',
-        danger: true
-      });
-      if (!ok) return;
-      return _deleteCustomer();
-    };
-  }
-  
-  // deletePart
-  if (typeof deletePart === 'function') {
-    var _deletePart = deletePart;
-    deletePart = async function(id) {
-      var ok = await buildConfirmModal({
-        title: 'حذف قطعه از انبار',
-        message: 'این قطعه از لیست انبار حذف می‌شود.\nادامه می‌دهید؟',
-        icon: '📦',
-        confirmText: '✓ حذف کن',
-        danger: true
-      });
-      if (!ok) return;
-      return _deletePart(id);
-    };
-  }
-  
-  // deleteExpense
-  if (typeof deleteExpense === 'function') {
-    var _deleteExpense = deleteExpense;
-    deleteExpense = async function(expId) {
-      var ok = await buildConfirmModal({
-        title: 'حذف هزینه',
-        message: 'این هزینه از لیست حذف می‌شود.\nادامه می‌دهید؟',
-        icon: '💸',
-        confirmText: '✓ حذف کن',
-        danger: true
-      });
-      if (!ok) return;
-      return _deleteExpense(expId);
-    };
-  }
-  
-  // deleteTransaction
-  if (typeof deleteTransaction === 'function') {
-    var _deleteTransaction = deleteTransaction;
-    deleteTransaction = async function(txId) {
-      var ok = await buildConfirmModal({
-        title: 'حذف آیتم مالی',
-        message: 'این فاکتور/دریافتی از پرونده حذف می‌شود.\nادامه می‌دهید؟',
-        icon: '🗑️',
-        confirmText: '✓ حذف کن',
-        danger: true
-      });
-      if (!ok) return;
-      return _deleteTransaction(txId);
-    };
-  }
-  
   console.log('[pretty-confirm] Ready ✅');
 })();
 
@@ -11264,11 +11026,36 @@ var _undoCountdownTimer = null;
     
     // استخراج آیتم‌ها
     var items = getInvoiceItemsFromForm();
-    if (items.length === 0) return showToast('حداقل یک شرح کار وارد کنید', 'warning');
-    
-    var sumRaw = 0, laborSum = 0;
-    items.forEach(function(it) { sumRaw += it.amount; if (!it.partId) laborSum += it.amount; });
-    if (sumRaw <= 0) return showToast('مبلغ کل نمی‌تواند صفر باشد', 'warning');
+var sumRaw = 0, laborSum = 0;
+items.forEach(function(it) { sumRaw += it.amount; if (!it.partId) laborSum += it.amount; });
+
+var devModelEl = document.getElementById('dev-model');
+var devProblemEl = document.getElementById('dev-problem');
+var modelVal = (devModelEl && devModelEl.value || '').trim();
+var problemVal = (devProblemEl && devProblemEl.value || '').trim();
+
+if (type === 'DEBT') {
+  // 🔒 فاکتور قطعی: حتماً باید مبلغ مشخص باشه
+  if (items.length === 0) return showToast('حداقل یک شرح کار وارد کنید', 'warning');
+  if (sumRaw <= 0) return showToast('مبلغ کل نمی‌تواند صفر باشد', 'warning');
+} else {
+  // 🆕 پذیرش: امکان ثبت بدون مبلغ (عیب نامشخص)
+  var hasIdentity = items.length > 0 || modelVal || problemVal;
+  if (!hasIdentity) {
+    return showToast('حداقل مدل دستگاه یا شرح ایراد را وارد کنید', 'warning');
+  }
+  // اگه هیچ ردیفی پر نشده، یه ردیف placeholder با مبلغ ۰ بساز
+  if (items.length === 0) {
+    items.push({ 
+      title: problemVal || 'عیب نامشخص — در انتظار بررسی', 
+      amount: 0, 
+      partId: null, 
+      buyPrice: 0 
+    });
+    sumRaw = 0;
+    laborSum = 0;
+  }
+}
     
     var model = (document.getElementById('dev-model').value || '').trim();
     var brand = (document.getElementById('dev-brand').value || '').trim();
@@ -11307,7 +11094,8 @@ var _undoCountdownTimer = null;
     var discountPercent = (applyLoyalty && loyalty.discountPercent) ? loyalty.discountPercent : 0;
     var discountAmt = Math.round(laborSum * discountPercent / 100);
     var finalWorkAmount = Math.max(0, sumRaw - discountAmt);
-    var combinedTitle = (model ? model + ' - ' : '') + items.map(function(it) { return it.title; }).join(' ، ');
+    var titleParts = items.map(function(it) { return it.title; }).filter(Boolean);
+var combinedTitle = (model ? model + ' - ' : '') + (titleParts.length > 0 ? titleParts.join(' ، ') : (problemVal || 'عیب نامشخص'));
     
     var currentIntakeCode = nextIntakeSeq;
 var currentTrackCode = generateRandom6Digit();
@@ -11777,7 +11565,6 @@ title: combinedTitle, workType: workType, collabName: collabName, collabCost: co
   
   var style = document.createElement('style');
   style.textContent =
-    '.swipe-wrapper { position: relative; overflow: hidden; margin-bottom: 14px; border-radius: 24px; }' +
     '.swipe-wrapper .workshop-card { margin-bottom: 0 !important; position: relative; z-index: 2; transition: transform 0.25s cubic-bezier(0.34, 1.2, 0.64, 1); background: var(--card); }' +
     '.swipe-wrapper .workshop-card.dragging { transition: none !important; }'
     +
@@ -13168,6 +12955,75 @@ paymentText: customPaymentText,
   console.log('[smart-archive] Ready ✅');
 })();
 
+// ═══════════════════════════════════════════════════════════════
+// 🔧 پچ: importBackup آرشیو رو هم بازیابی کنه
+// ═══════════════════════════════════════════════════════════════
+(function patchImportBackupForArchive() {
+
+  var ARCHIVE_DB_NAME = 'persia_archive';
+  var ARCHIVE_DB_VERSION = 1;
+
+  function openArchiveDB() {
+    return new Promise(function(resolve, reject) {
+      var req = indexedDB.open(ARCHIVE_DB_NAME, ARCHIVE_DB_VERSION);
+      req.onupgradeneeded = function(e) {
+        var db = e.target.result;
+        if (!db.objectStoreNames.contains('items')) {
+          var store = db.createObjectStore('items', { keyPath: 'archiveId', autoIncrement: true });
+          store.createIndex('type', 'type', { unique: false });
+          store.createIndex('archivedAt', 'archivedAt', { unique: false });
+        }
+      };
+      req.onsuccess = function(e) { resolve(e.target.result); };
+      req.onerror = function(e) { reject(e.target.error); };
+    });
+  }
+
+  var _baseImportBackup = importBackup;
+
+  importBackup = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+
+    var preReader = new FileReader();
+    preReader.onload = function(evt) {
+      var backupData = null;
+      try { backupData = JSON.parse(evt.target.result); } catch(err) {}
+
+      // اگه آرشیو داره، بعد از بازیابی اصلی، آرشیو رو هم برگردون
+      if (backupData && Array.isArray(backupData.archive) && backupData.archive.length > 0) {
+        // فایل رو دوباره بده به import اصلی
+        var fakeEvent = { target: { files: [file], value: '' } };
+        var result = _baseImportBackup.call(this, fakeEvent);
+
+        // بعد از ۲ ثانیه (وقتی import اصلی کارش تموم شد)، آرشیو رو بازیابی کن
+        setTimeout(function() {
+          openArchiveDB().then(function(db) {
+            var tx = db.transaction('items', 'readwrite');
+            var store = tx.objectStore('items');
+            store.clear();
+            backupData.archive.forEach(function(item) { store.add(item); });
+            tx.oncomplete = function() {
+              console.log('[archive-restore] ✅ ' + backupData.archive.length + ' آیتم آرشیو بازیابی شد');
+              if (typeof showToast === 'function') {
+                showToast('📦 ' + backupData.archive.length + ' آیتم آرشیو هم بازیابی شد', 'success');
+              }
+              if (typeof refreshArchiveCard === 'function') refreshArchiveCard();
+            };
+          }).catch(function(err) {
+            console.warn('[archive-restore] failed:', err);
+          });
+        }, 2000);
+      } else {
+        // آرشیو نداره، رفتار عادی
+        _baseImportBackup.call(this, e);
+      }
+    };
+    preReader.readAsText(file);
+  };
+
+  console.log('[import-backup-archive-patch] Ready ✅');
+})();
 
 // ═══════════════════════════════════════════════════════════════
 // 🔧 Fix: نوار وفاداری سرگردان رو داخل کارت برگردون
@@ -14807,38 +14663,6 @@ body.dark-mode select option {
 // 🛠️ پچ یکپارچه: تعمیر ساختار DOM + حذف پیام‌های تستی + Drag مودال
 // ═══════════════════════════════════════════════════════════════════
 (function() {
-  // ۱. خروج تب‌های دیگر از داخل #view-details (جبران تگ </div> جاافتاده)
-  function fixBrokenDOM() {
-    var vd = document.getElementById('view-details');
-    var tc = document.getElementById('tab-content-customers');
-    if (!vd || !tc) return;
-    
-    // اطمینان از اینکه view-details مستقیم داخل tab-content-customers است
-    if (vd.parentNode !== tc) tc.appendChild(vd);
-
-    var rootSections = [
-      'tab-content-deposits', 'tab-content-expenses', 'tab-content-parts',
-      'tab-content-reports', 'tab-content-backup', 'modal-receive-payment',
-      'modal-edit-customer', 'modal-evidence', 'modal-view-evidence',
-      'modal-qc', 'modal-signature', 'tariff-modal', 'modal-quote-edit',
-      'modal-part-edit', 'modal-expense-edit', 'modal-payment-edit',
-      'modal-imei-history', 'modal-pin-prompt', 'modal-quick-note',
-      'modal-timeline-view', 'print-section'
-    ];
-    rootSections.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el && (vd.contains(el) || tc.contains(el))) {
-        document.body.insertBefore(el, document.body.lastElementChild);
-      }
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fixBrokenDOM);
-  } else {
-    fixBrokenDOM();
-  }
-
   // ۲. فیلتر کردن Toastهای تستیِ دیباگ (🔵 قبل از confirm و...)
   if (typeof window.showToast === 'function' && !window.showToast._cleaned) {
     var _origToast = window.showToast;
@@ -15371,110 +15195,47 @@ window.showCustomerList = function() {
   console.log('[fix-glass-ref-stuck] Ready ✅');
 })();
 </script>
-<!-- ✨ افکت نهایی (روش ساندویچی: لیزر + گرادیانت + نابودی کادر استاتیک) -->
+
+<!-- ✨ افکت نهایی: لیزر هوشمند + گرادیانت متحرک (نسخه تمیز) -->
 <style>
-  @property --angle {
-    syntax: '<angle>';
-    initial-value: 0deg;
-    inherits: false;
-  }
+  /* ۱. رنگ‌های وضعیت */
+  .workshop-card:has(.badge-blue)   { --beam-color: #3b82f6; --beam-glow: rgba(59, 130, 246, 0.25); --bg-move-color: rgba(59, 130, 246, 0.15); }
+  .workshop-card:has(.badge-orange) { --beam-color: #f59e0b; --beam-glow: rgba(245, 158, 11, 0.25); --bg-move-color: rgba(245, 158, 11, 0.15); }
+  .workshop-card:has(.badge-purple) { --beam-color: #a855f7; --beam-glow: rgba(168, 85, 247, 0.25); --bg-move-color: rgba(168, 85, 247, 0.15); }
+  .workshop-card:has(.badge-green)  { --beam-color: #10b981; --beam-glow: rgba(16, 185, 129, 0.25); --bg-move-color: rgba(16, 185, 129, 0.15); }
+  .workshop-card:has(.badge-red)    { --beam-color: #ef4444; --beam-glow: rgba(239, 68, 68, 0.25); --bg-move-color: rgba(239, 68, 68, 0.15); }
+  .workshop-card:has(.badge-collab) { --beam-color: #ea580c; --beam-glow: rgba(234, 88, 12, 0.25); --bg-move-color: rgba(234, 88, 12, 0.15); }
+  .workshop-card.overdue            { --beam-color: #ef4444; --beam-glow: rgba(239, 68, 68, 0.4); --bg-move-color: rgba(239, 68, 68, 0.25); }
 
-  /* ۱. آماده‌سازی قاب بیرونی (باید کاملاً تمیز باشه) */
-  .swipe-wrapper {
-    padding: 0 !important;
-    background: transparent !important;
-    margin-bottom: 14px !important;
-    overflow: hidden !important; /* برای اینکه گوشه‌ها گرد بمونن */
-    border-radius: 26px !important;
-    box-shadow: 0 4px 15px var(--beam-glow, rgba(0,0,0,0.1)) !important;
-  }
-
-  /* ۲. تعریف رنگ‌ها */
-  .workshop-card:has(.badge-blue)   { --beam-color: #3b82f6; --beam-glow: rgba(59, 130, 246, 0.2); --bg-move-color: rgba(59, 130, 246, 0.1); } 
-  .workshop-card:has(.badge-orange) { --beam-color: #f59e0b; --beam-glow: rgba(245, 158, 11, 0.2); --bg-move-color: rgba(245, 158, 11, 0.1); } 
-  .workshop-card:has(.badge-purple) { --beam-color: #a855f7; --beam-glow: rgba(168, 85, 247, 0.2); --bg-move-color: rgba(168, 85, 247, 0.1); } 
-  .workshop-card:has(.badge-green)  { --beam-color: #10b981; --beam-glow: rgba(16, 185, 129, 0.2); --bg-move-color: rgba(16, 185, 129, 0.1); } 
-  .workshop-card:has(.badge-red)    { --beam-color: #ef4444; --beam-glow: rgba(239, 68, 68, 0.2); --bg-move-color: rgba(239, 68, 68, 0.1); } 
-  .workshop-card:has(.badge-collab) { --beam-color: #ea580c; --beam-glow: rgba(234, 88, 12, 0.2); --bg-move-color: rgba(234, 88, 12, 0.1); } 
-  .workshop-card.overdue            { --beam-color: #ef4444; --beam-glow: rgba(239, 68, 68, 0.3); --bg-move-color: rgba(239, 68, 68, 0.15); } 
-
-  /* ۳. کارت اصلی (حذف کامل کادرها و پس‌زمینه‌های قبلی) */
-  .workshop-card,
-  .workshop-card:has(.badge-blue),
-  .workshop-card:has(.badge-orange),
-  .workshop-card:has(.badge-purple),
-  .workshop-card:has(.badge-green),
-  .workshop-card:has(.badge-red),
-  .workshop-card:has(.badge-collab),
-  .workshop-card.overdue {
-    margin: 0 !important;
-    border: none !important; /* 💥 نابودی کادر ۶ پیکسلی سمت راست */
-    border-right: none !important;
-    border-radius: 26px !important;
-    background: transparent !important;
-    position: relative !important;
-    z-index: 1 !important;
-    padding: 16px !important; /* حفظ فاصله داخلی */
-  }
-
-  /* ۴. لایه اول: لیزر چرخان (پشت همه چیز) */
-  .workshop-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    border-radius: 26px;
-    background: conic-gradient(
-      from var(--angle), 
-      transparent 60%, 
-      #22d3ee 80%, 
-      #ffffff 92%, 
-      #22d3ee 98%, 
-      transparent 100%
-    );
-    animation: borderSpin 3s linear infinite;
-  }
-
-<!-- ✨ افکت نهایی: لیزر هوشمند + گرادیانت متحرک (نسخه پایدار) -->
-<style>
-  /* ۱. تعریف رنگ‌ها */
-  .workshop-card:has(.badge-blue)   { --beam-color: #3b82f6; --beam-glow: rgba(59, 130, 246, 0.2); --bg-move-color: rgba(59, 130, 246, 0.15); } 
-  .workshop-card:has(.badge-orange) { --beam-color: #f59e0b; --beam-glow: rgba(245, 158, 11, 0.2); --bg-move-color: rgba(245, 158, 11, 0.15); } 
-  .workshop-card:has(.badge-purple) { --beam-color: #a855f7; --beam-glow: rgba(168, 85, 247, 0.2); --bg-move-color: rgba(168, 85, 247, 0.15); } 
-  .workshop-card:has(.badge-green)  { --beam-color: #10b981; --beam-glow: rgba(16, 185, 129, 0.2); --bg-move-color: rgba(16, 185, 129, 0.15); } 
-  .workshop-card:has(.badge-red)    { --beam-color: #ef4444; --beam-glow: rgba(239, 68, 68, 0.2); --bg-move-color: rgba(239, 68, 68, 0.15); } 
-  .workshop-card:has(.badge-collab) { --beam-color: #ea580c; --beam-glow: rgba(234, 88, 12, 0.2); --bg-move-color: rgba(234, 88, 12, 0.15); } 
-  .workshop-card.overdue            { --beam-color: #ef4444; --beam-glow: rgba(239, 68, 68, 0.4); --bg-move-color: rgba(239, 68, 68, 0.25); } 
-
-  /* ۲. قاب بیرونی */
+  /* ۲. قاب بیرونی (لیزر) */
   .swipe-wrapper {
     position: relative !important;
     padding: 2.5px !important;
     border-radius: 26px !important;
     overflow: hidden !important;
     margin-bottom: 14px !important;
-    background: var(--border) !important;
+    background: var(--border, #e2e8f0) !important;
     box-shadow: 0 4px 20px var(--beam-glow, rgba(0,0,0,0.1)) !important;
     z-index: 1 !important;
   }
 
-  /* ۳. لیزر چرخان (با متغیر رنگ وضعیت) */
+  /* ۳. لیزر چرخان */
   .swipe-wrapper::before {
     content: '';
     position: absolute;
     top: -50%; left: -50%;
     width: 200%; height: 200%;
     background: conic-gradient(
-      transparent 40%, 
-      var(--beam-color, #22d3ee) 80%, 
-      #ffffff 90%, 
+      transparent 40%,
+      var(--beam-color, #22d3ee) 80%,
+      #ffffff 90%,
       transparent 100%
     );
     animation: spinLaser 3s linear infinite;
     z-index: 0;
   }
 
-  /* ۴. کارت اصلی + گرادیانت متحرک پررنگ‌تر */
+  /* ۴. کارت با گرادیانت متحرک */
   .workshop-card,
   .workshop-card:has(.badge-blue),
   .workshop-card:has(.badge-orange),
@@ -15484,29 +15245,28 @@ window.showCustomerList = function() {
   .workshop-card:has(.badge-collab),
   .workshop-card.overdue {
     margin: 0 !important;
-    border-radius: 23.5px !important; 
-    border: none !important; 
+    border-radius: 23.5px !important;
+    border: none !important;
     border-right: none !important;
     position: relative !important;
-    z-index: 1 !important; 
-    
+    z-index: 1 !important;
     background-color: var(--card) !important;
     background-image: linear-gradient(120deg, transparent 20%, var(--bg-move-color) 50%, transparent 80%) !important;
     background-size: 200% 200% !important;
-    
+    animation: bgMove 8s ease-in-out infinite !important;
   }
 
-  /* ۵. انیمیشن‌ها */
+  /* ۵. کی‌فریم‌ها */
   @keyframes spinLaser {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
-  
   @keyframes bgMove {
     0% { background-position: 0% 50%; }
     100% { background-position: 100% 50%; }
   }
 </style>
+
   <!-- 🛠️ فیکس نهایی (نوار وفاداری بدون خرابی ظاهر) + دکمه تغییر تم -->
 <script>
 (function fixCustomerBarsAndAddThemeBtn() {
@@ -17074,59 +16834,6 @@ if (typeof _baseConvertQuote === 'function') {
     else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
   };
 
-  // ─── ۱۰. تنظیمات ───
-  window.openDPSettings = function() {
-    var old = document.getElementById('dp-settings-modal');
-    if (old) old.remove();
-
-    var html = `
-      <div class="modal-overlay" id="dp-settings-modal" style="z-index:9999999;display:flex;">
-        <div class="modal-content" style="max-width:400px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;">
-            <h3 style="font-size:1rem;color:#1e293b;">⚙️ تنظیمات دیجی‌پی</h3>
-            <button type="button" onclick="document.getElementById('dp-settings-modal').remove()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">✕</button>
-          </div>
-          <label class="field-label">لینک شخصی دیجی‌پی:</label>
-          <input type="url" id="dp-cfg-link" value="${dpMerchantLink}" placeholder="https://..." style="direction:ltr;text-align:left;font-size:0.75rem;">
-          <label class="field-label">کمیسیون اعتبار ماهانه (%):</label>
-          <input type="number" id="dp-cfg-m1" value="${dpSettings.m1}">
-          <label class="field-label">کمیسیون ۴ قسطه (%):</label>
-          <input type="number" id="dp-cfg-m2" value="${dpSettings.m2}">
-          <label class="field-label">کمیسیون کیف پول (%):</label>
-          <input type="number" id="dp-cfg-m3" value="${dpSettings.m3}">
-          <div class="row" style="margin-top:14px;">
-            <button type="button" onclick="saveDPSettings()" style="background:var(--success);flex:1.4;padding:11px;font-weight:800;cursor:pointer;">💾 ذخیره</button>
-            <button type="button" onclick="document.getElementById('dp-settings-modal').remove()" style="background:#cbd5e1;color:#1e293b;flex:1;padding:11px;cursor:pointer;">انصراف</button>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', html);
-  };
-
-  window.saveDPSettings = function() {
-    dpMerchantLink = document.getElementById('dp-cfg-link').value.trim();
-    dpSettings.m1 = Number(document.getElementById('dp-cfg-m1').value) || 8;
-    dpSettings.m2 = Number(document.getElementById('dp-cfg-m2').value) || 12;
-    dpSettings.m3 = Number(document.getElementById('dp-cfg-m3').value) || 8;
-    
-    localStorage.setItem('db_digipay_merchant_link', dpMerchantLink);
-    localStorage.setItem('db_digipay_settings', JSON.stringify(dpSettings));
-    
-    document.getElementById('dp-settings-modal').remove();
-    showToast('✅ تنظیمات ذخیره شد', 'success');
-    renderDPTab();
-    
-    ['del-payment-method', 'pay-method-select'].forEach(function(id) {
-       var typeSel = document.getElementById('dp-select-type-' + id);
-       if (typeSel) {
-           typeSel.options[0].text = 'اعتبار ماهانه (کمیسیون ' + dpSettings.m1 + '٪)';
-           typeSel.options[1].text = 'اعتبار ۴ قسطه (کمیسیون ' + dpSettings.m2 + '٪)';
-           typeSel.options[2].text = 'پرداخت از کیف پول (کمیسیون ' + dpSettings.m3 + '٪)';
-       }
-    });
-  };
-
   // ─── شروع ───
   function init() {
     injectPaymentUI();
@@ -18413,18 +18120,42 @@ body.apk-print-mode #apk-print-toolbar {
     // اجرای تابع اصلی تحویل
     _baseConvert.apply(this, arguments);
     
-    // اعمال تخفیف روی تراکنش ایجاد شده (فاکتور قطعی)
-    if (q && discount > 0) {
-      var lastTx = transactions.find(t => t.customerId === q.customerId && t.intakeCode === q.intakeCode && t.type === 'DEBT');
-      if (lastTx) {
-        lastTx.manualDiscount = discount;
-        lastTx.rawAmount = Number(q.amount || 0); // مبلغ اصلی قبل از تخفیف
-        lastTx.totalWork = Math.max(0, lastTx.totalWork - discount); // مبلغ نهایی
-        lastTx.amount = lastTx.totalWork;
-        saveAll();
-      }
+   // ۵. اعمال تخفیف روی فاکتور و تراکنش نهایی هنگام ذخیره
+var _baseConvert = window.convertQuoteToDebt;
+window.convertQuoteToDebt = function(qId, deliverySignature, deliverySignatureDbId, newPayment, payMethod) {
+  var q = quotes.find(x => x.id === qId && !x.deleted);
+  var discount = 0;
+  if (q) {
+    var discInput = document.getElementById('del-manual-discount');
+    discount = discInput ? Number(cleanNumber(discInput.value)) || 0 : 0;
+  }
+  
+  // اجرای تابع اصلی تحویل
+  _baseConvert.apply(this, arguments);
+  
+  // اعمال تخفیف روی تراکنش ایجاد شده (فاکتور قطعی)
+  if (q && discount > 0) {
+    var lastTx = transactions.find(t => t.customerId === q.customerId && t.intakeCode === q.intakeCode && t.type === 'DEBT');
+    if (lastTx) {
+      lastTx.manualDiscount = discount;
+      lastTx.rawAmount = Number(q.amount || 0); // مبلغ اصلی قبل از تخفیف
+      lastTx.totalWork = Math.max(0, lastTx.totalWork - discount); // مبلغ نهایی
+      lastTx.amount = lastTx.totalWork;
+      
+      // ✅ ذخیره در دیتابیس
+      saveAll();
+      
+      // ✅ پاک کردن کش تا مبلغ جدید محاسبه بشه
+      if (typeof invalidateCaches === 'function') invalidateCaches();
+      
+      // ✅ رفرش کردن همه صفحاتی که مبلغ رو نشون می‌دن
+      if (typeof renderCustomers === 'function') renderCustomers();
+      if (typeof renderTransactions === 'function') renderTransactions();
+      if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
+      if (typeof renderCustomerLoyaltyBanner === 'function') renderCustomerLoyaltyBanner();
     }
-  };
+  }
+};
 
   // ۶. نمایش تخفیف در فاکتور چاپی نهایی (printCustomerInvoice)
   var _basePrintCustomerInv = window.printCustomerInvoice;
@@ -18623,12 +18354,39 @@ body.apk-print-mode #apk-print-toolbar {
   #tab-content-customers .container,
   #view-details .container,
   #tab-content-orders .container {
-    padding-bottom: 120px !important; /* ایجاد فضای خالی به اندازه منوی پایین */
+    padding-bottom: 120px !important;
   }
 
-  /* ۳. مخفی کردن اجباری دکمه مزاحم فروش سریع */
-  button[onclick="saveQuickSale()"] {
+  /* ۳. سازگاری فروش سریع با حالت تاریک */
+  body.dark-mode #cust-sec-quick .card {
+    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%) !important;
+    border-color: #6d28d9 !important;
+  }
+  body.dark-mode #cust-sec-quick input:not([type="hidden"]),
+  body.dark-mode #cust-sec-quick select {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #4c1d95 !important;
+  }
+  body.dark-mode #cust-sec-quick .field-label {
+    color: #c4b5fd !important;
+  }
+  body.dark-mode #cust-sec-quick input::placeholder {
+    color: #6b7280 !important;
+  }
+  body.dark-mode #cust-sec-quick input[type="hidden"] {
     display: none !important;
+  }
+  body.dark-mode #cust-sec-quick .part-search-results {
+    background: #0f172a !important;
+    border-color: #4c1d95 !important;
+  }
+  body.dark-mode #cust-sec-quick .part-search-item {
+    border-bottom-color: #1e293b !important;
+    color: #f8fafc !important;
+  }
+  body.dark-mode #cust-sec-quick .part-search-item:hover {
+    background: #1e1b4b !important;
   }
 </style>
 
@@ -18821,18 +18579,35 @@ body.apk-print-mode #apk-print-toolbar {
   if (!window.orders) window.orders = [];
   if (!window.supplierPurchases) window.supplierPurchases = [];
 
-  // ─── لود دیتا از دیتابیس ───
+  // ─── لود دیتا از دیتابیس (با محافظت از race condition) ───
   if (!window._ordersLoaded) {
     window._ordersLoaded = true;
-    setTimeout(function() {
-      openAppDB().then(function(db) {
-        var req = db.transaction('store', 'readonly').objectStore('store').get('db_orders');
-        req.onsuccess = function(e) {
-          if (e.target.result && Array.isArray(e.target.result)) window.orders = e.target.result;
-          if (typeof renderOrders === 'function') renderOrders();
-        };
-      });
-    }, 500);
+    openAppDB().then(function(db) {
+      var req = db.transaction('store', 'readonly').objectStore('store').get('db_orders');
+      req.onsuccess = function(e) {
+        var loaded = Array.isArray(e.target.result) ? e.target.result : [];
+        var inMemory = Array.isArray(window.orders) ? window.orders : [];
+
+        if (loaded.length > 0) {
+          // DB برنده — دیتای ذخیره‌شده رو بارگذاری کن
+          window.orders = loaded;
+        } else if (inMemory.length > 0) {
+          // حافظه آیتم داره → به DB بریز (save‌های زودهنگام)
+          db.transaction('store', 'readwrite').objectStore('store').put(inMemory, 'db_orders');
+          window.orders = inMemory;
+        } else {
+          window.orders = [];
+        }
+
+        window._ordersFullyLoaded = true;
+        if (typeof renderOrders === 'function') renderOrders();
+        console.log('[orders] Loaded:', window.orders.length);
+      };
+      req.onerror = function() {
+        window.orders = window.orders || [];
+        window._ordersFullyLoaded = true;
+      };
+    });
   }
 
   if (!window._ordersSavePatched) {
@@ -18840,12 +18615,15 @@ body.apk-print-mode #apk-print-toolbar {
     var _baseSaveAll = saveAll;
     saveAll = function() {
       var p = _baseSaveAll();
-      openAppDB().then(function(db) {
-        db.transaction('store', 'readwrite').objectStore('store').put(window.orders, 'db_orders');
-      });
+      if (window._ordersFullyLoaded) {
+        openAppDB().then(function(db) {
+          db.transaction('store', 'readwrite').objectStore('store').put(window.orders, 'db_orders');
+        }).catch(function() {});
+      }
       return p;
     };
   }
+
 
   // ─── پاکسازی و تزریق HTML جدید ───
   ['modal-add-order', 'modal-transfer-order'].forEach(function(id) {
@@ -19108,82 +18886,88 @@ body.apk-print-mode #apk-print-toolbar {
     document.getElementById('modal-transfer-order').style.display = 'none';
   };
 
-  window.confirmTransferToInventory = function() {
-    var id = Number(document.getElementById('transfer-order-id').value);
-    var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
-    if (!o) return;
 
-    var supplierId = Number(document.getElementById('transfer-supplier-id').value) || null;
-    var quality = (document.getElementById('transfer-quality').value || '').trim();
-    var qty = Number(cleanNumber(document.getElementById('transfer-qty').value)) || 1;
-    var buyPrice = Number(cleanNumber(document.getElementById('transfer-buy-price').value)) || 0;
-    var sellPrice = Number(cleanNumber(document.getElementById('transfer-sell-price').value)) || 0;
+// 🆕 تابع ارسال پیامک سفارش آماده
+window.sendOrderReadySMS = function(orderId) {
+  var o = window.orders.find(function(x) { return x.id === orderId; });
+  if (!o) return;
+  var c = customers.find(function(x) { return x.id === o.customerId && !x.deleted; });
+  if (!c || !c.phone) return showToast('شماره تماس مشتری ثبت نشده است.', 'warning');
 
-    var supplierName = '';
-    if (supplierId) {
-      var sup = customers.find(function(x){ return x.id === supplierId; });
-      if (sup) supplierName = sup.name;
-    }
+  var msg = '✦ موبایل پرشیا ✦\n' + (c.name || 'مشتری') + ' عزیز، سفارش شما (' + o.itemName + ') آماده تحویل/نصب است. ';
+  window.location.href = buildSmsLink(c.phone, msg);
+};
 
-    if (!window.parts) window.parts = [];
-    var newPartId = Date.now();
-    window.parts.unshift({
-      id: newPartId,
-      model: o.itemName,
-      quality: quality,
-      shop: supplierName || 'سفارشات',
-      supplierId: supplierId,
-      qty: qty,
-      buyPrice: buyPrice,
-      sellPrice: sellPrice,
-      date: getTodayJalali(),
-      deleted: false,
-      updatedAt: Date.now()
-    });
 
-    // اگر سفارش برای یک مشتری خاص بود، خودکار به فاکتور در حال تعمیرش اضافه کن
-    if (o.customerId && sellPrice > 0) {
-      var activeQuote = quotes.find(function(q) { 
-        return q.customerId === o.customerId && !q.deleted && q.deviceStatus !== 'DELIVERED'; 
-      });
 
-      if (activeQuote) {
-        if (!activeQuote.items) activeQuote.items = [];
-        activeQuote.items.push({
-          title: 'قطعه: ' + o.itemName + (quality ? ' (' + quality + ')' : ''),
-          amount: sellPrice,
-          partId: newPartId,
-          buyPrice: buyPrice
-        });
-        activeQuote.amount = (activeQuote.amount || 0) + (sellPrice * qty);
-        activeQuote.rawAmount = (activeQuote.rawAmount || 0) + (sellPrice * qty);
-        activeQuote.updatedAt = Date.now();
+ window.confirmTransferToInventory = function() {
+  var id = Number(document.getElementById('transfer-order-id').value);
+  var o = window.orders.find(function(x) { return x.id === id && !x.deleted; });
+  if (!o) return;
+
+  var supplierId = Number(document.getElementById('transfer-supplier-id').value) || null;
+  var quality = (document.getElementById('transfer-quality').value || '').trim();
+  var qty = Number(cleanNumber(document.getElementById('transfer-qty').value)) || 1;
+  var buyPrice = Number(cleanNumber(document.getElementById('transfer-buy-price').value)) || 0;
+  var sellPrice = Number(cleanNumber(document.getElementById('transfer-sell-price').value)) || 0;
+
+  var supplierName = '';
+  if (supplierId) {
+    var sup = customers.find(function(x){ return x.id === supplierId; });
+    if (sup) supplierName = sup.name;
+  }
+
+  if (!window.parts) window.parts = [];
+  var newPartId = Date.now();
+  window.parts.unshift({
+    id: newPartId,
+    model: o.itemName,
+    quality: quality,
+    shop: supplierName || 'سفارشات',
+    supplierId: supplierId,
+    qty: qty,
+    buyPrice: buyPrice,
+    sellPrice: sellPrice,
+    date: getTodayJalali(),
+    deleted: false,
+    updatedAt: Date.now()
+  });
+
+  o.transferredToInventory = true;
+  o.supplierId = supplierId;
+  o.buyPrice = buyPrice; 
+  o.sellPrice = sellPrice;
+  o.updatedAt = Date.now();
+
+  saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
+  
+  if (typeof renderParts === 'function') renderParts();
+  closeTransferModal();
+  renderOrders();
+  if (typeof renderQuotes === 'function') renderQuotes();
+  if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
+
+  // هدایت هوشمند به فاکتور جدید (بدون شلوغ کردن تایم‌لاین)
+  if (o.customerId && sellPrice > 0) {
+    var targetCustomer = customers.find(function(c) { return c.id === o.customerId && !c.deleted; });
+    if (targetCustomer) {
+      openCustomer(o.customerId);
+      setTimeout(function() {
+        switchCustTab('new');
+        addInvoiceItemRow('قطعه: ' + o.itemName + (quality ? ' (' + quality + ')' : ''), sellPrice, newPartId, buyPrice);
         
-        if (typeof addTimelineEvent === 'function') {
-          addTimelineEvent(activeQuote, 'PART', '📦', 'افزودن قطعه', o.itemName + ' با مبلغ ' + formatToman(sellPrice));
-        }
-        showToast('✅ قطعه به انبار و فاکتور «' + activeQuote.model + '» اضافه شد.', 'success');
-      } else {
-        showToast('⚠️ قطعه به انبار رفت، ولی فاکتور در حال تعمیری برای مشتری پیدا نشد.', 'info');
-      }
-    } else {
-      showToast('📦 قطعه با موفقیت به انبار منتقل شد', 'success');
+        showToast('✅ قطعه به انبار رفت و به فاکتور جدید اضافه شد. لطفاً نوع دستگاه را مشخص کنید.', 'info');
+        if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+      }, 400);
+      return;
     }
+  }
 
-    o.transferredToInventory = true;
-    o.supplierId = supplierId;
-    o.buyPrice = buyPrice; 
-    o.sellPrice = sellPrice;
-    o.updatedAt = Date.now();
+  // برای کسری انبار (بدون مشتری)
+  showToast('📦 قطعه با موفقیت به انبار منتقل شد', 'success');
+};
 
-    saveAll().then(function() { if (typeof uploadToDrive === 'function') uploadToDrive(true); });
-    
-    if (typeof renderParts === 'function') renderParts();
-    closeTransferModal();
-    renderOrders();
-    if (typeof renderQuotes === 'function') renderQuotes();
-    if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
-  };
+
 
   // ─── رندر کارت‌های سفارشات ───
   window.renderOrders = function() {
@@ -19248,11 +19032,13 @@ body.apk-print-mode #apk-print-toolbar {
         if (isTransferred) {
           actionButtons = `<span class="badge badge-green" style="font-size:0.7rem;">وارد انبار شد</span>`;
         } else if (isArrived) {
-          actionButtons = `
-            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-              <button type="button" onclick="openTransferModal(${o.id})" style="background:#2563eb;padding:6px 10px;font-size:0.75rem;margin:0;border-radius:8px;width:auto;white-space:nowrap;">📦 انتقال</button>
-            </div>
-          `;
+  var hasPhone = c && c.phone;
+  actionButtons = `
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+      ${hasPhone ? `<button type="button" onclick="sendOrderReadySMS(${o.id})" style="background:#0284c7;padding:6px 10px;font-size:0.75rem;margin:0;border-radius:8px;width:auto;white-space:nowrap;box-shadow:none;">✉️ پیامک</button>` : ''}
+      <button type="button" onclick="openTransferModal(${o.id})" style="background:#2563eb;padding:6px 10px;font-size:0.75rem;margin:0;border-radius:8px;width:auto;white-space:nowrap;box-shadow:none;">📦 انتقال</button>
+    </div>
+  `;
         } else {
           actionButtons = `<span class="badge badge-orange" style="font-size:0.7rem;">⏳ منتظر</span>`;
         }
@@ -19298,143 +19084,1285 @@ body.apk-print-mode #apk-print-toolbar {
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🖨️ پرینت پیشرفته با Capacitor (Browser + Share)
+// 🎨 FIX Batch-2-A: Delete ها با prettyConfirm + Undo
 // ═══════════════════════════════════════════════════════════════
-(function setupAdvancedPrint() {
+(function fixDeletesWithPrettyConfirmAndUndo() {
+  
+  // ─── Undo toast (self-contained) ───
+  var _undoTimer = null;
+  var _undoToast = null;
+  var _undoCountdown = null;
+  
+  function showUndoToast(message, undoFn, duration) {
+    duration = duration || 10000;
+    
+    if (_undoToast) { _undoToast.remove(); _undoToast = null; }
+    clearTimeout(_undoTimer);
+    if (_undoCountdown) clearInterval(_undoCountdown);
+    
+    var remaining = Math.ceil(duration / 1000);
+    var toast = document.createElement('div');
+    toast.style.cssText =
+      'position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(30px);' +
+      'opacity:0;padding:12px 16px;border-radius:14px;' +
+      'background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%);' +
+      'color:#fff;display:flex;align-items:center;gap:12px;' +
+      'box-shadow:0 12px 35px rgba(0,0,0,0.35);z-index:999999;' +
+      'max-width:92%;min-width:280px;justify-content:space-between;' +
+      'border:1px solid rgba(255,255,255,0.1);' +
+      'transition:all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);';
+    
+    toast.innerHTML = 
+      '<div style="font-size:0.82rem;color:#cbd5e1;flex:1;">' + message + 
+        ' <span style="color:#fbbf24;font-weight:900;">' + remaining + 'ث</span></div>' +
+      '<button type="button" style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:0.8rem;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 4px 12px rgba(245,158,11,0.4);margin:0;width:auto;">↩️ برگردون</button>';
+    
+    var btn = toast.querySelector('button');
+    btn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        undoFn();
+        if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+      } catch(err) { console.error('[undo]', err); }
+      dismiss();
+    };
+    
+    function dismiss() {
+      if (_undoToast) {
+        _undoToast.style.transform = 'translateX(-50%) translateY(30px)';
+        _undoToast.style.opacity = '0';
+        var t = _undoToast;
+        setTimeout(function() { if (t) t.remove(); }, 350);
+        _undoToast = null;
+      }
+      clearTimeout(_undoTimer);
+      if (_undoCountdown) { clearInterval(_undoCountdown); _undoCountdown = null; }
+    }
+    
+    document.body.appendChild(toast);
+    _undoToast = toast;
+    
+    requestAnimationFrame(function() {
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+      toast.style.opacity = '1';
+    });
+    
+    _undoCountdown = setInterval(function() {
+      remaining--;
+      var el = toast.querySelector('span');
+      if (el) {
+        el.innerText = Math.max(0, remaining) + 'ث';
+        if (remaining <= 3) el.style.color = '#ef4444';
+      }
+      if (remaining <= 0) dismiss();
+    }, 1000);
+    
+    _undoTimer = setTimeout(dismiss, duration + 500);
+    if (navigator.vibrate) navigator.vibrate(20);
+  }
+  
+  // ─── helper: async confirm ───
+  function ask(opts) {
+    if (typeof window.prettyConfirm === 'function') return window.prettyConfirm(opts);
+    return Promise.resolve(window.confirm(opts.message || 'ادامه می‌دهید؟'));
+  }
+  
+  // ═══════════════════════════════════════════════════════════════
+  // ۱. حذف فاکتور در حال تعمیر
+  // ═══════════════════════════════════════════════════════════════
+  deleteQuote = async function(qId) {
+    var q = quotes.find(function(x) { return x.id === qId && !x.deleted; });
+    if (!q) return;
+    
+    var ok = await ask({
+      title: 'حذف فاکتور در حال تعمیر',
+      message: 'آیا مطمئنید؟\n(قطعات کسرشده به انبار برمی‌گردند)',
+      icon: '🗑️',
+      confirmText: '✓ بله، حذف کن',
+      danger: true
+    });
+    if (!ok) return;
+    
+    var affectedPayments = [];
+    if (q.depositPayId) {
+      for (var i = 0; i < transactions.length; i++) {
+        if (transactions[i].id === q.depositPayId) {
+          transactions[i].deleted = true;
+          transactions[i].updatedAt = Date.now();
+          affectedPayments.push(transactions[i].id);
+          break;
+        }
+      }
+    } else {
+      var cashPay = transactions.find(function(t) { return !t.deleted && t.customerId === q.customerId && t.intakeCode === q.intakeCode && t.type === 'PAY' && t.title && t.title.indexOf('بیعانه نقدی مغازه') !== -1; });
+      if (cashPay) { cashPay.deleted = true; cashPay.updatedAt = Date.now(); affectedPayments.push(cashPay.id); }
+      var onlinePay = transactions.find(function(t) { return !t.deleted && t.customerId === q.customerId && t.intakeCode === q.intakeCode && t.type === 'PAY' && t.title && t.title.indexOf('واریز بیعانه تاییدشده') !== -1; });
+      if (onlinePay) { onlinePay.deleted = true; onlinePay.updatedAt = Date.now(); affectedPayments.push(onlinePay.id); }
+    }
+    
+    var itemsSnapshot = JSON.parse(JSON.stringify(q.items || []));
+    restorePartsStock(q.items);
+    if (q.evidenceList && q.evidenceList.length > 0) deleteImagesFromList(q.evidenceList);
+    q.deleted = true;
+    q.updatedAt = Date.now();
+    
+    saveAll();
+    if (typeof uploadToDrive === 'function') uploadToDrive(true);
+    if (typeof renderCustomerLoyaltyBanner === 'function') renderCustomerLoyaltyBanner();
+    if (typeof renderQuotes === 'function') renderQuotes();
+    if (typeof renderTransactions === 'function') renderTransactions();
+    if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
+    if (typeof renderDepositsStream === 'function') renderDepositsStream();
+    if (typeof renderParts === 'function') renderParts();
+    if (typeof renderReports === 'function') renderReports();
+    
+    showUndoToast('فاکتور در حال تعمیر حذف شد', function() {
+      q.deleted = false;
+      q.updatedAt = Date.now();
+      q.items = itemsSnapshot;
+      itemsSnapshot.forEach(function(it) {
+        if (it && it.partId) {
+          var p = parts.find(function(item) { return item.id === it.partId && !item.deleted; });
+          if (p) { p.qty = Math.max(0, (Number(p.qty) || 0) - 1); p.updatedAt = Date.now(); }
+        }
+      });
+      affectedPayments.forEach(function(pid) {
+        transactions.forEach(function(t) { if (t.id === pid) { t.deleted = false; t.updatedAt = Date.now(); } });
+      });
+      saveAll();
+      if (typeof uploadToDrive === 'function') uploadToDrive(true);
+      if (typeof renderQuotes === 'function') renderQuotes();
+      if (typeof renderTransactions === 'function') renderTransactions();
+      if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
+      if (typeof renderParts === 'function') renderParts();
+      if (typeof renderReports === 'function') renderReports();
+      if (typeof showToast === 'function') showToast('✅ فاکتور برگشت', 'success');
+    });
+  };
+  
+  // ═══════════════════════════════════════════════════════════════
+  // ۲. حذف مشتری
+  // ═══════════════════════════════════════════════════════════════
+  deleteCustomer = async function() {
+    if (!activeCustomerId) return;
+    var deletedCustId = activeCustomerId;
+    var c = customers.find(function(x) { return x.id === deletedCustId && !x.deleted; });
+    if (!c) return;
+    
+    var ok = await ask({
+      title: 'حذف کامل پرونده مشتری',
+      message: 'تمام سوابق، فاکتورها و مستندات این مشتری حذف می‌شوند.\nآیا مطمئنید؟',
+      icon: '🗑️',
+      confirmText: '✓ بله، همه رو حذف کن',
+      danger: true
+    });
+    if (!ok) return;
+    
+    var now = Date.now();
+    var affectedCustomers = [], affectedTransactions = [], affectedQuotes = [];
+    
+    transactions.forEach(function(t) {
+      if (t.customerId === deletedCustId && !t.deleted) {
+        if (t.type === 'DEBT' && !t.stockRestored) { restorePartsStock(t.items); t.stockRestored = true; }
+        if (t.deliverySignatureDbId) deleteImageFromDB(t.deliverySignatureDbId);
+        affectedTransactions.push(t.id);
+        t.deleted = true; t.updatedAt = now;
+      }
+    });
+    quotes.forEach(function(q) {
+      if (q.customerId === deletedCustId && !q.deleted) {
+        restorePartsStock(q.items);
+        if (q.evidenceList && q.evidenceList.length > 0) deleteImagesFromList(q.evidenceList);
+        affectedQuotes.push(q.id);
+        q.deleted = true; q.updatedAt = now;
+      }
+    });
+    customers.forEach(function(cu) {
+      if (cu.id === deletedCustId) { cu.deleted = true; cu.updatedAt = now; affectedCustomers.push(cu.id); }
+    });
+    
+    saveAll();
+    if (typeof uploadToDrive === 'function') uploadToDrive(true);
+    if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
+    if (typeof renderDepositsStream === 'function') renderDepositsStream();
+    if (typeof renderParts === 'function') renderParts();
+    if (typeof renderReports === 'function') renderReports();
+    if (typeof showCustomerList === 'function') showCustomerList();
+    
+    showUndoToast('مشتری «' + (c.name || '') + '» حذف شد', function() {
+      customers.forEach(function(cu) { if (affectedCustomers.indexOf(cu.id) !== -1) { cu.deleted = false; cu.updatedAt = Date.now(); } });
+      transactions.forEach(function(t) { if (affectedTransactions.indexOf(t.id) !== -1) { t.deleted = false; t.stockRestored = false; t.updatedAt = Date.now(); } });
+      quotes.forEach(function(q) { if (affectedQuotes.indexOf(q.id) !== -1) { q.deleted = false; q.updatedAt = Date.now(); } });
+      saveAll();
+      if (typeof uploadToDrive === 'function') uploadToDrive(true);
+      if (typeof renderCustomers === 'function') renderCustomers();
+      if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard();
+      if (typeof renderParts === 'function') renderParts();
+      if (typeof renderReports === 'function') renderReports();
+      if (typeof showToast === 'function') showToast('✅ مشتری برگشت', 'success');
+    });
+  };
+  
+  // ═══════════════════════════════════════════════════════════════
+  // ۳. حذف تراکنش (فاکتور قطعی / دریافتی)
+  // ═══════════════════════════════════════════════════════════════
+  deleteTransaction = async function(txId) {
+    var t = transactions.find(function(x) { return x.id === txId && !x.deleted; });
+    if (!t) return;
+    
+    var ok = await ask({
+      title: 'حذف آیتم مالی',
+      message: 'این فاکتور/دریافتی از پرونده حذف می‌شود.\nادامه می‌دهید؟',
+      icon: '🗑️',
+      confirmText: '✓ حذف کن',
+      danger: true
+    });
+    if (!ok) return;
+    
+    var label = t.type === 'DEBT' ? 'فاکتور قطعی' : 'دریافتی';
+    var itemsSnapshot = t.type === 'DEBT' ? JSON.parse(JSON.stringify(t.items || [])) : null;
+    
+    if (t.type === 'DEBT' && !t.stockRestored) { restorePartsStock(t.items); t.stockRestored = true; }
+    if (t.deliverySignatureDbId) deleteImageFromDB(t.deliverySignatureDbId);
+    t.deleted = true;
+    t.updatedAt = Date.now();
+    
+    saveAll();
+    if (typeof uploadToDrive === 'function') uploadToDrive(true);
+    if (typeof renderCustomerLoyaltyBanner === 'function') renderCustomerLoyaltyBanner();
+    if (typeof renderTransactions === 'function') renderTransactions();
+    if (typeof renderParts === 'function') renderParts();
+    if (typeof renderReports === 'function') renderReports();
+    
+    showUndoToast(label + ' حذف شد', function() {
+      t.deleted = false;
+      t.updatedAt = Date.now();
+      if (itemsSnapshot) {
+        t.items = itemsSnapshot;
+        itemsSnapshot.forEach(function(it) {
+          if (it && it.partId) {
+            var p = parts.find(function(item) { return item.id === it.partId && !item.deleted; });
+            if (p) { p.qty = Math.max(0, (Number(p.qty) || 0) - 1); p.updatedAt = Date.now(); }
+          }
+        });
+      }
+      t.stockRestored = false;
+      saveAll();
+      if (typeof uploadToDrive === 'function') uploadToDrive(true);
+      if (typeof renderTransactions === 'function') renderTransactions();
+      if (typeof renderParts === 'function') renderParts();
+      if (typeof renderReports === 'function') renderReports();
+      if (typeof showToast === 'function') showToast('✅ ' + label + ' برگشت', 'success');
+    });
+  };
+  
+  // ═══════════════════════════════════════════════════════════════
+  // ۴. حذف قطعه
+  // ═══════════════════════════════════════════════════════════════
+  deletePart = async function(id) {
+  var item = parts.find(function(p) { return p.id === id && !p.deleted; });
+  if (!item) return;
+  
+  // اگه قطعه از خرید تامین‌کننده اومده، پیام هشدار متفاوت
+  var hasPurchase = !!item.linkedPurchaseId;
+  var message = hasPurchase 
+    ? 'این قطعه از انبار حذف می‌شود.\n\n⚠️ چون از تامین‌کننده خریداری شده، فاکتور خرید و پرداخت نقدی مربوطه هم حذف می‌شوند.'
+    : 'این قطعه از لیست انبار حذف می‌شود.\nادامه می‌دهید؟';
+  
+  var ok = await ask({
+    title: 'حذف قطعه از انبار',
+    message: message,
+    icon: '📦',
+    confirmText: '✓ حذف کن',
+    danger: true
+  });
+  if (!ok) return;
+  
+  var name = item.model || 'قطعه';
+  
+  // ─── حذف فاکتور خرید مرتبط (اگه وجود داره) ───
+  var affectedPurchase = null;
+  var affectedPayment = null;
+  
+  if (item.linkedPurchaseId) {
+    affectedPurchase = (window.supplierPurchases || []).find(function(p) { 
+      return p.id === item.linkedPurchaseId && !p.deleted; 
+    });
+    if (affectedPurchase) {
+      affectedPurchase.deleted = true;
+      affectedPurchase.updatedAt = Date.now();
+      
+      // پرداخت نقدی مربوطه رو هم پیدا و حذف کن
+      affectedPayment = transactions.find(function(t) {
+        return !t.deleted && t.customerId === item.supplierId && 
+               t.type === 'PAY' && t.title && t.title.indexOf(item.model) !== -1;
+      });
+      if (affectedPayment) {
+        affectedPayment.deleted = true;
+        affectedPayment.updatedAt = Date.now();
+      }
+    }
+  }
+  
+  // ─── حذف خود قطعه ───
+  item.deleted = true;
+  item.updatedAt = Date.now();
+  
+  saveAll();
+  if (typeof uploadToDrive === 'function') uploadToDrive(true);
+  if (typeof renderParts === 'function') renderParts();
+  if (typeof renderReports === 'function') renderReports();
+  if (typeof renderSupplierPurchases === 'function') renderSupplierPurchases();
+  if (typeof renderSupplierBalance === 'function') renderSupplierBalance();
+  
+  // ─── Undo ───
+  showUndoToast('قطعه «' + name + '» حذف شد' + (affectedPurchase ? ' (فاکتور خرید هم حذف شد)' : ''), function() {
+    // برگرداندن قطعه
+    item.deleted = false;
+    item.updatedAt = Date.now();
+    
+    // برگرداندن فاکتور خرید
+    if (affectedPurchase) {
+      affectedPurchase.deleted = false;
+      affectedPurchase.updatedAt = Date.now();
+    }
+    
+    // برگرداندن پرداخت نقدی
+    if (affectedPayment) {
+      affectedPayment.deleted = false;
+      affectedPayment.updatedAt = Date.now();
+    }
+    
+    saveAll();
+    if (typeof uploadToDrive === 'function') uploadToDrive(true);
+    if (typeof renderParts === 'function') renderParts();
+    if (typeof renderReports === 'function') renderReports();
+    if (typeof renderSupplierPurchases === 'function') renderSupplierPurchases();
+    if (typeof renderSupplierBalance === 'function') renderSupplierBalance();
+    if (typeof showToast === 'function') showToast('✅ قطعه و فاکتور خریدش برگشتن', 'success');
+  });
+};
+  
+  // ═══════════════════════════════════════════════════════════════
+  // ۵. حذف هزینه
+  // ═══════════════════════════════════════════════════════════════
+  deleteExpense = async function(expId) {
+    var exp = expenses.find(function(x) { return x.id === expId && !x.deleted; });
+    if (!exp) return;
+    
+    var ok = await ask({
+      title: 'حذف هزینه',
+      message: 'این هزینه از لیست حذف می‌شود.\nادامه می‌دهید؟',
+      icon: '💸',
+      confirmText: '✓ حذف کن',
+      danger: true
+    });
+    if (!ok) return;
+    
+    var title = exp.title || 'هزینه';
+    exp.deleted = true;
+    exp.updatedAt = Date.now();
+    
+    saveAll();
+    if (typeof uploadToDrive === 'function') uploadToDrive(true);
+    if (typeof renderExpenses === 'function') renderExpenses();
+    if (typeof renderReports === 'function') renderReports();
+    
+    showUndoToast('هزینه «' + title + '» حذف شد', function() {
+      exp.deleted = false;
+      exp.updatedAt = Date.now();
+      saveAll();
+      if (typeof uploadToDrive === 'function') uploadToDrive(true);
+      if (typeof renderExpenses === 'function') renderExpenses();
+      if (typeof renderReports === 'function') renderReports();
+      if (typeof showToast === 'function') showToast('✅ هزینه برگشت', 'success');
+    });
+  };
+  
+  console.log('[fix-deletes-pretty-undo] Ready ✅');
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🔢 FIX Batch-2-B: nextIntakeSeq sync با دیتای واقعی DB
+// ═══════════════════════════════════════════════════════════════
+(function syncNextIntakeSeqWithDB() {
+  
+  function syncSeq() {
+    if (typeof quotes === 'undefined' || !Array.isArray(quotes)) return false;
+    if (typeof transactions === 'undefined' || !Array.isArray(transactions)) return false;
+    
+    // اگه هیچ دیتایی لود نشده، صبر کن
+    if (quotes.length === 0 && transactions.length === 0) return false;
+    
+    var maxCode = 0;
+    
+    quotes.forEach(function(q) {
+      if (q.intakeCode) {
+        var n = Number(q.intakeCode);
+        if (!isNaN(n) && n > maxCode) maxCode = n;
+      }
+    });
+    
+    transactions.forEach(function(t) {
+      if (t.intakeCode) {
+        var n = Number(t.intakeCode);
+        if (!isNaN(n) && n > maxCode) maxCode = n;
+      }
+    });
+    
+    var syncedSeq = Math.max(maxCode + 1, 1001);
+    
+    if (syncedSeq > nextIntakeSeq) {
+      console.log('[seq-sync] nextIntakeSeq corrected: ' + nextIntakeSeq + ' → ' + syncedSeq);
+      nextIntakeSeq = syncedSeq;
+      try { localStorage.setItem('db_next_intake_seq', nextIntakeSeq.toString()); } catch(e) {}
+      return true;
+    }
+    
+    return false;
+  }
+  
+  // تلاش اولیه بعد از لود
+  setTimeout(function() {
+    syncSeq();
+    // اگه بازم دیر بود، دوباره تلاش کن
+    setTimeout(syncSeq, 2000);
+    setTimeout(syncSeq, 5000);
+  }, 1500);
+  
+  // هر بار که فاکتور جدید ثبت شد، اگه شمارنده عقب افتاده، جلو بکش
+  // (مثلاً اگه بعد از پاک کردن localStorage فاکتور جدید ثبت بشه)
+  var _baseSaveMultiItemInvoice = window.saveMultiItemInvoice;
+  if (typeof _baseSaveMultiItemInvoice === 'function') {
+    window.saveMultiItemInvoice = function(type) {
+      // قبل از ثبت، sync کن
+      syncSeq();
+      return _baseSaveMultiItemInvoice.apply(this, arguments);
+    };
+  }
+  
+  // بعد از Sync ابری هم چک کن
+  var _baseOnSync = window.onSmartSyncDataReceived;
+  if (typeof _baseOnSync === 'function') {
+    window.onSmartSyncDataReceived = function(rawContent) {
+      var result = _baseOnSync.apply(this, arguments);
+      setTimeout(syncSeq, 500);
+      return result;
+    };
+  }
+  
+  // بعد از ایمپورت بکاپ هم چک کن
+  var _baseImportBackup = window.importBackup;
+  if (typeof _baseImportBackup === 'function') {
+    window.importBackup = function(e) {
+      var result = _baseImportBackup.apply(this, arguments);
+      setTimeout(syncSeq, 1000);
+      return result;
+    };
+  }
+  
+  console.log('[seq-sync] Ready ✅');
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🔐 FIX Batch-2-C: updateGlobalLockIcon گلوبال برای SmartLock
+// ═══════════════════════════════════════════════════════════════
+(function exposeGlobalLockIconUpdater() {
+  
+  // ─── نسخه گلوبال که از بیرون قابل دسترسیه ───
+  window.updateGlobalLockIcon = function() {
+    var btn = document.getElementById('global-lock-btn');
+    if (!btn) return;
+    
+    var allUnlocked = (
+      typeof isReportsUnlocked !== 'undefined' && isReportsUnlocked &&
+      typeof isStockUnlocked !== 'undefined' && isStockUnlocked &&
+      typeof isExpensesUnlocked !== 'undefined' && isExpensesUnlocked
+    );
+    
+    if (allUnlocked) {
+      btn.innerHTML = '🔓';
+      btn.title = 'همه‌چیز بازه — کلیک کن تا قفل بشه';
+      btn.style.background = 'rgba(16,185,129,0.3)';
+      btn.style.borderColor = 'rgba(16,185,129,0.6)';
+      btn.style.boxShadow = '0 0 12px rgba(16,185,129,0.4)';
+    } else {
+      btn.innerHTML = '🔒';
+      btn.title = 'کلیک کن تا همه قفل‌ها با رمز باز بشن';
+      btn.style.background = 'rgba(239,68,68,0.25)';
+      btn.style.borderColor = 'rgba(239,68,68,0.5)';
+      btn.style.boxShadow = '0 0 8px rgba(239,68,68,0.3)';
+    }
+  };
+  
+  // ─── هر ۵ ثانیه آیکون رو با وضعیت فعلی همگام کن ───
+  // (این باعث می‌شه حتی اگه جایی updateGlobalLockIcon رو صدا نزنه، آیکون همیشه درست باشه)
+  setInterval(window.updateGlobalLockIcon, 5000);
+  
+  // ─── اجرای اولیه ───
+  setTimeout(window.updateGlobalLockIcon, 1500);
+  setTimeout(window.updateGlobalLockIcon, 3000);
+  
+  // ─── بعد از هر بار قفل/باز شدن، آیکون رو به‌روز کن ───
+  var _baseUpdateReportsLock = window.updateReportsLockUI;
+  if (typeof _baseUpdateReportsLock === 'function') {
+    window.updateReportsLockUI = function() {
+      _baseUpdateReportsLock.apply(this, arguments);
+      setTimeout(window.updateGlobalLockIcon, 50);
+    };
+  }
+  
+  var _baseUpdateStockLock = window.updateStockLockUI;
+  if (typeof _baseUpdateStockLock === 'function') {
+    window.updateStockLockUI = function() {
+      _baseUpdateStockLock.apply(this, arguments);
+      setTimeout(window.updateGlobalLockIcon, 50);
+    };
+  }
+  
+  var _baseUpdateExpensesLock = window.updateExpensesLockUI;
+  if (typeof _baseUpdateExpensesLock === 'function') {
+    window.updateExpensesLockUI = function() {
+      _baseUpdateExpensesLock.apply(this, arguments);
+      setTimeout(window.updateGlobalLockIcon, 50);
+    };
+  }
+  
+  console.log('[expose-global-lock-icon] Ready ✅');
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🖨️ FIX Batch-2-D: پرینت Capacitor برای HTML بزرگ
+// ═══════════════════════════════════════════════════════════════
+(function fixLargeInvoicePrint() {
+  
+  // نسخه بومی مرورگر (بدون هیچ override)
+  var nativePrint = (window.Window && window.Window.prototype && window.Window.prototype.print)
+                    ? window.Window.prototype.print
+                    : function() { console.log('[print] native print unavailable'); };
   
   function getPrintHTML() {
     var content = document.getElementById('print-section').innerHTML;
     if (!content || content.trim() === '') return null;
-
-    return `<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>فاکتور موبایل پرشیا</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Tahoma, Arial, sans-serif; background: #525659; padding-top: 60px; }
-    .toolbar { 
-      position: fixed; top: 0; left: 0; right: 0; height: 55px; 
-      background: #0f172a; display: flex; align-items: center; justify-content: center; 
-      padding: 0 15px; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-    }
-    .toolbar button { 
-      background: #10b981; color: #fff; border: none; padding: 10px 20px; 
-      border-radius: 8px; font-weight: bold; font-size: 15px; width: 100%; max-width: 300px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer;
-    }
-    .print-wrapper { display: flex; justify-content: center; padding: 15px; }
-    #print-section { background: #fff; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-    .print-page { width: 148mm; min-height: 210mm; padding: 2mm 3mm; display: flex; flex-direction: column; box-sizing: border-box; background: #fff; }
-    .print-half { flex: 1; overflow: hidden; box-sizing: border-box; padding: 3mm 4mm; border: 1.5px solid #333; border-radius: 4px; display: flex; flex-direction: column; min-height: 0; position: relative; }
-    .print-half.split { flex-direction: row; padding: 0; gap: 0; }
-    .workshop-col { flex: 2; padding: 3mm 3.5mm; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
-    .notes-col { flex: 1; padding: 3mm 2.5mm; border-right: 1px dashed #333; display: flex; flex-direction: column; min-height: 0; background: #fdfdfd; }
-    .cut-line-mid { height: 5mm; display: flex; align-items: center; justify-content: center; font-size: 6.5pt; color: #666; flex: 0 0 auto; }
-    .r-header { text-align: center; margin-bottom: 1.5mm; border-bottom: 1px solid #444; padding-bottom: 1mm; position: relative; }
-    .r-title { font-size: 9.5pt; font-weight: bold; line-height: 1.2; }
-    .r-badge { font-size: 6.5pt; position: absolute; right: 0; top: 0; font-weight: bold; border: 1px solid #333; padding: 0.5px 3px; border-radius: 2px; }
-    .r-meta { font-size: 6.8pt; line-height: 1.45; }
-    .r-meta table { width: 100%; border-collapse: collapse; }
-    .r-meta td { padding: 0.4mm 0; vertical-align: top; }
-    .r-table { width: 100%; border-collapse: collapse; font-size: 6.8pt; margin-top: 1mm; }
-    .r-table td, .r-table th { padding: 0.9mm 1mm; vertical-align: top; border: 1px solid #888; }
-    .r-table th { background: #eee; font-weight: bold; font-size: 6.8pt; }
-    .r-totals { margin-top: 1.2mm; font-size: 7.2pt; line-height: 1.6; }
-    .r-totals > div { display: flex; justify-content: space-between; }
-    .r-total-final { border-top: 1px solid #333; margin-top: 0.8mm; padding-top: 0.8mm; font-weight: bold; font-size: 8.2pt; }
-    .r-law { font-size: 5.2pt; line-height: 1.3; text-align: justify; margin-top: 1.2mm; padding: 1mm 1.5mm; background: #fafafa; border: 1px solid #e0e0e0; border-radius: 2px; }
-    .r-sign { display: flex; justify-content: space-between; font-size: 6.5pt; margin-top: auto; padding-top: 1.5mm; gap: 2mm; }
-    .r-sign > div { flex: 1; }
-    .r-sign .line { border-bottom: 1px dotted #333; height: 6mm; }
-    .r-qr-box { position: absolute; left: 3mm; top: 3mm; text-align: center; }
-    .r-qr-box img { width: 36px; height: 36px; border: 1px solid #333; border-radius: 3px; display: block; }
-    .r-qr-caption { font-size: 4.5pt; color: #333; margin-top: 0.5px; }
-    .r-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 65pt; font-weight: 900; letter-spacing: 12px; text-transform: uppercase; color: rgba(0, 0, 0, 0.04); z-index: 0; pointer-events: none; font-family: Arial, sans-serif; }
-    .r-tech { font-size: 6.5pt; line-height: 1.55; background: #fafafa; padding: 1.5mm; border: 1px solid #e0e0e0; border-radius: 2px; margin-top: 1mm; }
-    .r-notes-title { font-size: 7pt; font-weight: bold; margin-bottom: 1mm; border-bottom: 1px solid #666; padding-bottom: 0.6mm; text-align: center; }
-    .r-notes-lines { flex: 1; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 5mm, #ccc 5mm, #ccc 5.05mm); min-height: 20mm; }
-    @media print {
-      @page { size: A5 portrait; margin: 0; }
-      body { background: #fff; padding: 0; }
-      .toolbar { display: none !important; }
-      .print-wrapper { padding: 0; display: block; }
-      #print-section { box-shadow: none; max-width: none; width: 100%; }
-      .print-page { width: 148mm; height: 210mm; page-break-after: avoid; }
-    }
-  </style>
-</head>
-<body>
-  <div class="toolbar">
-    <button onclick="window.print()">🖨️ پرینت / ذخیره PDF</button>
-  </div>
-  <div class="print-wrapper">
-    <div id="print-section">
-      ${content}
-    </div>
-  </div>
-</body>
-</html>`;
+    
+    return '<!DOCTYPE html>\n' +
+'<html lang="fa" dir="rtl">\n' +
+'<head>\n' +
+'  <meta charset="UTF-8">\n' +
+'  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">\n' +
+'  <title>فاکتور موبایل پرشیا</title>\n' +
+'  <style>\n' +
+'    * { box-sizing: border-box; margin: 0; padding: 0; }\n' +
+'    body { font-family: Tahoma, Arial, sans-serif; background: #525659; padding-top: 60px; }\n' +
+'    .toolbar { position: fixed; top: 0; left: 0; right: 0; height: 55px; background: #0f172a; display: flex; align-items: center; justify-content: center; padding: 0 15px; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }\n' +
+'    .toolbar button { background: #10b981; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 15px; width: 100%; max-width: 300px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; }\n' +
+'    .print-wrapper { display: flex; justify-content: center; padding: 15px; }\n' +
+'    #print-section { background: #fff; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }\n' +
+'    .print-page { width: 148mm; min-height: 210mm; padding: 2mm 3mm; display: flex; flex-direction: column; box-sizing: border-box; background: #fff; }\n' +
+'    .print-half { flex: 1; overflow: hidden; box-sizing: border-box; padding: 3mm 4mm; border: 1.5px solid #333; border-radius: 4px; display: flex; flex-direction: column; min-height: 0; position: relative; }\n' +
+'    .print-half.split { flex-direction: row; padding: 0; gap: 0; }\n' +
+'    .workshop-col { flex: 2; padding: 3mm 3.5mm; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }\n' +
+'    .notes-col { flex: 1; padding: 3mm 2.5mm; border-right: 1px dashed #333; display: flex; flex-direction: column; min-height: 0; background: #fdfdfd; }\n' +
+'    .cut-line-mid { height: 5mm; display: flex; align-items: center; justify-content: center; font-size: 6.5pt; color: #666; flex: 0 0 auto; }\n' +
+'    .r-header { text-align: center; margin-bottom: 1.5mm; border-bottom: 1px solid #444; padding-bottom: 1mm; position: relative; }\n' +
+'    .r-title { font-size: 9.5pt; font-weight: bold; line-height: 1.2; }\n' +
+'    .r-badge { font-size: 6.5pt; position: absolute; right: 0; top: 0; font-weight: bold; border: 1px solid #333; padding: 0.5px 3px; border-radius: 2px; }\n' +
+'    .r-meta { font-size: 6.8pt; line-height: 1.45; }\n' +
+'    .r-meta table { width: 100%; border-collapse: collapse; }\n' +
+'    .r-meta td { padding: 0.4mm 0; vertical-align: top; }\n' +
+'    .r-table { width: 100%; border-collapse: collapse; font-size: 6.8pt; margin-top: 1mm; }\n' +
+'    .r-table td, .r-table th { padding: 0.9mm 1mm; vertical-align: top; border: 1px solid #888; }\n' +
+'    .r-table th { background: #eee; font-weight: bold; font-size: 6.8pt; }\n' +
+'    .r-totals { margin-top: 1.2mm; font-size: 7.2pt; line-height: 1.6; }\n' +
+'    .r-totals > div { display: flex; justify-content: space-between; }\n' +
+'    .r-total-final { border-top: 1px solid #333; margin-top: 0.8mm; padding-top: 0.8mm; font-weight: bold; font-size: 8.2pt; }\n' +
+'    .r-law { font-size: 5.2pt; line-height: 1.3; text-align: justify; margin-top: 1.2mm; padding: 1mm 1.5mm; background: #fafafa; border: 1px solid #e0e0e0; border-radius: 2px; }\n' +
+'    .r-sign { display: flex; justify-content: space-between; font-size: 6.5pt; margin-top: auto; padding-top: 1.5mm; gap: 2mm; }\n' +
+'    .r-sign > div { flex: 1; }\n' +
+'    .r-sign .line { border-bottom: 1px dotted #333; height: 6mm; }\n' +
+'    .r-qr-box { position: absolute; left: 3mm; top: 3mm; text-align: center; }\n' +
+'    .r-qr-box img { width: 36px; height: 36px; border: 1px solid #333; border-radius: 3px; display: block; }\n' +
+'    .r-qr-caption { font-size: 4.5pt; color: #333; margin-top: 0.5px; }\n' +
+'    .r-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 65pt; font-weight: 900; letter-spacing: 12px; text-transform: uppercase; color: rgba(0, 0, 0, 0.04); z-index: 0; pointer-events: none; font-family: Arial, sans-serif; }\n' +
+'    .r-tech { font-size: 6.5pt; line-height: 1.55; background: #fafafa; padding: 1.5mm; border: 1px solid #e0e0e0; border-radius: 2px; margin-top: 1mm; }\n' +
+'    .r-notes-title { font-size: 7pt; font-weight: bold; margin-bottom: 1mm; border-bottom: 1px solid #666; padding-bottom: 0.6mm; text-align: center; }\n' +
+'    .r-notes-lines { flex: 1; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 5mm, #ccc 5mm, #ccc 5.05mm); min-height: 20mm; }\n' +
+'    @media print {\n' +
+'      @page { size: A5 portrait; margin: 0; }\n' +
+'      body { background: #fff; padding: 0; }\n' +
+'      .toolbar { display: none !important; }\n' +
+'      .print-wrapper { padding: 0; display: block; }\n' +
+'      #print-section { box-shadow: none; max-width: none; width: 100%; }\n' +
+'      .print-page { width: 148mm; height: 210mm; page-break-after: avoid; }\n' +
+'    }\n' +
+'  </style>\n' +
+'</head>\n' +
+'<body>\n' +
+'  <div class="toolbar">\n' +
+'    <button onclick="window.print()">🖨️ پرینت / ذخیره PDF</button>\n' +
+'  </div>\n' +
+'  <div class="print-wrapper">\n' +
+'    <div id="print-section">\n' + content + '\n    </div>\n  </div>\n' +
+'</body>\n' +
+'</html>';
   }
-
-  async function openPrintPage() {
+  
+  async function openPrintPageSafely() {
     var html = getPrintHTML();
-    if (!html) return;
-
-    // ─── روش ۱: Capacitor Browser Plugin ───
-    var CapBrowser = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
-    if (CapBrowser) {
-      try {
-        var dataUrl = 'data:text/html;charset=utf-8;base64,' + btoa(unescape(encodeURIComponent(html)));
-        await CapBrowser.open({ url: dataUrl });
-        return;
-      } catch(e) { console.warn('[print] Browser plugin failed:', e); }
+    if (!html) {
+      if (typeof showToast === 'function') showToast('فاکتوری برای چاپ موجود نیست', 'warning');
+      return;
     }
-
-    // ─── روش ۲: Filesystem + Share ───
+    
+    var htmlBytes = html.length;
+    var isLarge = htmlBytes > 400000; // ~۴۰۰ کیلوبایت (≈ ۳۰۰KB پس از encode)
+    
+    console.log('[print] HTML size:', Math.round(htmlBytes / 1024) + 'KB', isLarge ? '(large mode)' : '(normal mode)');
+    
+    // ─── روش ۱: Browser.open (فقط برای HTML کوچیک) ───
+    if (!isLarge) {
+      var CapBrowser = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
+      if (CapBrowser) {
+        try {
+          // بدون btoa (که unescape لازم داره) — از URL-encode مستقیم استفاده می‌کنیم
+          var dataUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+          await CapBrowser.open({ url: dataUrl });
+          return;
+        } catch(e) {
+          console.warn('[print] Browser.open failed:', e);
+        }
+      }
+    }
+    
+    // ─── روش ۲: Filesystem + Share (برای همه، مخصوصاً بزرگ‌ها) ───
     var CapFs = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
     var CapShare = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
-
+    
     if (CapFs && CapShare) {
       try {
         var fileName = 'Persia_Faktur_' + Date.now() + '.html';
-        await CapFs.writeFile({ 
-          path: fileName, 
-          data: html, 
-          directory: 'CACHE', 
-          encoding: 'utf8' 
+        await CapFs.writeFile({
+          path: fileName,
+          data: html,
+          directory: 'CACHE',
+          encoding: 'utf8'
         });
         var uriRes = await CapFs.getUri({ path: fileName, directory: 'CACHE' });
         
         await CapShare.share({
           title: 'فاکتور موبایل پرشیا',
           url: uriRes.uri,
-          dialogTitle: '⚠️ از لیست، «Chrome» را انتخاب کن (نه اپ دیگر)'
+          dialogTitle: 'از لیست، «Chrome» را انتخاب کن'
         });
         return;
-      } catch(e) { console.warn('[print] Share failed:', e); }
+      } catch(e) {
+        console.warn('[print] Share failed:', e);
+      }
     }
-
+    
     // ─── روش ۳: Blob (وب) ───
     try {
       var blob = new Blob([html], { type: 'text/html' });
-      window.open(URL.createObjectURL(blob), '_blank');
-    } catch(e) { console.warn('[print] Blob failed:', e); }
+      var url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(function() { URL.revokeObjectURL(url); }, 60000);
+    } catch(e) {
+      console.warn('[print] Blob failed:', e);
+      if (typeof showToast === 'function') showToast('پرینت در این دستگاه پشتیبانی نمی‌شود', 'error');
+    }
   }
-
-  // Override window.print to use advanced print on Capacitor
-  var _origPrint = window.print;
+  
+  // ─── Override نهایی window.print ───
   window.print = function() {
-    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-      openPrintPage();
+    var isNative = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+    
+    if (isNative) {
+      openPrintPageSafely();
     } else {
-      _origPrint.apply(this, arguments);
+      // وب: نسخه بومی مرورگر (که دیالوگ پرینت رو باز می‌کنه)
+      try {
+        nativePrint.apply(window, arguments);
+      } catch(e) {
+        console.warn('[print] native print failed:', e);
+        // fallback
+        window.open('', '_self');
+      }
     }
   };
+  
+  console.log('[fix-large-print] Ready ✅');
+})();
+</script>
 
-  console.log('[advanced-print] Ready ✅');
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🛡️ FIX Batch-2-E: XSS در تنظیمات دیجی‌پی
+// ═══════════════════════════════════════════════════════════════
+(function fixDPSettingsXSS() {
+  
+  // helper برای escape اگر esc موجود نبود
+  function safeEsc(s) {
+    if (typeof window.esc === 'function') return window.esc(s);
+    if (s === null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  
+  // ─── override openDPSettings با escape کامل ───
+  window.openDPSettings = function() {
+    var old = document.getElementById('dp-settings-modal');
+    if (old) old.remove();
+    
+    // خواندن مقادیر فعلی از localStorage
+    var dpMerchantLink = '';
+    var dpSettings = { m1: 8, m2: 12, m3: 8 };
+    
+    try {
+      dpMerchantLink = localStorage.getItem('db_digipay_merchant_link') || '';
+    } catch(e) {}
+    try {
+      var saved = localStorage.getItem('db_digipay_settings');
+      if (saved) {
+        var parsed = JSON.parse(saved);
+        if (typeof parsed.m1 === 'number') dpSettings.m1 = parsed.m1;
+        if (typeof parsed.m2 === 'number') dpSettings.m2 = parsed.m2;
+        if (typeof parsed.m3 === 'number') dpSettings.m3 = parsed.m3;
+      }
+    } catch(e) {}
+    
+    // escape همه چیز
+    var safeLink = safeEsc(dpMerchantLink);
+    var safeM1 = String(Number(dpSettings.m1) || 8);
+    var safeM2 = String(Number(dpSettings.m2) || 12);
+    var safeM3 = String(Number(dpSettings.m3) || 8);
+    
+    var html = 
+      '<div class="modal-overlay" id="dp-settings-modal" style="z-index:9999999;display:flex;">' +
+        '<div class="modal-content" style="max-width:400px;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;">' +
+            '<h3 style="font-size:1rem;color:#1e293b;">⚙️ تنظیمات دیجی‌پی</h3>' +
+            '<button type="button" onclick="document.getElementById(\'dp-settings-modal\').remove()" style="width:auto;background:none;border:none;font-size:1.2rem;color:#64748b;cursor:pointer;">✕</button>' +
+          '</div>' +
+          '<label class="field-label">لینک شخصی دیجی‌پی:</label>' +
+          '<input type="url" id="dp-cfg-link" value="' + safeLink + '" placeholder="https://..." style="direction:ltr;text-align:left;font-size:0.75rem;">' +
+          '<label class="field-label">کمیسیون اعتبار ماهانه (%):</label>' +
+          '<input type="number" id="dp-cfg-m1" value="' + safeM1 + '" min="0" max="50">' +
+          '<label class="field-label">کمیسیون ۴ قسطه (%):</label>' +
+          '<input type="number" id="dp-cfg-m2" value="' + safeM2 + '" min="0" max="50">' +
+          '<label class="field-label">کمیسیون کیف پول (%):</label>' +
+          '<input type="number" id="dp-cfg-m3" value="' + safeM3 + '" min="0" max="50">' +
+          '<div class="row" style="margin-top:14px;">' +
+            '<button type="button" onclick="saveDPSettings()" style="background:var(--success);flex:1.4;padding:11px;font-weight:800;cursor:pointer;">💾 ذخیره</button>' +
+            '<button type="button" onclick="document.getElementById(\'dp-settings-modal\').remove()" style="background:#cbd5e1;color:#1e293b;flex:1;padding:11px;cursor:pointer;">انصراف</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    
+    document.body.insertAdjacentHTML('beforeend', html);
+  };
+  
+  // ─── override saveDPSettings با validation ───
+  var _baseSaveDP = window.saveDPSettings;
+  window.saveDPSettings = function() {
+    var linkEl = document.getElementById('dp-cfg-link');
+    var m1El = document.getElementById('dp-cfg-m1');
+    var m2El = document.getElementById('dp-cfg-m2');
+    var m3El = document.getElementById('dp-cfg-m3');
+    
+    if (!linkEl) return;
+    
+    var newLink = String(linkEl.value || '').trim();
+    
+    // اعتبارسنجی URL
+    if (newLink) {
+      // فقط http/https (جلوگیری از javascript: و data:)
+      if (!/^https?:\/\//i.test(newLink)) {
+        if (typeof showToast === 'function') showToast('لینک باید با http:// یا https:// شروع بشه', 'error');
+        return;
+      }
+      // طول منطقی
+      if (newLink.length > 500) {
+        if (typeof showToast === 'function') showToast('لینک بیش از حد طولانیه', 'error');
+        return;
+      }
+    }
+    
+    // ذخیره
+    try {
+      localStorage.setItem('db_digipay_merchant_link', newLink);
+      
+      var newSettings = {
+        m1: Math.max(0, Math.min(50, Number(m1El.value) || 8)),
+        m2: Math.max(0, Math.min(50, Number(m2El.value) || 12)),
+        m3: Math.max(0, Math.min(50, Number(m3El.value) || 8))
+      };
+      localStorage.setItem('db_digipay_settings', JSON.stringify(newSettings));
+      
+      document.getElementById('dp-settings-modal').remove();
+      if (typeof showToast === 'function') showToast('✅ تنظیمات ذخیره شد', 'success');
+      
+      // آپدیت تب
+      if (typeof renderDPTab === 'function') renderDPTab();
+      
+      // آپدیت select ها
+      ['del-payment-method', 'pay-method-select'].forEach(function(id) {
+        var typeSel = document.getElementById('dp-select-type-' + id);
+        if (typeSel && typeSel.options.length >= 3) {
+          typeSel.options[0].text = 'اعتبار ماهانه (کمیسیون ' + newSettings.m1 + '٪)';
+          typeSel.options[1].text = 'اعتبار ۴ قسطه (کمیسیون ' + newSettings.m2 + '٪)';
+          typeSel.options[2].text = 'پرداخت از کیف پول (کمیسیون ' + newSettings.m3 + '٪)';
+        }
+      });
+    } catch(e) {
+      console.warn('[dp-save]', e);
+      if (typeof showToast === 'function') showToast('خطا در ذخیره', 'error');
+    }
+  };
+  
+  // ─── پاکسازی خودکار لینک‌های خطرناک ───
+  setTimeout(function() {
+    try {
+      var link = localStorage.getItem('db_digipay_merchant_link');
+      if (link && !/^https?:\/\//i.test(link)) {
+        console.warn('[dp-xss-cleanup] Removed unsafe link:', link.substring(0, 50));
+        localStorage.removeItem('db_digipay_merchant_link');
+      }
+    } catch(e) {}
+  }, 2000);
+  
+  console.log('[fix-dp-xss] Ready ✅');
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🔐 FIX Batch-2-F: حذف PIN پیش‌فرض 43799 + تعیین امن در اولین بار
+// ═══════════════════════════════════════════════════════════════
+(function fixPinFallbackSecurity() {
+  
+  // ─── ۱. حذف fallback خطرناک ───
+  window.getStoredPinHash = function() {
+    try {
+      // اول v2 (SHA-256 جدید) رو چک کن
+      var h2 = localStorage.getItem('db_admin_pin_hash_v2');
+      if (h2) return h2;
+      
+      // بعد v1 (legacy)
+      var h = localStorage.getItem('db_admin_pin_hash');
+      if (h) return h;
+      
+      // ❌ fallback به 43799 حذف شد
+      return null;
+    } catch(e) {
+      return null;
+    }
+  };
+  
+  // ─── ۲. verifyPinAsync: اجازه‌ی تعیین PIN در اولین بار ───
+  window.verifyPinAsync = async function(pin) {
+    var normalized = (typeof toEnglishDigits === 'function' ? toEnglishDigits(pin) : String(pin)).trim();
+    if (!normalized) return false;
+    if (normalized.length < 4) return false;
+    
+    // ─── a) اگه v2 هست → verify عادی ───
+    var storedV2 = null;
+    try { storedV2 = localStorage.getItem('db_admin_pin_hash_v2'); } catch(e) {}
+    
+    if (storedV2) {
+      var h = await (typeof hashPinAsync === 'function' ? hashPinAsync(normalized) : Promise.resolve(null));
+      return h === storedV2;
+    }
+    
+    // ─── b) اگه legacy v1 هست → verify و ارتقا به v2 ───
+    var legacy = null;
+    try { legacy = localStorage.getItem('db_admin_pin_hash'); } catch(e) {}
+    
+    if (legacy) {
+      var okLegacy = (typeof hashPinSync === 'function' && hashPinSync(normalized) === legacy);
+      if (okLegacy) {
+        try {
+          if (typeof hashPinAsync === 'function') {
+            var newHash = await hashPinAsync(normalized);
+            localStorage.setItem('db_admin_pin_hash_v2', newHash);
+          }
+        } catch(e) {}
+        return true;
+      }
+      return false;
+    }
+    
+    // ─── c) هیچ hashی نیست → اولین بار: هر PIN غیرخالی قبول می‌شه و ذخیره می‌شه ───
+    try {
+      if (typeof hashPinAsync === 'function') {
+        var firstHash = await hashPinAsync(normalized);
+        localStorage.setItem('db_admin_pin_hash_v2', firstHash);
+      } else if (typeof hashPinSync === 'function') {
+        localStorage.setItem('db_admin_pin_hash', hashPinSync(normalized));
+      }
+      
+      if (typeof showToast === 'function') {
+        showToast('🔐 رمز مدیریت تنظیم شد (برای تغییر: تنظیمات → تغییر رمز)', 'success');
+      }
+    } catch(e) {
+      console.warn('[pin-security] save failed:', e);
+    }
+    
+    return true;
+  };
+  
+  // ─── ۳. promptForPinAsync: عنوان مودال رو تغییر بده اگه اولین باره ───
+  var _basePrompt = window.promptForPinAsync;
+  window.promptForPinAsync = function() {
+    var hasPin = false;
+    try {
+      hasPin = !!localStorage.getItem('db_admin_pin_hash_v2') || !!localStorage.getItem('db_admin_pin_hash');
+    } catch(e) {}
+    
+    if (!hasPin) {
+      // بعد از اینکه مودال باز شد، ظاهرش رو تغییر بده
+      setTimeout(function() {
+        var modal = document.getElementById('modal-pin-prompt');
+        if (!modal) return;
+        
+        var title = modal.querySelector('h3');
+        if (title) {
+          title.innerHTML = '🔐 تعیین رمز مدیریت (اولین بار)';
+          title.style.color = '#7c3aed';
+        }
+        
+        var input = document.getElementById('pin-prompt-input');
+        if (input) {
+          input.placeholder = 'رمز جدید (حداقل ۴ رقم)';
+          input.style.borderColor = '#a855f7';
+        }
+        
+        // اضافه کردن هشدار
+        var errEl = document.getElementById('pin-prompt-error');
+        if (errEl && errEl.parentNode && !document.getElementById('pin-first-time-hint')) {
+          var hint = document.createElement('div');
+          hint.id = 'pin-first-time-hint';
+          hint.style.cssText = 'font-size:0.75rem;color:#7c3aed;text-align:center;margin:8px 0;line-height:1.6;padding:8px;background:#f3e8ff;border-radius:8px;border:1px solid #c4b5fd;';
+          hint.innerHTML = '⚠️ رمز پیش‌فرض <code style="background:#fff;padding:2px 6px;border-radius:4px;font-weight:bold;color:#7c3aed;">43799</code> حذف شد.<br>هر رمزی که می‌خواهید تعیین کنید.';
+          errEl.parentNode.insertBefore(hint, errEl);
+        }
+      }, 150);
+    }
+    
+    return _basePrompt.apply(this, arguments);
+  };
+  
+  // ─── ۴. پاکسازی PIN پیش‌فرض 43799 در صورت وجود ───
+  setTimeout(function() {
+    try {
+      var legacy = localStorage.getItem('db_admin_pin_hash');
+      if (legacy && typeof hashPinSync === 'function' && hashPinSync('43799') === legacy) {
+        console.warn('[pin-security] Default PIN 43799 detected → removing');
+        localStorage.removeItem('db_admin_pin_hash');
+        try { localStorage.removeItem('db_admin_pin_hash_v2'); } catch(e) {}
+        
+        // پیام به کاربر (فقط یک بار)
+        var notified = localStorage.getItem('db_pin_security_notified');
+        if (!notified) {
+          localStorage.setItem('db_pin_security_notified', '1');
+          if (typeof showToast === 'function') {
+            setTimeout(function() {
+              showToast('🔐 به‌دلیل امنیت، رمز پیش‌فرض حذف شد. لطفاً رمز جدید تعیین کنید.', 'warning');
+            }, 3000);
+          }
+        }
+      }
+    } catch(e) {}
+  }, 2000);
+  
+  // ─── ۵. جلوگیری از استفاده دوباره از 43799 ───
+  var _baseChangeAdminPin = window.changeAdminPin;
+  if (typeof _baseChangeAdminPin === 'function') {
+    window.changeAdminPin = async function() {
+      var newPinEl = document.getElementById('cfg-new-pin');
+      if (newPinEl) {
+        var newVal = (typeof toEnglishDigits === 'function' ? toEnglishDigits(newPinEl.value) : String(newPinEl.value)).trim();
+        if (newVal === '43799') {
+          if (typeof showToast === 'function') showToast('❌ این رمز پیش‌فرض است و امن نیست. رمز دیگری انتخاب کنید.', 'error');
+          return;
+        }
+      }
+      return _baseChangeAdminPin.apply(this, arguments);
+    };
+  }
+  
+  console.log('[fix-pin-fallback-security] Ready ✅');
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// 🔧 SMART SYNC - FIX PACK v1
+// (رفع باگ‌های merge/re-upload/verify + تشخیص URL منقضی)
+// ═══════════════════════════════════════════════════════════════════════
+(function fixSmartSyncBugs() {
+  
+  // ─── ۱. سینک کامل: نسخه بازنویسی‌شده ───
+  window.startSmartSync = function() {
+    if (window._syncInProgress) {
+      if (typeof showToast === 'function') showToast('همگام‌سازی در جریان است...', 'info');
+      return;
+    }
+    window._syncInProgress = true;
+
+    var targetUrl = (typeof driveScriptUrl !== 'undefined' && driveScriptUrl) || defaultDriveUrl;
+    var st = document.getElementById('main-sync-status');
+    if (st) { st.innerText = '⏳ در حال دریافت از سرور...'; st.style.color = '#1e40af'; }
+
+    var done = (typeof showProgress === 'function') ? showProgress() : function(){};
+    window._syncProgressDone = done;
+
+    clearTimeout(window._syncSafetyTimer);
+    window._syncSafetyTimer = setTimeout(function() {
+      window._syncInProgress = false;
+      if (window._syncProgressDone) window._syncProgressDone();
+      if (st) { st.innerText = '⏰ زمان پاسخ طولانی شد'; st.style.color = '#dc2626'; }
+      if (typeof showToast === 'function') showToast('زمان همگام‌سازی به پایان رسید — احتمالاً اسکریپت درایو مشکل داره', 'error');
+    }, 30000);
+
+    var oldScript = document.getElementById('jsonp_drive_script');
+    if (oldScript) oldScript.remove();
+
+    // ✅ کالبک JSONP امن — با چک اینکه داده معتبره یا نه
+    window._onSyncDataV2 = function(rawContent) {
+      // اگه اینجا رسیدیم، یعنی callback صدا زده شد
+      clearTimeout(window._syncSafetyTimer);
+      
+      try {
+        // اگه rawContent یک آبجکت نیست، یعنی Apps Script داده‌ی نامعتبر داده
+        if (rawContent === null || rawContent === undefined) {
+          throw new Error('پاسخ خالی از سرور');
+        }
+        if (typeof rawContent === 'string' && rawContent.trim().startsWith('<')) {
+          throw new Error('سرور HTML برگردوند (اسکریپت خرابه یا deployment منقضی)');
+        }
+        
+        var d = (typeof rawContent === 'string') ? JSON.parse(rawContent) : rawContent;
+        if (!d || typeof d !== 'object' || Array.isArray(d)) {
+          throw new Error('ساختار داده‌ی سرور نامعتبر است');
+        }
+
+        // ═══ مرحله ۲: ادغام کامل همه چیز ═══
+        customers           = mergeArraysById(customers || [],              d.customers || []);
+        transactions        = mergeArraysById(transactions || [],           d.transactions || []);
+        quotes              = mergeArraysById(quotes || [],                 d.quotes || []);
+        parts               = mergeArraysById(parts || [],                  d.parts || []);
+        expenses            = mergeArraysById(expenses || [],               d.expenses || []);
+        window.orders       = mergeArraysById(window.orders || [],          d.orders || []);           // 🆕 FIX
+        window.supplierPurchases = mergeArraysById(window.supplierPurchases || [], d.supplierPurchases || []);
+
+        if (d.nextIntakeSeq) {
+          nextIntakeSeq = Math.max(Number(nextIntakeSeq) || 1000, Number(d.nextIntakeSeq) || 1000);
+        }
+        if (d.paymentText && typeof customPaymentText !== 'undefined') {
+          customPaymentText = d.paymentText;
+        }
+
+        try { saveAll(); } catch(e) { console.warn('[sync] saveAll failed:', e); }
+        if (typeof invalidateCaches === 'function') invalidateCaches();
+
+        // ═══ مرحله ۳: رندر همه بخش‌ها ═══
+        try { if (typeof renderCustomers === 'function') renderCustomers(); } catch(e){}
+        try { if (typeof renderWorkshopBoard === 'function') renderWorkshopBoard(); } catch(e){}
+        try { if (typeof renderDepositsStream === 'function') renderDepositsStream(); } catch(e){}
+        try { if (typeof renderExpenses === 'function') renderExpenses(); } catch(e){}
+        try { if (typeof renderParts === 'function') renderParts(); } catch(e){}
+        try { if (typeof renderReports === 'function') renderReports(); } catch(e){}
+        try { if (typeof renderOrders === 'function') renderOrders(); } catch(e){}
+        if (activeCustomerId) {
+          try { if (typeof renderQuotes === 'function') renderQuotes(); } catch(e){}
+          try { if (typeof renderTransactions === 'function') renderTransactions(); } catch(e){}
+          try { if (typeof renderCustomerLoyaltyBanner === 'function') renderCustomerLoyaltyBanner(); } catch(e){}
+        }
+
+        if (st) st.innerText = '⏳ ادغام شد، در حال ارسال...';
+
+        // ═══ مرحله ۴: آپلود کامل (شامل orders و supplierPurchases) ═══
+        setTimeout(function() {
+          var payload = {
+            customers: customers || [],
+            transactions: transactions || [],
+            quotes: quotes || [],
+            parts: parts || [],
+            expenses: expenses || [],
+            orders: window.orders || [],
+            supplierPurchases: window.supplierPurchases || [],   // 🆕 FIX
+            paymentText: (typeof customPaymentText !== 'undefined') ? customPaymentText : '',
+            nextIntakeSeq: nextIntakeSeq,
+            syncTime: Date.now()
+          };
+
+          fetch(targetUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          })
+          .then(function() {
+            window._syncInProgress = false;
+            if (window._syncProgressDone) { window._syncProgressDone(); window._syncProgressDone = null; }
+            if (st) { st.innerText = '✅ همگام‌سازی کامل شد'; st.style.color = '#15803d'; }
+            try { localStorage.setItem('db_last_sync_time', Date.now().toString()); } catch(e) {}
+            if (typeof updateSyncStatusBadge === 'function') updateSyncStatusBadge();
+            if (typeof showToast === 'function') {
+              showToast('✅ سینک کامل شد (' +
+                'مشتری: ' + (customers || []).length +
+                ' • فاکتور: ' + (quotes || []).length +
+                ' • سفارش: ' + (window.orders || []).length +
+                ' • خرید: ' + (window.supplierPurchases || []).length + ')', 'success');
+            }
+          })
+          .catch(function(err) {
+            window._syncInProgress = false;
+            if (window._syncProgressDone) { window._syncProgressDone(); window._syncProgressDone = null; }
+            if (st) { st.innerText = '⚠️ دریافت شد ولی ارسال ناموفق'; st.style.color = '#f59e0b'; }
+            if (typeof showToast === 'function') showToast('⚠️ ارسال داده ناموفق: ' + err.message, 'error');
+          });
+        }, 400);
+
+      } catch(e) {
+        console.error('[sync] processing failed:', e);
+        window._syncInProgress = false;
+        clearTimeout(window._syncSafetyTimer);
+        if (window._syncProgressDone) { window._syncProgressDone(); window._syncProgressDone = null; }
+        if (st) { st.innerText = '❌ خطا در پردازش داده‌ی سرور'; st.style.color = '#dc2626'; }
+        if (typeof showToast === 'function') showToast('❌ ' + e.message, 'error');
+      }
+    };
+
+    var script = document.createElement('script');
+    script.id = 'jsonp_drive_script';
+    script.src = targetUrl + (targetUrl.indexOf('?') !== -1 ? '&' : '?') + 'callback=_onSyncDataV2&t=' + Date.now();
+    script.onerror = function() {
+      window._syncInProgress = false;
+      clearTimeout(window._syncSafetyTimer);
+      if (window._syncProgressDone) { window._syncProgressDone(); window._syncProgressDone = null; }
+      if (st) { st.innerText = '❌ خطا در برقراری ارتباط با درایو'; st.style.color = '#dc2626'; }
+      if (typeof showToast === 'function') showToast('❌ اسکریپت Google Drive پاسخ نمی‌ده — تست ۱ رو ببین', 'error');
+    };
+    document.body.appendChild(script);
+  };
+
+  // ─── ۲. verifyCloudSync اصلاح‌شده (چک همه‌ی فیلدها) ───
+  window.verifyCloudSync = function(expectedCounts) {
+    var targetUrl = (typeof driveScriptUrl !== 'undefined' && driveScriptUrl) || defaultDriveUrl;
+    var st = document.getElementById('main-sync-status');
+
+    var oldScript = document.getElementById('jsonp_verify_script');
+    if (oldScript) oldScript.remove();
+
+    var callbackName = 'onVerifySyncReceived_' + Date.now();
+    var done = false;
+
+    window[callbackName] = function(serverData) {
+      if (done) return;
+      done = true;
+      try {
+        if (typeof serverData === 'string' && serverData.trim().startsWith('<')) {
+          throw new Error('HTML response');
+        }
+        var d = (typeof serverData === 'string') ? JSON.parse(serverData) : serverData;
+        if (!d || typeof d !== 'object') throw new Error('invalid data');
+
+        var expected = String(expectedCounts).split('|').map(Number);
+        var sCusts = (d.customers || []).length;
+        var sTxs = (d.transactions || []).length;
+        var sQuotes = (d.quotes || []).length;
+        var sOrders = (d.orders || []).length;
+        var sPurch = (d.supplierPurchases || []).length;
+        var eOrders = (window.orders || []).length;
+        var ePurch = (window.supplierPurchases || []).length;
+
+        var ok = (sCusts >= expected[0] - 2)
+              && (sTxs  >= expected[1] - 2)
+              && (sQuotes >= expected[2] - 2)
+              && (sOrders >= eOrders - 2)
+              && (sPurch  >= ePurch  - 2);
+
+        if (ok) {
+          if (st) { st.innerText = '✅ ذخیره و تایید شد'; st.style.color = '#15803d'; }
+          try { localStorage.setItem('db_last_sync_time', Date.now().toString()); } catch(e) {}
+          if (typeof showToast === 'function') showToast('✅ همه‌چیز ذخیره و تایید شد', 'success');
+        } else {
+          if (st) { st.innerText = '⚠️ ناقص در سرور (' + sCusts + 'C/' + sOrders + 'O/' + sPurch + 'P)'; st.style.color = '#f59e0b'; }
+          if (typeof showToast === 'function') showToast('⚠️ آپلود ناقص — دوباره تلاش کن', 'warning');
+        }
+      } catch(e) {
+        if (st) { st.innerText = '⚠️ خطا در تایید'; st.style.color = '#f59e0b'; }
+      }
+      delete window[callbackName];
+      var s = document.getElementById('jsonp_verify_script');
+      if (s) s.remove();
+    };
+
+    var script = document.createElement('script');
+    script.id = 'jsonp_verify_script';
+    script.src = targetUrl + (targetUrl.indexOf('?') !== -1 ? '&' : '?') + 'callback=' + callbackName + '&t=' + Date.now();
+    script.onerror = function() {
+      if (done) return;
+      done = true;
+      if (st) { st.innerText = '⚠️ خطا در تایید (شبکه)'; st.style.color = '#f59e0b'; }
+      delete window[callbackName];
+    };
+    document.body.appendChild(script);
+
+    setTimeout(function() {
+      if (!done && window[callbackName]) {
+        done = true;
+        delete window[callbackName];
+        var s = document.getElementById('jsonp_verify_script');
+        if (s) s.remove();
+      }
+    }, 10000);
+  };
+
+  // ─── ۳. ابزار تشخیصی گلوبال ───
+  window.diagnoseSync = function() {
+    var url = (typeof driveScriptUrl !== 'undefined' && driveScriptUrl) || defaultDriveUrl;
+    var storedUrl = localStorage.getItem('db_drive_script_url');
+    console.log('═══════════ SYNC DIAGNOSTIC ═══════════');
+    console.log('📌 URL فعلی:', url);
+    console.log('📌 URL در localStorage:', storedUrl);
+    console.log('📌 یکی هستن؟', storedUrl === url || !storedUrl ? '✅' : '❌ (کلیک کن تنظیمات → ذخیره)');
+    console.log('📌 آخرین سینک:', localStorage.getItem('db_last_sync_time'));
+    console.log('📊 دیتای محلی:');
+    console.log('  customers:', (customers||[]).length);
+    console.log('  transactions:', (transactions||[]).length);
+    console.log('  quotes:', (quotes||[]).length);
+    console.log('  parts:', (parts||[]).length);
+    console.log('  orders:', (window.orders||[]).length);
+    console.log('  supplierPurchases:', (window.supplierPurchases||[]).length);
+    console.log('════════════════════════════════════════');
+    
+    // تست پینگ JSONP
+    window._diagPing = function(d) {
+      console.log('✅ JSONP پاسخ داد');
+      console.log('  → customers در سرور:', (d?.customers||[]).length);
+      console.log('  → orders در سرور:', (d?.orders||[]).length);
+      console.log('  → supplierPurchases در سرور:', (d?.supplierPurchases||[]).length);
+    };
+    var s = document.createElement('script');
+    s.src = url + (url.indexOf('?')!==-1?'&':'?') + 'callback=_diagPing&t=' + Date.now();
+    s.onerror = function() { console.error('❌ JSONP load error — اسکریپت خرابه یا deployment منقضی'); };
+    document.body.appendChild(s);
+  };
+
+  console.log('[fix-smart-sync-v1] ✅ Ready — برای تست دستی: diagnoseSync()');
 })();
 </script>
 

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<!-- 🔐 این صفحه فقط «متن‌های فاکتور» را از لینک می‌گیرد و روی canvas می‌کشد؛ هیچ HTML یا اسکریپتی از لینک اجرا نمی‌شود -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src blob: data: https:; font-src 'self';">
+<title>چاپ فاکتور — موبایل پرشیا</title>
+<style>
+  @font-face { font-family: 'Vazirmatn'; font-style: normal; font-weight: 400; font-display: swap; src: url('font/Vazirmatn-Regular.woff2') format('woff2'); }
+  @font-face { font-family: 'Vazirmatn'; font-style: normal; font-weight: 700; font-display: swap; src: url('font/Vazirmatn-Bold.woff2') format('woff2'); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Vazirmatn, Tahoma, Arial, sans-serif; background: #525659; color: #fff; min-height: 100vh; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #0f172a; display: none; align-items: center; justify-content: center; gap: 10px; padding: 0 12px; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,.35); }
+  #bar button { background: #10b981; color: #fff; border: 0; border-radius: 10px; padding: 11px 18px; font-weight: bold; font-size: 15px; font-family: inherit; }
+  #bar button.alt { background: #475569; }
+  #wrap { padding: 70px 10px 20px; display: none; justify-content: center; }
+  #page { width: 100%; max-width: 560px; background: #fff; box-shadow: 0 4px 18px rgba(0,0,0,.45); }
+  #page img { display: block; width: 100%; height: auto; }
+  #msg { position: fixed; inset: 56px 0 0 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; line-height: 2; font-size: 15px; }
+  #hint { position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; color: #fbbf24; text-align: center; padding: 12px; font-size: 14px; display: none; z-index: 11; }
+  @page { size: auto; margin: 0; }
+  @media print {
+    html, body { background: #fff !important; height: 100% !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+    #bar, #msg, #hint { display: none !important; }
+    #wrap { display: flex !important; padding: 0 !important; height: 100vh; width: 100vw; align-items: center; justify-content: center; page-break-after: avoid; break-after: avoid; }
+    #page { width: auto; max-width: 100vw; max-height: 100vh; box-shadow: none; background: #fff; break-inside: avoid; page-break-inside: avoid; }
+    #page img { width: auto; height: auto; max-width: 100vw; max-height: 100vh; object-fit: contain; }
+  }
+</style>
+</head>
+<body>
+<div id="bar">
+  <button id="btn-print" type="button">🖨️ پرینت / ذخیره PDF</button>
+  <button id="btn-close" type="button" class="alt">بستن</button>
+</div>
+<div id="msg">⏳ در حال آماده‌سازی فاکتور...</div>
+<div id="wrap"><div id="page"><img id="img" alt="فاکتور"></div></div>
+<div id="hint">می‌توانید این تب را ببندید و به برنامه برگردید.</div>
+
+<script>
+(function () {
+  var msg = document.getElementById('msg');
+  function fail(text) { msg.style.display = 'flex'; msg.textContent = text; }
+
+  var _lastCode = 'Factor'; // کد زیر QR؛ از داخل لینک پر می‌شود
+
+  // ─────────── کد رسم فاکتور (عیناً از استودیوی چاپ برنامه؛ یک منبع واحد) ───────────
+  function roundRect(ctx, x, y, w, h, r, fill, stroke, strokeColor, lineWidth) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) {
+      ctx.strokeStyle = strokeColor || '#333';
+      ctx.lineWidth = lineWidth || 2;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawWrappedRTL(ctx, text, xRight, yStart, maxWidth, lineHeight, maxLines) {
+    var words = String(text || '').replace(/\r/g, '').split(/\s+/);
+    var line = '';
+    var y = yStart;
+    var linesCount = 0;
+    ctx.save();
+    ctx.direction = 'rtl';
+    ctx.textAlign = 'right';
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line + (line ? ' ' : '') + words[n];
+      if (ctx.measureText(testLine).width > maxWidth && line !== '') {
+        ctx.fillText(line, xRight, y);
+        line = words[n];
+        y += lineHeight;
+        linesCount++;
+        if (maxLines && linesCount >= maxLines - 1) break;
+      } else {
+        line = testLine;
+      }
+    }
+    if (line) {
+      ctx.fillText(line, xRight, y);
+      y += lineHeight;
+    }
+    ctx.restore();
+    return y;
+  }
+
+  function loadSafeImage(url) {
+    return new Promise(function(resolve) {
+      if (!url) return resolve(null);
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      var timer = setTimeout(function() { resolve(null); }, 1500);
+      img.onload = function() { clearTimeout(timer); resolve(img); };
+      img.onerror = function() { clearTimeout(timer); resolve(null); };
+      img.src = url;
+    });
+  }
+
+  async function renderReceiptToCanvas(data) {
+    var canvas = document.createElement('canvas');
+    var W = 1480, H = 2100;
+    canvas.width = W;
+    canvas.height = H;
+    var ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+    var fontName = 'Vazirmatn, Tahoma, Arial, sans-serif';
+
+    if (!data || data.mode === 'SINGLE_PAGE') {
+      roundRect(ctx, 36, 36, W - 72, H - 72, 14, '#ffffff', true, '#222', 4);
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 34px ' + fontName;
+      ctx.textAlign = 'center';
+      var headTitle = (data && data.rawLines && data.rawLines[0]) ? data.rawLines[0] : 'صورت‌حساب رسمی — موبایل پرشیا';
+      ctx.fillText(headTitle, W / 2, 100);
+      ctx.beginPath(); ctx.moveTo(70, 130); ctx.lineTo(W - 70, 130); ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
+
+      var y = 185;
+      ctx.font = 'bold 23px ' + fontName;
+      ctx.textAlign = 'right';
+      if (data && data.rawLines) {
+        var maxL = Math.min(data.rawLines.length, 6);
+        for (var i = 1; i < maxL; i++) {
+          ctx.fillText(data.rawLines[i], W - 70, y);
+          y += 45;
+        }
+      }
+      if (data && data.table && data.table.length > 0) {
+        y += 20;
+        var tblW = W - 140;
+        var maxR = Math.min(data.table.length, 24);
+        for (var rIdx = 0; rIdx < maxR; rIdx++) {
+          var row = data.table[rIdx];
+          var cellW = tblW / row.length;
+          ctx.fillStyle = rIdx === 0 ? '#e2e8f0' : '#ffffff';
+          ctx.fillRect(70, y, tblW, 50);
+          ctx.strokeStyle = '#64748b';
+          ctx.strokeRect(70, y, tblW, 50);
+          ctx.fillStyle = '#000';
+          ctx.font = (rIdx === 0 ? 'bold 22px ' : 'bold 20px ') + fontName;
+          ctx.textAlign = 'center';
+          for (var c = 0; c < row.length; c++) {
+            var cx = (W - 70) - (c * cellW) - (cellW / 2);
+            ctx.fillText(row[c], cx, y + 33);
+          }
+          y += 50;
+        }
+      }
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 22px ' + fontName;
+      ctx.textAlign = 'right';
+      ctx.fillText('امضای مشتری: .........................................', W - 80, H - 100);
+      ctx.textAlign = 'left';
+      ctx.fillText('مهر و امضای موبایل پرشیا: .........................................', 80, H - 100);
+      return canvas;
+    }
+
+    var cX = 32, cY = 28, cW = W - 64, cH = 1015;
+    roundRect(ctx, cX, cY, cW, cH, 12, '#ffffff', true, '#222222', 3.5);
+
+    ctx.save();
+    ctx.translate(cX + cW / 2, cY + cH / 2);
+    ctx.rotate(-28 * Math.PI / 180);
+    ctx.font = '900 135px Arial, sans-serif';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.038)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('PERSIA', 0, 0);
+    ctx.restore();
+
+    roundRect(ctx, cX + cW - 155, cY + 18, 135, 42, 6, '#f8fafc', true, '#333', 2);
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 21px ' + fontName;
+    ctx.textAlign = 'center';
+    ctx.fillText('نسخه مشتری', cX + cW - 87, cY + 46);
+
+    ctx.fillStyle = '#000';
+    ctx.font = '900 32px ' + fontName;
+    ctx.textAlign = 'center';
+    ctx.fillText(data.title, W / 2, cY + 50);
+
+    ctx.font = 'bold 21px ' + fontName;
+    ctx.fillStyle = '#334155';
+    ctx.fillText(data.headerSub || '', W / 2, cY + 86);
+
+    var qrImg = await loadSafeImage(data.qrSrc);
+    var qrX = cX + 22, qrY = cY + 14, qrSize = 92;
+    roundRect(ctx, qrX, qrY, qrSize, qrSize, 6, '#fff', true, '#333', 2);
+    if (qrImg) {
+      ctx.drawImage(qrImg, qrX + 3, qrY + 3, qrSize - 6, qrSize - 6);
+    } else {
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 16px ' + fontName;
+      ctx.textAlign = 'center';
+      ctx.fillText('کد قبض', qrX + qrSize / 2, qrY + 38);
+      ctx.font = 'bold 20px monospace';
+      ctx.fillText(_lastCode, qrX + qrSize / 2, qrY + 68);
+    }
+
+    var curY = cY + 116;
+    ctx.beginPath(); ctx.moveTo(cX + 20, curY); ctx.lineTo(cX + cW - 20, curY);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
+    curY += 34;
+
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 21px ' + fontName;
+    ctx.textAlign = 'right';
+    for (var mIdx = 0; mIdx < data.metaLines.length; mIdx++) {
+      curY = drawWrappedRTL(ctx, data.metaLines[mIdx], cX + cW - 24, curY, cW - 48, 32, 2);
+    }
+    curY += 6;
+
+    var tX = cX + 22, tW = cW - 44, colSplit = tX + 340, thH = 42;
+    roundRect(ctx, tX, curY, tW, thH, 4, '#e2e8f0', true, '#64748b', 2);
+    ctx.beginPath(); ctx.moveTo(colSplit, curY); ctx.lineTo(colSplit, curY + thH); ctx.strokeStyle = '#64748b'; ctx.stroke();
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 21px ' + fontName;
+    ctx.textAlign = 'right';
+    ctx.fillText('شرح خدمات / قطعه', tX + tW - 16, curY + 28);
+    ctx.textAlign = 'center';
+    ctx.fillText('مبلغ', tX + 170, curY + 28);
+    curY += thH;
+
+    var maxTRows = Math.min(data.tableRows.length, 5);
+    for (var trI = 0; trI < maxTRows; trI++) {
+      var r = data.tableRows[trI];
+      var rH = 42;
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(tX, curY, tW, rH);
+      ctx.beginPath(); ctx.moveTo(colSplit, curY); ctx.lineTo(colSplit, curY + rH); ctx.stroke();
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 20px ' + fontName;
+      ctx.textAlign = 'right';
+      ctx.fillText(r.col1 || '', tX + tW - 14, curY + 28);
+      ctx.textAlign = 'center';
+      ctx.fillText(r.col2 || '', tX + 170, curY + 28);
+      curY += rH;
+    }
+
+    curY += 28;
+
+    for (var totI = 0; totI < data.totals.length; totI++) {
+      var tot = data.totals[totI];
+      if (tot.isFinal) {
+        ctx.beginPath(); ctx.moveTo(tX, curY - 18); ctx.lineTo(tX + tW, curY - 18);
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
+        curY += 8;
+      }
+      ctx.font = (tot.isFinal ? '900 24px ' : 'bold 21px ') + fontName;
+      ctx.fillStyle = tot.isFinal ? '#b91c1c' : '#0f172a';
+      ctx.textAlign = 'right';
+      ctx.fillText(tot.label, tX + tW - 6, curY);
+      if (tot.val) {
+        ctx.textAlign = 'left';
+        ctx.fillText(tot.val, tX + 6, curY);
+      }
+      curY += 34;
+    }
+
+    if (data.lawText) {
+      var lawY = Math.max(curY + 4, cY + cH - 225);
+      var lawH = (cY + cH - 80) - lawY;
+      if (lawH > 55) {
+        roundRect(ctx, tX, lawY, tW, lawH, 6, '#f8fafc', true, '#cbd5e1', 1.5);
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 16.5px ' + fontName;
+        drawWrappedRTL(ctx, data.lawText, tX + tW - 12, lawY + 25, tW - 24, 24, 5);
+      }
+    }
+
+    var signY = cY + cH - 26;
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 20px ' + fontName;
+    ctx.textAlign = 'right';
+    ctx.fillText('امضای مشتری: ....................................', tX + tW - 10, signY);
+    ctx.textAlign = 'left';
+    ctx.fillText('مهر و امضای تعمیرگاه: ....................................', tX + 10, signY);
+
+    var cutY = 1068;
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([12, 10]);
+    ctx.moveTo(40, cutY);
+    ctx.lineTo(W - 40, cutY);
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(W / 2 - 150, cutY - 16, 300, 32);
+    ctx.fillStyle = '#475569';
+    ctx.font = 'bold 20px ' + fontName;
+    ctx.textAlign = 'center';
+    ctx.fillText('✂ ────── محل برش ────── ✂', W / 2, cutY + 7);
+
+    var sX = 32, sY = 1094, sW = W - 64, sH = 974;
+    roundRect(ctx, sX, sY, sW, sH, 12, '#ffffff', true, '#222222', 3.5);
+
+    var splitX = sX + Math.round(sW * 0.33);
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([10, 8]);
+    ctx.moveTo(splitX, sY + 10);
+    ctx.lineTo(splitX, sY + sH - 10);
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+
+    var wRight = sX + sW - 22;
+    var wWidth = (sX + sW) - splitX - 44;
+    var wCenter = splitX + ((sX + sW - splitX) / 2);
+
+    roundRect(ctx, sX + sW - 145, sY + 16, 125, 40, 6, '#f1f5f9', true, '#333', 2);
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 20px ' + fontName;
+    ctx.textAlign = 'center';
+    ctx.fillText('نسخه کارگاه', sX + sW - 82, sY + 42);
+
+    ctx.font = '900 30px ' + fontName;
+    ctx.fillText('پرونده فنی کارگاه', wCenter, sY + 46);
+    ctx.font = 'bold 20px ' + fontName;
+    ctx.fillStyle = '#334155';
+    ctx.fillText(data.shopHeaderSub || '', wCenter, sY + 80);
+
+    var wy = sY + 105;
+    ctx.beginPath(); ctx.moveTo(splitX + 18, wy); ctx.lineTo(sX + sW - 18, wy);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
+    wy += 34;
+
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 21px ' + fontName;
+    for (var smI = 0; smI < data.shopMetaLines.length; smI++) {
+      wy = drawWrappedRTL(ctx, data.shopMetaLines[smI], wRight, wy, wWidth, 32, 2);
+    }
+    wy += 10;
+
+    var techBoxH = Math.max(200, (sY + sH - 30) - wy);
+    roundRect(ctx, splitX + 20, wy, wWidth, techBoxH, 8, '#f8fafc', true, '#cbd5e1', 2);
+    var ty = wy + 34;
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 20px ' + fontName;
+    for (var stI = 0; stI < data.shopTechLines.length; stI++) {
+      if (ty < wy + techBoxH - 20) {
+        ty = drawWrappedRTL(ctx, '• ' + data.shopTechLines[stI], wRight - 14, ty, wWidth - 28, 33, 3);
+        ty += 4;
+      }
+    }
+
+    var nCenter = sX + ((splitX - sX) / 2);
+    ctx.fillStyle = '#000';
+    ctx.font = '900 24px ' + fontName;
+    ctx.textAlign = 'center';
+    ctx.fillText('📝 یادداشت و گزارش تعمیرکار', nCenter, sY + 52);
+
+    ctx.beginPath(); ctx.moveTo(sX + 18, sY + 75); ctx.lineTo(splitX - 18, sY + 75);
+    ctx.strokeStyle = '#475569'; ctx.lineWidth = 2; ctx.stroke();
+
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.5;
+    for (var ly = sY + 135; ly < sY + sH - 110; ly += 55) {
+      ctx.beginPath();
+      ctx.moveTo(sX + 20, ly);
+      ctx.lineTo(splitX - 20, ly);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 19px ' + fontName;
+    ctx.textAlign = 'right';
+    ctx.fillText('امضای تکنسین و تاریخ تحویل:', splitX - 22, sY + sH - 65);
+    ctx.fillText('................................................', splitX - 22, sY + sH - 28);
+
+    return canvas;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────────
+
+  function unb64url(s) {
+    s = s.replace(/-/g, '+').replace(/_/g, '/');
+    while (s.length % 4) s += '=';
+    var bin = atob(s), u = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    return u;
+  }
+
+  async function decode(kind, body) {
+    var bytes = unb64url(body);
+    if (kind === 'g') {
+      if (!window.DecompressionStream) throw new Error('no-decompress');
+      var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+      bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+    }
+    return new TextDecoder().decode(bytes);
+  }
+
+  // 🔐 فقط فیلدهای شناخته‌شده و فقط «متن» پذیرفته می‌شود؛ همه چیز با fillText کشیده می‌شود (نه HTML)
+  function S(v, n) { return String(v == null ? '' : v).slice(0, n || 400); }
+  function SA(a, maxItems, n) { return Array.isArray(a) ? a.slice(0, maxItems || 30).map(function (x) { return S(x, n); }) : []; }
+  function sanitize(d) {
+    d = d && typeof d === 'object' ? d : {};
+    var out = {
+      mode: d.mode === 'SINGLE_PAGE' ? 'SINGLE_PAGE' : 'SPLIT_A5', code: S(d.code, 60),
+      title: S(d.title, 120), headerSub: S(d.headerSub, 300), shopHeaderSub: S(d.shopHeaderSub, 300), lawText: S(d.lawText, 2000),
+      qrSrc: /^https:\/\/[^\s"'<>]{1,500}$/.test(d.qrSrc || '') ? d.qrSrc : '',
+      metaLines: SA(d.metaLines, 12, 400), shopMetaLines: SA(d.shopMetaLines, 12, 400), shopTechLines: SA(d.shopTechLines, 20, 400),
+      rawLines: SA(d.rawLines, 40, 400),
+      table: Array.isArray(d.table) ? d.table.slice(0, 40).map(function (r) { return SA(r, 8, 200); }).filter(function (r) { return r.length > 0; }) : [],
+      tableRows: Array.isArray(d.tableRows) ? d.tableRows.slice(0, 30).map(function (r) { r = r || {}; return { col1: S(r.col1, 200), col2: S(r.col2, 100) }; }) : [],
+      totals: Array.isArray(d.totals) ? d.totals.slice(0, 10).map(function (t) { t = t || {}; return { label: S(t.label, 200), val: S(t.val, 200), isFinal: !!t.isFinal }; }) : []
+    };
+    return out;
+  }
+
+  function printNow() { try { window.print(); } catch (e) {} }
+
+  async function main() {
+    var m = /^#d=([gr])\.([A-Za-z0-9_-]{20,})$/.exec(location.hash || '');
+    if (!m) return fail('فاکتوری برای چاپ پیدا نشد. از داخل برنامه دوباره دکمهٔ «چاپ با Chrome» را بزنید.');
+    var data;
+    try { data = sanitize(JSON.parse(await decode(m[1], m[2]))); }
+    catch (e) {
+      return fail(e && e.message === 'no-decompress'
+        ? 'این مرورگر قدیمی است. Chrome را به‌روز کنید و دوباره امتحان کنید.'
+        : 'لینک فاکتور کامل نیست یا خراب است. از داخل برنامه دوباره «کپی لینک» را بزنید.');
+    }
+    _lastCode = data.code || 'Factor';
+    // فونت‌ها قبل از رسم بارگذاری شوند (وگرنه متن با فونت پیش‌فرض کشیده می‌شود)
+    try {
+      await Promise.all([document.fonts.load('bold 34px Vazirmatn', 'فاکتور'), document.fonts.load('23px Vazirmatn', 'فاکتور'), document.fonts.load('900 24px Vazirmatn', 'فاکتور')]);
+    } catch (e) {}
+    var canvas;
+    try { canvas = await renderReceiptToCanvas(data); } catch (e) { console.error('[print] render failed:', e && e.stack || e); return fail('رسم فاکتور ممکن نشد.'); }
+    var blob = await new Promise(function (res) { canvas.toBlob(res, 'image/png'); });
+    if (!blob) return fail('ساخت تصویر فاکتور ممکن نشد.');
+    var img = document.getElementById('img');
+    img.onload = async function () {
+      try { if (img.decode) await img.decode(); } catch (e) {}
+      msg.style.display = 'none';
+      document.getElementById('wrap').style.display = 'flex';
+      document.getElementById('bar').style.display = 'flex';
+      try { history.replaceState(null, '', location.pathname); } catch (e) {}
+      requestAnimationFrame(function () { requestAnimationFrame(function () { setTimeout(printNow, 1500); }); });
+    };
+    img.onerror = function () { fail('نمایش فاکتور ممکن نشد.'); };
+    img.src = URL.createObjectURL(blob);
+  }
+
+  document.getElementById('btn-print').onclick = printNow;
+  // ⚠️ history.back() عمداً استفاده نمی‌شود: وقتی لینک در تب جدید پیست شده، «برگشت» برنامهٔ اصلی را ریست می‌کرد
+  document.getElementById('btn-close').onclick = function () {
+    try { window.close(); } catch (e) {}
+    setTimeout(function () { document.getElementById('hint').style.display = 'block'; }, 250);
+  };
+  main();
+})();
+</script>
+</body>
+</html>

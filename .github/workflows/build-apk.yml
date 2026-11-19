@@ -30,6 +30,14 @@ jobs:
           npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/app @capacitor/splash-screen @capacitor/filesystem @capacitor/share @capacitor/browser @capacitor/clipboard
           npm install --save-dev @capacitor/assets
 
+      # 🖐 افزونهٔ اثرانگشت (اختیاری: اگر نصبش شکست بخورد، ساخت APK ادامه می‌یابد و فقط ویژگی اثرانگشت غیرفعال می‌ماند)
+      - name: Install biometric plugin (optional)
+        run: npm install @capgo/capacitor-native-biometric --legacy-peer-deps
+        continue-on-error: true
+
+      - name: Show Capacitor versions
+        run: npm ls @capacitor/core @capacitor/android @capacitor/filesystem @capacitor/share @capgo/capacitor-native-biometric --depth=0 || true
+
       - name: Prepare www folder
         run: |
           mkdir -p www
@@ -59,6 +67,12 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Ensure biometric permission in AndroidManifest
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          grep -q "USE_BIOMETRIC" "$M" || sed -i 's#<application#<uses-permission android:name="android.permission.USE_BIOMETRIC" />\n    <application#' "$M"
+          grep -n "USE_BIOMETRIC" "$M" || true
 
       # ─────────────────────────────────────────────
       # 🔐 مراحل امضای Release (بدون دست زدن به build.gradle اصلی)
